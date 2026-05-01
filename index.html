@@ -1,852 +1,153 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Café Roble</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --brown-dark:  #2C1A0E;
-      --brown-mid:   #3D2210;
-      --brown-light: #8B5E2F;
-      --gold:        #C9A87C;
-      --cream:       #F5ECD7;
-      --cream-soft:  #FDF6EC;
-      --text:        #1a1008;
-      --text-muted:  #6b5340;
-      --border:      rgba(201,168,124,0.25);
-    }
-    html { scroll-behavior: smooth; }
-    body { font-family: 'Lato', sans-serif; background: var(--cream-soft); color: var(--text); overflow-x: hidden; }
-
-    /* ── PAGES ── */
-    .page { display: none; }
-    .page.active { display: block; }
-
-    /* ── HERO BANNER ── */
-    .hero-banner {
-      background: var(--brown-dark); display: flex; align-items: center;
-      cursor: pointer; text-decoration: none; position: relative;
-      overflow: hidden; min-height: 72px; transition: filter 0.18s;
-    }
-    .hero-banner:hover { filter: brightness(1.08); }
-    .hero-banner:active { filter: brightness(0.95); }
-    .hero-banner::before {
-      content: ''; position: absolute; inset: 0; pointer-events: none;
-      background: repeating-linear-gradient(45deg, transparent, transparent 18px, rgba(255,255,255,0.015) 18px, rgba(255,255,255,0.015) 36px);
-    }
-    .hero-banner-photo { width: 90px; height: 72px; object-fit: cover; flex-shrink: 0; display: block; }
-    .hero-banner-body { flex: 1; padding: 0 1rem; display: flex; flex-direction: column; gap: 2px; position: relative; z-index: 1; min-width: 0; }
-    .hero-banner-name { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 700; color: var(--cream); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .hero-banner-sub { font-size: 0.68rem; color: var(--gold); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 300; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .hero-banner-cta { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 1rem; gap: 2px; position: relative; z-index: 1; }
-    .hero-banner-cta-icon { font-size: 1.1rem; }
-    .hero-banner-cta-label { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(201,168,124,0.7); white-space: nowrap; }
-
-    /* ── CATEGORY NAV ── */
-    .cat-nav-wrapper { background: var(--brown-mid); padding: 0.8rem 0; position: relative; }
-    .cat-nav-wrapper::before, .cat-nav-wrapper::after { content: ''; position: absolute; top: 0; bottom: 0; width: 52px; z-index: 2; pointer-events: none; }
-    .cat-nav-wrapper::before { left: 0;  background: linear-gradient(to right, var(--brown-mid) 30%, transparent); }
-    .cat-nav-wrapper::after  { right: 0; background: linear-gradient(to left,  var(--brown-mid) 30%, transparent); }
-    .cat-nav { display: flex; gap: 10px; overflow-x: auto; scroll-behavior: smooth; scrollbar-width: none; padding: 0 52px; justify-content: safe center; }
-    .cat-nav::-webkit-scrollbar { display: none; }
-    .cat-btn { flex-shrink: 0; padding: 6px 18px; border-radius: 22px; border: 1.5px solid rgba(201,168,124,0.45); background: transparent; color: var(--gold); font-family: 'Lato', sans-serif; font-size: 0.76rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; cursor: pointer; white-space: nowrap; transition: background 0.2s, color 0.2s, border-color 0.2s; }
-    .cat-btn:hover, .cat-btn.active { background: var(--gold); color: var(--brown-dark); border-color: var(--gold); }
-    .swipe-hint { text-align: center; font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.06em; padding: 0.55rem 0 0; transition: opacity 0.5s; user-select: none; }
-    .swipe-hint.hidden { opacity: 0; pointer-events: none; }
-
-    /* ── SLIDER ── */
-    .slider-viewport { overflow: hidden; width: 100%; cursor: grab; }
-    .slider-viewport.grabbing { cursor: grabbing; }
-    .slider-track { position: relative; width: 100%; }
-    .slide-panel { width: 100%; padding: 0.3rem 1.2rem 2rem; will-change: transform; }
-    @media (min-width: 860px) {
-      .slide-panel { padding-left: calc((100vw - 860px)/2 + 1.2rem); padding-right: calc((100vw - 860px)/2 + 1.2rem); }
-    }
-
-    /* ── SECTION TITLE ── */
-    .section-title { font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 600; color: var(--brown-dark); padding: 0.9rem 0 0.7rem; border-bottom: 2px solid var(--gold); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.5rem; }
-    .section-title.first { padding-top: 0.5rem; }
-
-    /* ── ITEM ROWS ── */
-    .items-list { display: flex; flex-direction: column; }
-    .item-row { display: flex; align-items: center; gap: 1rem; padding: 0.85rem 0.4rem; border-bottom: 1px solid var(--border); border-radius: 8px; transition: background 0.15s; }
-    .item-row:last-child { border-bottom: none; }
-    .item-row:hover { background: rgba(201,168,124,0.09); }
-
-    /* product thumbnail — now a real image, clickable */
-    .item-thumb {
-      width: 64px; height: 64px; border-radius: 10px;
-      overflow: hidden; flex-shrink: 0; position: relative;
-      cursor: pointer;
-    }
-    .item-thumb img {
-      width: 100%; height: 100%; object-fit: cover; display: block;
-      transition: transform 0.22s;
-    }
-    .item-thumb:hover img { transform: scale(1.08); }
-    .badge { position: absolute; top: -5px; right: -5px; background: var(--gold); color: var(--brown-dark); font-size: 0.52rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 6px; border-radius: 20px; white-space: nowrap; z-index: 2; }
-
-    .item-info { flex: 1; min-width: 0; user-select: none; }
-    .item-name { font-family: 'Playfair Display', serif; font-size: 0.97rem; font-weight: 600; color: var(--brown-dark); margin-bottom: 0.2rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .item-desc { font-size: 0.76rem; color: var(--text-muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .item-right { flex-shrink: 0; padding-left: 0.5rem; user-select: none; }
-    .price { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--brown-light); white-space: nowrap; }
-
-    /* ── PANEL GALLERY (3 images at bottom of each panel) ── */
-    .panel-gallery { margin-top: 1.6rem; padding-top: 1.2rem; border-top: 1.5px solid var(--border); }
-    .panel-gallery-title { font-family: 'Playfair Display', serif; font-size: 0.9rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.8rem; letter-spacing: 0.04em; }
-    .panel-gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
-    .pg-cell { display: flex; flex-direction: column; gap: 0.4rem; cursor: pointer; }
-    .pg-cell-img { width: 100%; aspect-ratio: 4/3; border-radius: 8px; overflow: hidden; }
-    .pg-cell-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.22s; }
-    .pg-cell:hover .pg-cell-img img { transform: scale(1.05); }
-    .pg-cell-caption { font-size: 0.7rem; color: var(--text-muted); line-height: 1.4; text-align: center; padding: 0 2px; }
-
-    /* ── LIGHTBOX ── */
-    #lightbox {
-      position: fixed; inset: 0; z-index: 1000;
-      background: rgba(0,0,0,0.92);
-      display: none; align-items: center; justify-content: center;
-      flex-direction: column; gap: 1rem;
-      padding: 1rem;
-      cursor: zoom-out;
-    }
-    #lightbox.open { display: flex; }
-    #lightbox img {
-      max-width: min(90vw, 900px); max-height: 78vh;
-      border-radius: 10px; object-fit: contain;
-      box-shadow: 0 0 60px rgba(0,0,0,0.6);
-      cursor: default;
-    }
-    #lightbox-caption {
-      color: rgba(255,255,255,0.85); font-size: 0.88rem;
-      font-family: 'Playfair Display', serif; text-align: center;
-      max-width: 600px; line-height: 1.5;
-    }
-    #lightbox-close {
-      position: absolute; top: 1rem; right: 1.2rem;
-      color: rgba(255,255,255,0.7); font-size: 1.8rem; cursor: pointer;
-      line-height: 1; background: none; border: none;
-      transition: color 0.15s;
-    }
-    #lightbox-close:hover { color: #fff; }
-    #lightbox-prev, #lightbox-next {
-      position: absolute; top: 50%; transform: translateY(-50%);
-      background: rgba(255,255,255,0.12); border: none; color: #fff;
-      font-size: 1.6rem; width: 44px; height: 44px; border-radius: 50%;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      transition: background 0.15s;
-    }
-    #lightbox-prev:hover, #lightbox-next:hover { background: rgba(255,255,255,0.25); }
-    #lightbox-prev { left: 1rem; }
-    #lightbox-next { right: 1rem; }
-    #lightbox-counter { position: absolute; bottom: 1rem; color: rgba(255,255,255,0.45); font-size: 0.75rem; }
-
-    /* ── INFO PAGE ── */
-    .info-content { max-width: 900px; margin: 0 auto; padding: 0 1.2rem 3rem; }
-    .info-section-title { font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 600; color: var(--brown-dark); padding: 2rem 0 0.7rem; border-bottom: 2px solid var(--gold); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
-    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
-    @media (max-width: 580px) { .about-grid { grid-template-columns: 1fr; } }
-    .about-img { width: 100%; height: 185px; object-fit: cover; border-radius: 12px; display: block; }
-    .about-text { display: flex; flex-direction: column; justify-content: center; gap: 0.6rem; }
-    .about-badge { display: inline-block; background: var(--cream); color: var(--brown-light); font-size: 0.67rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; align-self: flex-start; }
-    .about-text h3 { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 600; color: var(--brown-dark); }
-    .about-text p { font-size: 0.82rem; color: var(--text-muted); line-height: 1.7; }
-    .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 0.85rem; }
-    .contact-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.1rem; display: flex; align-items: flex-start; gap: 0.75rem; }
-    .contact-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 1px; }
-    .contact-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.2rem; }
-    .contact-value { font-size: 0.88rem; font-weight: 600; color: var(--brown-dark); }
-    .hours-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px,1fr)); gap: 0.8rem; }
-    .hours-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 0.85rem; text-align: center; }
-    .hours-day { font-size: 0.67rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem; }
-    .hours-time { font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 600; color: var(--brown-dark); }
-    .promo-card { background: var(--brown-mid); border-radius: 14px; overflow: hidden; display: flex; align-items: stretch; min-height: 110px; }
-    .promo-photo { width: 130px; flex-shrink: 0; object-fit: cover; display: block; }
-    .promo-body { padding: 1rem 1.2rem; display: flex; flex-direction: column; justify-content: center; gap: 0.35rem; }
-    .promo-tag { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
-    .promo-title { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700; color: var(--cream); line-height: 1.3; }
-    .promo-desc { font-size: 0.75rem; color: rgba(245,236,215,0.7); line-height: 1.45; }
-    .promo-price { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; color: var(--gold); }
-    @media (max-width: 460px) { .promo-photo { width: 100px; } }
-    .gallery-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.6rem; }
-    @media (max-width: 460px) { .gallery-grid { grid-template-columns: repeat(2,1fr); } }
-    .gallery-img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; display: block; transition: transform 0.2s; cursor: pointer; }
-    .gallery-img:hover { transform: scale(1.03); }
-    .featured-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 0.9rem; }
-    .feat-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; cursor: pointer; }
-    .feat-img { width: 100%; height: 110px; object-fit: cover; display: block; transition: transform 0.2s; }
-    .feat-card:hover .feat-img { transform: scale(1.04); }
-    .feat-body { padding: 0.6rem 0.8rem; }
-    .feat-name { font-family: 'Playfair Display', serif; font-size: 0.88rem; font-weight: 600; color: var(--brown-dark); margin-bottom: 0.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .feat-price { font-size: 0.83rem; font-weight: 700; color: var(--brown-light); }
-    .map-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
-    .map-frame { width: 100%; height: 230px; border: none; display: block; }
-    .map-info { padding: 0.85rem 1.1rem; display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; justify-content: space-between; }
-    .map-address { font-size: 0.81rem; color: var(--text-muted); line-height: 1.6; }
-    .map-address strong { display: block; font-size: 0.9rem; color: var(--brown-dark); font-weight: 700; margin-bottom: 0.12rem; }
-    .map-link { display: inline-block; padding: 6px 15px; border-radius: 22px; background: var(--brown-dark); color: var(--cream); font-size: 0.73rem; font-weight: 700; text-decoration: none; letter-spacing: 0.04em; transition: background 0.2s; white-space: nowrap; }
-    .map-link:hover { background: var(--gold); color: var(--brown-dark); }
-    footer { background: var(--brown-dark); color: var(--gold); text-align: center; padding: 1.8rem 1rem; font-size: 0.8rem; letter-spacing: 0.05em; }
-    footer p + p { margin-top: 0.3rem; color: rgba(201,168,124,0.5); font-size: 0.73rem; }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/styles.css"/>
 </head>
 <body>
 
-<!-- ═══════════ LIGHTBOX ═══════════ -->
-<div id="lightbox" onclick="lbClose(event)">
-  <button id="lightbox-close" onclick="closeLightbox()">✕</button>
-  <button id="lightbox-prev" onclick="lbNav(-1);event.stopPropagation()">&#8249;</button>
-  <img id="lightbox-img" src="" alt="" />
-  <div id="lightbox-caption"></div>
-  <button id="lightbox-next" onclick="lbNav(1);event.stopPropagation()">&#8250;</button>
-  <span id="lightbox-counter"></span>
+<!-- LIGHTBOX -->
+<div id="lb" onclick="lbBg(event)">
+  <button id="lb-close" onclick="lbClose()">✕</button>
+  <button id="lb-prev" onclick="lbNav(-1);event.stopPropagation()">&#8249;</button>
+  <img id="lb-img" src="" alt=""/>
+  <div id="lb-cap"></div>
+  <button id="lb-next" onclick="lbNav(1);event.stopPropagation()">&#8250;</button>
+  <span id="lb-ctr"></span>
 </div>
 
-<!-- ═══════════ MENU PAGE ═══════════ -->
+<!-- ADMIN FLOATING BUTTON -->
+<button id="adminBtn" onclick="goAdmin()">⚙ Administrar</button>
+
+<!-- ══════════ MENU PAGE ══════════ -->
 <div class="page active" id="page-menu">
-
-  <a class="hero-banner" href="#" onclick="showPage('info'); return false;" title="Toca para ver información del café">
-    <img class="hero-banner-photo" src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=200&q=80" alt="Café Roble" />
-    <div class="hero-banner-body">
-      <span class="hero-banner-name">Café Roble</span>
-      <span class="hero-banner-sub">Av. Principal 123 · Desde 1998</span>
+  <a class="banner" href="#" onclick="goPage('info');return false">
+    <img class="banner-photo" src="" alt="Café Roble"/>
+    <div class="banner-body">
+      <span class="banner-name">Café Roble</span>
+      <span class="banner-sub"></span>
     </div>
-    <div class="hero-banner-cta">
-      <span class="hero-banner-cta-icon" style="font-size:0.9rem;opacity:0.5">›</span>
+    <div class="banner-action">
+      <span class="banner-action-icon">ℹ️</span>
+      <span class="banner-action-label">Nosotros</span>
     </div>
   </a>
-
-  <nav class="cat-nav-wrapper" aria-label="Categorías del menú">
-    <div class="cat-nav" id="catNav">
-      <button class="cat-btn active" data-index="0">Cafés</button>
-      <button class="cat-btn" data-index="1">Fríos</button>
-      <button class="cat-btn" data-index="2">Panadería</button>
-      <button class="cat-btn" data-index="3">Desayunos</button>
-      <button class="cat-btn" data-index="4">Postres</button>
-    </div>
-  </nav>
-
+  <nav class="cat-nav-wrap"><div class="cat-nav" id="catNav"></div></nav>
   <p class="swipe-hint" id="swipeHint">← arrastra para cambiar categoría →</p>
-
-  <div class="slider-viewport" id="viewport">
-    <div class="slider-track" id="track">
-
-      <!-- ══ PANEL 0: CAFÉS ══ -->
-      <div class="slide-panel" data-panel="0">
-        <h2 class="section-title">Cafés calientes</h2>
-        <div class="items-list">
-
-          <div class="item-row">
-            <div class="item-thumb" onclick="openLightbox(0,0)">
-              <img src="https://images.unsplash.com/photo-1541167760496-1628856ab772?w=200&q=80" alt="Espresso">
-              <span class="badge">Clásico</span>
-            </div>
-            <div class="item-info"><p class="item-name">Espresso</p><p class="item-desc">Shot puro de café de origen único, tostado artesanal. Intenso y cremoso con crema dorada perfecta.</p></div>
-            <div class="item-right"><span class="price">$1.80</span></div>
-          </div>
-
-          <div class="item-row">
-            <div class="item-thumb" onclick="openLightbox(0,1)">
-              <img src="https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=200&q=80" alt="Cappuccino">
-            </div>
-            <div class="item-info"><p class="item-name">Cappuccino</p><p class="item-desc">Espresso con leche vaporizada y espuma cremosa. Equilibrio perfecto entre intensidad y suavidad.</p></div>
-            <div class="item-right"><span class="price">$3.20</span></div>
-          </div>
-
-          <div class="item-row">
-            <div class="item-thumb" onclick="openLightbox(0,2)">
-              <img src="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=200&q=80" alt="Latte">
-              <span class="badge">Popular</span>
-            </div>
-            <div class="item-info"><p class="item-name">Latte</p><p class="item-desc">Café suave con abundante leche vaporizada. Disponible en vainilla, caramelo y avellana.</p></div>
-            <div class="item-right"><span class="price">$3.50</span></div>
-          </div>
-
-          <div class="item-row">
-            <div class="item-thumb" onclick="openLightbox(0,3)">
-              <img src="https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=200&q=80" alt="Mocha">
-            </div>
-            <div class="item-info"><p class="item-name">Mocha</p><p class="item-desc">Espresso con chocolate belga y leche cremosa vaporizada. Un lujo para el paladar.</p></div>
-            <div class="item-right"><span class="price">$4.00</span></div>
-          </div>
-
-          <div class="item-row">
-            <div class="item-thumb" onclick="openLightbox(0,4)">
-              <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=200&q=80" alt="Cortado">
-            </div>
-            <div class="item-info"><p class="item-name">Cortado</p><p class="item-desc">Espresso cortado con un toque de leche caliente. Intensidad suavizada sin perder carácter.</p></div>
-            <div class="item-right"><span class="price">$2.40</span></div>
-          </div>
-
-          <div class="item-row">
-            <div class="item-thumb" onclick="openLightbox(0,5)">
-              <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=200&q=80" alt="Americano">
-            </div>
-            <div class="item-info"><p class="item-name">Americano</p><p class="item-desc">Espresso con agua caliente. Largo, suave y reconfortante, ideal para saborear despacio.</p></div>
-            <div class="item-right"><span class="price">$2.80</span></div>
-          </div>
-
-        </div>
-
-        <!-- PANEL GALLERY -->
-        <div class="panel-gallery">
-          <p class="panel-gallery-title">Momentos con un café</p>
-          <div class="panel-gallery-grid">
-            <div class="pg-cell" onclick="openGalleryLightbox([{src:'https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=900&q=90',cap:'Nuestro rincón favorito para tomar un café tranquilo'},{src:'https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=900&q=90',cap:'Cada taza es una obra de arte hecha con pasión'},{src:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=900&q=90',cap:'El aroma del café recién hecho te espera cada mañana'}],0)">
-              <div class="pg-cell-img"><img src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=400&q=80" alt=""></div>
-              <span class="pg-cell-caption">Nuestro rincón favorito para tomar un café tranquilo</span>
-            </div>
-            <div class="pg-cell" onclick="openGalleryLightbox([{src:'https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=900&q=90',cap:'Nuestro rincón favorito para tomar un café tranquilo'},{src:'https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=900&q=90',cap:'Cada taza es una obra de arte hecha con pasión'},{src:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=900&q=90',cap:'El aroma del café recién hecho te espera cada mañana'}],1)">
-              <div class="pg-cell-img"><img src="https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=400&q=80" alt=""></div>
-              <span class="pg-cell-caption">Cada taza es una obra de arte hecha con pasión</span>
-            </div>
-            <div class="pg-cell" onclick="openGalleryLightbox([{src:'https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=900&q=90',cap:'Nuestro rincón favorito para tomar un café tranquilo'},{src:'https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=900&q=90',cap:'Cada taza es una obra de arte hecha con pasión'},{src:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=900&q=90',cap:'El aroma del café recién hecho te espera cada mañana'}],2)">
-              <div class="pg-cell-img"><img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=80" alt=""></div>
-              <span class="pg-cell-caption">El aroma del café recién hecho te espera cada mañana</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ══ PANEL 1: FRÍOS ══ -->
-      <div class="slide-panel" data-panel="1">
-        <h2 class="section-title">Bebidas frías</h2>
-        <div class="items-list">
-
-          <div class="item-row">
-            <div class="item-thumb" onclick="openLightbox(1,0)">
-              <img src="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=200&q=80" alt="Cold Brew">
-              <span class="badge">Verano</span>
-            </div>
-            <div class="item-info"><p class="item-name">Cold Brew</p><p class="item-desc">Café macerado en frío durante 24 horas. Suave, sin acidez y muy refrescante.</p></div>
-            <div class="item-right"><span class="price">$4.20</span></div>
-          </div>
-
-          <div class="item-row">
-            <div class="item-thumb" onclick="openLightbox(1,1)">
-              <img src="https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=200&q=80" alt="Frappé">
-            </div>
-            <div class="item-info"><p class="item-name">Frappé de vainilla</p><p class="item-desc">Café mezclado con hielo, leche y jarabe de vainilla. Cremoso, dulce e irresistible.</p></div>
-            <div class="item-right"><span class="price">$4.80</span></div>
-          </div>
-
-          <div class="item-row">
-            <div class="item-thumb" onclick="openLightbox(1,2)">
-              <img src="https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=200&q=80" alt="Matcha">
-            </div>
-            <div class="item-info"><p class="item-name">Matcha Latte frío</p><p class="item-desc">Té matcha japonés ceremonial con leche de avena y hielo. Energizante y delicado.</p></div>
-            <div class="item-right"><span class="price">$4.50</span></div>
-          </div>
-
-          <div class="item-row">
-            <div class="item-thumb" onclick="openLightbox(1,3)">
-              <img src="https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=200&q=80" alt="Limonada">
-            </div>
-            <div class="item-info"><p class="item-name">Limonada de jengibre</p><p class="item-desc">Limonada natural con jengibre fresco, menta y un toque de miel artesanal.</p></div>
-            <div class="item-right"><span class="price">$3.80</span></div>
-          </div>
-
-        </div>
-
-        <div class="panel-gallery">
-          <p class="panel-gallery-title">Refrescante en cada sorbo</p>
-          <div class="panel-gallery-grid">
-            <div class="pg-cell" onclick="openGalleryLightbox([{src:'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=90',cap:'La frescura del cold brew en una tarde de verano'},{src:'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=900&q=90',cap:'Matcha ceremonial — energía natural desde Japón'},{src:'https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=900&q=90',cap:'Sabores frescos y naturales para los días más calurosos'}],0)">
-              <div class="pg-cell-img"><img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80" alt=""></div>
-              <span class="pg-cell-caption">La frescura del cold brew en una tarde de verano</span>
-            </div>
-            <div class="pg-cell" onclick="openGalleryLightbox([{src:'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=90',cap:'La frescura del cold brew en una tarde de verano'},{src:'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=900&q=90',cap:'Matcha ceremonial — energía natural desde Japón'},{src:'https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=900&q=90',cap:'Sabores frescos y naturales para los días más calurosos'}],1)">
-              <div class="pg-cell-img"><img src="https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&q=80" alt=""></div>
-              <span class="pg-cell-caption">Matcha ceremonial — energía natural desde Japón</span>
-            </div>
-            <div class="pg-cell" onclick="openGalleryLightbox([{src:'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=90',cap:'La frescura del cold brew en una tarde de verano'},{src:'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=900&q=90',cap:'Matcha ceremonial — energía natural desde Japón'},{src:'https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=900&q=90',cap:'Sabores frescos y naturales para los días más calurosos'}],2)">
-              <div class="pg-cell-img"><img src="https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=400&q=80" alt=""></div>
-              <span class="pg-cell-caption">Sabores frescos y naturales para los días más calurosos</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ══ PANEL 2: PANADERÍA ══ -->
-      <div class="slide-panel" data-panel="2">
-        <h2 class="section-title">Panadería</h2>
-        <div class="items-list">
-
-          <div class="item-row">
-            <div class="item-thumb" onclick="openLightbox(2,0)">
-              <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&q=80" alt="Croissant">
-              <span class="badge">Recién hecho</span>
-            </div>
-            <div class="item-info"><p class="item-name">Croissant de mantequilla</p><p class="item-desc">Hojaldre artesanal, crujiente por fuera y esponjoso por dentro. Horneado cada mañana.</p></div>
-            <div class="item-right"><span class="price">$2.50</span></div>
-          </div>
-
-          <div class="item-row">
-            <div class="item-thumb" onclick="openLightbox(2,1)">
-              <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&q=80" alt="Bagel">
-            </div>
-            <div class="item-info"><p class="item-name">Bagel con queso crema</p><p class="item-desc">Bagel tostado con queso crema y láminas de salmón ahumado. Clásico neoyorquino.</p></div>
-            <div class="item-right"><span class="price">$5.90</span></div>
-          </div>
-
-          <div class="item-row">
-            <div class="item-thumb" onclick="openLightbox(2,2)">
-              <img src="https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=200&q=80" alt="Tostada aguacate">
-            </div>
-            <div class="item-info"><p class="item-name">Tostada con aguacate</p><p class="item-desc">Pan de masa madre, aguacate machacado, tomate cherry, semillas y sal en escamas.</p></div>
-            <div class="item-right"><span class="price">$6.50</span></div>
-          </div>
-
-          <div class="item-row">
-            <div class="item-thumb" onclick="openLightbox(2,3)">
-              <img src="https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=200&q=80" alt="Waffle">
-            </div>
-            <div class="item-info"><p class="item-name">Waffle belga</p><p class="item-desc">Waffle crujiente con frutos rojos frescos, crema batida y sirope de arce.</p></div>
-            <div class="item-right"><span class="price">$5.20</span></div>
-          </div>
-
-        </div>
-
-        <div class="panel-gallery">
-          <p class="panel-gallery-title">Horneado con amor cada mañana</p>
-          <div class="panel-gallery-grid">
-            <div class="pg-cell" onclick="openGalleryLightbox([{src:'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=900&q=90',cap:'Croissants recién salidos del horno, crujientes y dorados'},{src:'https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=900&q=90',cap:'Waffles belgas con frutas del bosque y crema fresca'},{src:'https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=900&q=90',cap:'Pan de masa madre con aguacate — sencillo y delicioso'}],0)">
-              <div class="pg-cell-img"><img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80" alt=""></div>
-              <span class="pg-cell-caption">Croissants recién salidos del horno, crujientes y dorados</span>
-            </div>
-            <div class="pg-cell" onclick="openGalleryLightbox([{src:'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=900&q=90',cap:'Croissants recién salidos del horno, crujientes y dorados'},{src:'https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=900&q=90',cap:'Waffles belgas con frutas del bosque y crema fresca'},{src:'https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=900&q=90',cap:'Pan de masa madre con aguacate — sencillo y delicioso'}],1)">
-              <div class="pg-cell-img"><img src="https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=400&q=80" alt=""></div>
-              <span class="pg-cell-caption">Waffles belgas con frutas del bosque y crema fresca</span>
-            </div>
-            <div class="pg-cell" onclick="openGalleryLightbox([{src:'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=900&q=90',cap:'Croissants recién salidos del horno, crujientes y dorados'},{src:'https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=900&q=90',cap:'Waffles belgas con frutas del bosque y crema fresca'},{src:'https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=900&q=90',cap:'Pan de masa madre con aguacate — sencillo y delicioso'}],2)">
-              <div class="pg-cell-img"><img src="https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=400&q=80" alt=""></div>
-              <span class="pg-cell-caption">Pan de masa madre con aguacate — sencillo y delicioso</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ══ PANEL 3: DESAYUNOS ══ -->
-      <div class="slide-panel" data-panel="3">
-        <h2 class="section-title">Desayunos</h2>
-        <div class="items-list">
-
-          <div class="item-row">
-            <div class="item-thumb" onclick="openLightbox(3,0)">
-              <img src="https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=200&q=80" alt="Huevos benedictinos">
-              <span class="badge">Estrella</span>
-            </div>
-            <div class="item-info"><p class="item-name">Huevos benedictinos</p><p class="item-desc">Huevos pochados sobre jamón y pan inglés tostado con salsa holandesa casera.</p></div>
-            <div class="item-right"><span class="price">$9.50</span></div>
-          </div>
-
-          <div class="item-row">
-            <div class="item-thumb" onclick="openLightbox(3,1)">
-              <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200&q=80" alt="Granola">
-            </div>
-            <div class="item-info"><p class="item-name">Bowl de granola</p><p class="item-desc">Granola artesanal tostada, yogur griego, miel de abeja y frutas de temporada.</p></div>
-            <div class="item-right"><span class="price">$7.20</span></div>
-          </div>
-
-          <div class="item-row">
-            <div class="item-thumb" onclick="openLightbox(3,2)">
-              <img src="https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=200&q=80" alt="Pancakes">
-            </div>
-            <div class="item-info"><p class="item-name">Pancakes de arándanos</p><p class="item-desc">Esponjosos pancakes con arándanos frescos, mantequilla y sirope de maple puro.</p></div>
-            <div class="item-right"><span class="price">$8.00</span></div>
-          </div>
-
-          <div class="item-row">
-            <div class="item-thumb" onclick="openLightbox(3,3)">
-              <img src="https://images.unsplash.com/photo-1506619216599-9d16d0903dfd?w=200&q=80" alt="Revuelto">
-            </div>
-            <div class="item-info"><p class="item-name">Revuelto de la casa</p><p class="item-desc">Huevos revueltos con queso feta, espinacas frescas y tomatitos cherry asados.</p></div>
-            <div class="item-right"><span class="price">$7.80</span></div>
-          </div>
-
-        </div>
-
-        <div class="panel-gallery">
-          <p class="panel-gallery-title">Empieza el día con buen pie</p>
-          <div class="panel-gallery-grid">
-            <div class="pg-cell" onclick="openGalleryLightbox([{src:'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=900&q=90',cap:'Huevos benedictinos — el desayuno que lo cambia todo'},{src:'https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=900&q=90',cap:'Pancakes esponjosos bañados en sirope de maple puro'},{src:'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&q=90',cap:'Bowl de granola artesanal con frutas frescas de temporada'}],0)">
-              <div class="pg-cell-img"><img src="https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=400&q=80" alt=""></div>
-              <span class="pg-cell-caption">Huevos benedictinos — el desayuno que lo cambia todo</span>
-            </div>
-            <div class="pg-cell" onclick="openGalleryLightbox([{src:'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=900&q=90',cap:'Huevos benedictinos — el desayuno que lo cambia todo'},{src:'https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=900&q=90',cap:'Pancakes esponjosos bañados en sirope de maple puro'},{src:'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&q=90',cap:'Bowl de granola artesanal con frutas frescas de temporada'}],1)">
-              <div class="pg-cell-img"><img src="https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=400&q=80" alt=""></div>
-              <span class="pg-cell-caption">Pancakes esponjosos bañados en sirope de maple puro</span>
-            </div>
-            <div class="pg-cell" onclick="openGalleryLightbox([{src:'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=900&q=90',cap:'Huevos benedictinos — el desayuno que lo cambia todo'},{src:'https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=900&q=90',cap:'Pancakes esponjosos bañados en sirope de maple puro'},{src:'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&q=90',cap:'Bowl de granola artesanal con frutas frescas de temporada'}],2)">
-              <div class="pg-cell-img"><img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80" alt=""></div>
-              <span class="pg-cell-caption">Bowl de granola artesanal con frutas frescas de temporada</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ══ PANEL 4: POSTRES ══ -->
-      <div class="slide-panel" data-panel="4">
-        <h2 class="section-title">Postres</h2>
-        <div class="items-list">
-
-          <div class="item-row">
-            <div class="item-thumb" onclick="openLightbox(4,0)">
-              <img src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=200&q=80" alt="Tarta de queso">
-              <span class="badge">Favorito</span>
-            </div>
-            <div class="item-info"><p class="item-name">Tarta de queso</p><p class="item-desc">Cheesecake cremoso al horno con base de galleta y coulis de frutos rojos.</p></div>
-            <div class="item-right"><span class="price">$5.50</span></div>
-          </div>
-
-          <div class="item-row">
-            <div class="item-thumb" onclick="openLightbox(4,1)">
-              <img src="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=200&q=80" alt="Brownie">
-            </div>
-            <div class="item-info"><p class="item-name">Brownie con helado</p><p class="item-desc">Brownie de chocolate intenso, tibio, con bola de helado de vainilla artesanal.</p></div>
-            <div class="item-right"><span class="price">$5.80</span></div>
-          </div>
-
-          <div class="item-row">
-            <div class="item-thumb" onclick="openLightbox(4,2)">
-              <img src="https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=200&q=80" alt="Tiramisú">
-            </div>
-            <div class="item-info"><p class="item-name">Tiramisú</p><p class="item-desc">Receta italiana tradicional con bizcochos empapados, mascarpone y cacao en polvo.</p></div>
-            <div class="item-right"><span class="price">$6.20</span></div>
-          </div>
-
-          <div class="item-row">
-            <div class="item-thumb" onclick="openLightbox(4,3)">
-              <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&q=80" alt="Flan">
-            </div>
-            <div class="item-info"><p class="item-name">Flan de la abuela</p><p class="item-desc">Flan casero de huevo con caramelo tostado y nata montada. Receta de siempre.</p></div>
-            <div class="item-right"><span class="price">$4.80</span></div>
-          </div>
-
-        </div>
-
-        <div class="panel-gallery">
-          <p class="panel-gallery-title">El dulce final que mereces</p>
-          <div class="panel-gallery-grid">
-            <div class="pg-cell" onclick="openGalleryLightbox([{src:'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=900&q=90',cap:'Tarta de queso horneada — cremosa, perfecta, irresistible'},{src:'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=900&q=90',cap:'Brownie tibio con helado — contraste de texturas y sabores'},{src:'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=900&q=90',cap:'Tiramisú artesanal — la elegancia del postre italiano clásico'}],0)">
-              <div class="pg-cell-img"><img src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&q=80" alt=""></div>
-              <span class="pg-cell-caption">Tarta de queso horneada — cremosa, perfecta, irresistible</span>
-            </div>
-            <div class="pg-cell" onclick="openGalleryLightbox([{src:'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=900&q=90',cap:'Tarta de queso horneada — cremosa, perfecta, irresistible'},{src:'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=900&q=90',cap:'Brownie tibio con helado — contraste de texturas y sabores'},{src:'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=900&q=90',cap:'Tiramisú artesanal — la elegancia del postre italiano clásico'}],1)">
-              <div class="pg-cell-img"><img src="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&q=80" alt=""></div>
-              <span class="pg-cell-caption">Brownie tibio con helado — contraste de texturas y sabores</span>
-            </div>
-            <div class="pg-cell" onclick="openGalleryLightbox([{src:'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=900&q=90',cap:'Tarta de queso horneada — cremosa, perfecta, irresistible'},{src:'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=900&q=90',cap:'Brownie tibio con helado — contraste de texturas y sabores'},{src:'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=900&q=90',cap:'Tiramisú artesanal — la elegancia del postre italiano clásico'}],2)">
-              <div class="pg-cell-img"><img src="https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400&q=80" alt=""></div>
-              <span class="pg-cell-caption">Tiramisú artesanal — la elegancia del postre italiano clásico</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /track -->
-  </div><!-- /viewport -->
-
+  <div class="slider-vp" id="viewport"><div class="slider-track" id="track"></div></div>
   <footer>
-    <p>Café Roble · Lunes a domingo, 7:00 – 21:00</p>
-    <p>Av. Principal 123 · Tel. (555) 000-0000</p>
+    <p class="footer-main"></p>
+    <p class="footer-sub"></p>
   </footer>
-</div><!-- /page-menu -->
+</div>
 
-
-<!-- ═══════════ INFO PAGE ═══════════ -->
+<!-- ══════════ INFO PAGE ══════════ -->
 <div class="page" id="page-info">
-
-  <a class="hero-banner" href="#" onclick="showPage('menu'); return false;" title="Toca para ver la carta">
-    <img class="hero-banner-photo" src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=200&q=80" alt="Café Roble" />
-    <div class="hero-banner-body">
-      <span class="hero-banner-name">Café Roble</span>
-      <span class="hero-banner-sub">Av. Principal 123 · Desde 1998</span>
+  <a class="banner" href="#" onclick="goPage('menu');return false">
+    <img class="banner-photo" src="" alt="Café Roble"/>
+    <div class="banner-body">
+      <span class="banner-name">Café Roble</span>
+      <span class="banner-sub"></span>
     </div>
-    <div class="hero-banner-cta">
-      <span class="hero-banner-cta-icon" style="font-size:0.9rem;opacity:0.5">›</span>
+    <div class="banner-action">
+      <span class="banner-action-icon">📋</span>
+      <span class="banner-action-label">Carta</span>
     </div>
   </a>
+  <div class="info-wrap">
+    <h2 class="info-sec">⭐ Oferta del mes</h2>
+    <div class="promo" id="promoBlock"></div>
 
-  <div class="info-content">
-
-    <h2 class="info-section-title">Oferta del mes</h2>
-    <div class="promo-card">
-      <img class="promo-photo" src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&q=80" alt="Promo" />
-      <div class="promo-body">
-        <span class="promo-tag">Solo en noviembre</span>
-        <p class="promo-title">Desayuno completo + café</p>
-        <p class="promo-desc">Elige tu desayuno favorito y llévate un espresso o americano incluido.</p>
-        <span class="promo-price">$10.90 <small style="font-size:0.7rem;font-weight:400;color:rgba(201,168,124,0.7)">combo</small></span>
-      </div>
-    </div>
-
-    <h2 class="info-section-title">Nuestra historia</h2>
+    <h2 class="info-sec">🫘 Nuestra historia</h2>
     <div class="about-grid">
-      <img class="about-img" src="https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=600&q=80" alt="Interior Café Roble" />
+      <img class="about-img" id="aboutImg" src="" alt="Interior"/>
       <div class="about-text">
-        <span class="about-badge">Desde 1998</span>
-        <h3>Un rincón para los amantes del café</h3>
-        <p>Café Roble nació con la idea de crear un espacio cálido donde cada taza cuente una historia. Granos de origen único, tostados artesanalmente cada semana.</p>
-        <p>Más de 25 años perfeccionando recetas y construyendo una comunidad de apasionados del buen café.</p>
+        <span class="about-badge" id="aboutBadge"></span>
+        <h3 id="aboutTitulo"></h3>
+        <p id="aboutP1"></p>
+        <p id="aboutP2"></p>
       </div>
     </div>
 
-    <h2 class="info-section-title">Contacto</h2>
-    <div class="contact-grid">
-      <div class="contact-card"><span class="contact-icon">📍</span><div><p class="contact-label">Dirección</p><p class="contact-value">Av. Principal 123, Col. Centro</p></div></div>
-      <div class="contact-card"><span class="contact-icon">📱</span><div><p class="contact-label">Teléfono</p><p class="contact-value">(555) 000-0000</p></div></div>
-      <div class="contact-card"><span class="contact-icon">✉️</span><div><p class="contact-label">Email</p><p class="contact-value">info@caferoble.com</p></div></div>
-      <div class="contact-card"><span class="contact-icon">📸</span><div><p class="contact-label">Instagram</p><p class="contact-value">@caferoble</p></div></div>
-    </div>
+    <h2 class="info-sec">📞 Contacto</h2>
+    <div class="cg" id="contactBlock"></div>
 
-    <h2 class="info-section-title">Horarios</h2>
-    <div class="hours-grid">
-      <div class="hours-card"><p class="hours-day">Lun – Vie</p><p class="hours-time">7:00 – 21:00</p></div>
-      <div class="hours-card"><p class="hours-day">Sábado</p><p class="hours-time">8:00 – 22:00</p></div>
-      <div class="hours-card"><p class="hours-day">Domingo</p><p class="hours-time">9:00 – 19:00</p></div>
-      <div class="hours-card"><p class="hours-day">Festivos</p><p class="hours-time">9:00 – 18:00</p></div>
-    </div>
+    <h2 class="info-sec">🕐 Horarios</h2>
+    <div class="hg" id="horariosBlock"></div>
 
-    <h2 class="info-section-title">Productos destacados</h2>
-    <div class="featured-grid">
-      <div class="feat-card" onclick="openSingleLightbox('https://images.unsplash.com/photo-1541167760496-1628856ab772?w=900&q=90','Espresso')"><div style="overflow:hidden"><img class="feat-img" src="https://images.unsplash.com/photo-1541167760496-1628856ab772?w=400&q=80" alt="Espresso" /></div><div class="feat-body"><p class="feat-name">Espresso</p><p class="feat-price">$1.80</p></div></div>
-      <div class="feat-card" onclick="openSingleLightbox('https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=900&q=90','Cappuccino')"><div style="overflow:hidden"><img class="feat-img" src="https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=400&q=80" alt="Cappuccino" /></div><div class="feat-body"><p class="feat-name">Cappuccino</p><p class="feat-price">$3.20</p></div></div>
-      <div class="feat-card" onclick="openSingleLightbox('https://images.unsplash.com/photo-1509440159596-0249088772ff?w=900&q=90','Croissant')"><div style="overflow:hidden"><img class="feat-img" src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80" alt="Croissant" /></div><div class="feat-body"><p class="feat-name">Croissant</p><p class="feat-price">$2.50</p></div></div>
-      <div class="feat-card" onclick="openSingleLightbox('https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=900&q=90','Tarta de queso')"><div style="overflow:hidden"><img class="feat-img" src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&q=80" alt="Tarta" /></div><div class="feat-body"><p class="feat-name">Tarta de queso</p><p class="feat-price">$5.50</p></div></div>
-      <div class="feat-card" onclick="openSingleLightbox('https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=900&q=90','Pancakes')"><div style="overflow:hidden"><img class="feat-img" src="https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=400&q=80" alt="Pancakes" /></div><div class="feat-body"><p class="feat-name">Pancakes</p><p class="feat-price">$8.00</p></div></div>
-      <div class="feat-card" onclick="openSingleLightbox('https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=900&q=90','Cold Brew')"><div style="overflow:hidden"><img class="feat-img" src="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&q=80" alt="Cold Brew" /></div><div class="feat-body"><p class="feat-name">Cold Brew</p><p class="feat-price">$4.20</p></div></div>
-    </div>
+    <h2 class="info-sec">✨ Destacados</h2>
+    <div class="feat-grid" id="infoFeat"></div>
 
-    <h2 class="info-section-title">Galería</h2>
-    <div class="gallery-grid">
-      <img class="gallery-img" src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80" alt="Barista" onclick="openSingleLightbox('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=90','Nuestro barista preparando la mejor taza del día')" />
-      <img class="gallery-img" src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=400&q=80" alt="Interior" onclick="openSingleLightbox('https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=900&q=90','Interior cálido y acogedor de Café Roble')" />
-      <img class="gallery-img" src="https://images.unsplash.com/photo-1506619216599-9d16d0903dfd?w=400&q=80" alt="Desayuno" onclick="openSingleLightbox('https://images.unsplash.com/photo-1506619216599-9d16d0903dfd?w=900&q=90','Desayunos completos para empezar el día con energía')" />
-      <img class="gallery-img" src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=400&q=80" alt="Latte art" onclick="openSingleLightbox('https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=900&q=90','Arte en cada taza — el latte art de nuestro barista')" />
-      <img class="gallery-img" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80" alt="Postre" onclick="openSingleLightbox('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=90','Postres artesanales elaborados con ingredientes de primera')" />
-      <img class="gallery-img" src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=80" alt="Café" onclick="openSingleLightbox('https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=900&q=90','El café perfecto para cualquier momento del día')" />
-    </div>
+    <h2 class="info-sec">📸 Galería</h2>
+    <div class="info-gal" id="infoGal"></div>
 
-    <h2 class="info-section-title">Dónde encontrarnos</h2>
+    <h2 class="info-sec">📍 Ubicación</h2>
     <div class="map-card">
-      <iframe class="map-frame"
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.521260322283!2d-99.16869232426222!3d19.427023340975!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDI1JzM3LjMiTiA5OcKwMTAnMDAuMyJX!5e0!3m2!1ses!2smx!4v1699000000000!5m2!1ses!2smx"
-        allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
-      </iframe>
+      <iframe class="map-frame" id="mapFrame" src="" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       <div class="map-info">
-        <div class="map-address"><strong>Café Roble</strong>Av. Principal 123, Col. Centro<br>Tel: (555) 000-0000</div>
-        <a class="map-link" href="https://maps.google.com" target="_blank">Abrir en Maps →</a>
+        <div class="map-addr" id="mapAddr"></div>
+        <a class="map-lnk" id="mapLink" href="#" target="_blank">Abrir en Maps →</a>
       </div>
+    </div>
+  </div>
+  <footer>
+    <p class="footer-main"></p>
+    <p class="footer-sub"></p>
+  </footer>
+</div>
+
+<!-- ══════════ ADMIN PAGE ══════════ -->
+<div class="page" id="page-admin">
+
+  <!-- BARRA SUPERIOR -->
+  <div class="adm-bar">
+    <span class="adm-bar-title">⚙️ Administración — Café Roble</span>
+    <button class="ab ab-ghost" onclick="goPage('menu')">← Salir</button>
+    <button class="ab ab-green" onclick="admApply()">✔ Guardar y aplicar</button>
+    <button class="ab ab-gold" onclick="admExport()">⬇ Exportar JSON</button>
+    <label class="ab ab-blue" style="cursor:pointer">
+      📂 Importar JSON
+      <input type="file" accept=".json" style="display:none" onchange="admImport(this)"/>
+    </label>
+    <button class="ab ab-red" onclick="admReset()">↺ Restablecer</button>
+  </div>
+
+  <div class="adm-body">
+
+    <!-- NAVEGACIÓN DE SECCIONES -->
+    <div class="adm-section-nav">
+      <button class="asec-btn active" data-sec="menu"       onclick="switchSection('menu')">🛍 Menú y galería</button>
+      <button class="asec-btn"        data-sec="negocio"    onclick="switchSection('negocio')">🏪 Datos del negocio</button>
+      <button class="asec-btn"        data-sec="categorias" onclick="switchSection('categorias')">📂 Categorías</button>
+    </div>
+
+    <!-- SECCIÓN: MENÚ -->
+    <div class="adm-section active" id="adm-sec-menu">
+      <div class="adm-tabs" id="admTabs"></div>
+      <div id="admContent"></div>
+    </div>
+
+    <!-- SECCIÓN: NEGOCIO -->
+    <div class="adm-section" id="adm-sec-negocio">
+      <div id="adm-negocio-content"></div>
+    </div>
+
+    <!-- SECCIÓN: CATEGORÍAS -->
+    <div class="adm-section" id="adm-sec-categorias">
+      <div id="adm-cat-content"></div>
     </div>
 
   </div>
-  <footer>
-    <p>Café Roble · Lunes a domingo, 7:00 – 21:00</p>
-    <p>Av. Principal 123 · Tel. (555) 000-0000</p>
-  </footer>
-</div><!-- /page-info -->
+</div>
 
+<div id="toast"></div>
 
-<script>
-/* ══════════════════════════
-   LIGHTBOX
-══════════════════════════ */
-let _lbImages = [];  // [{src, cap}]
-let _lbIdx    = 0;
-
-// Per-panel product image sets
-const PANEL_IMGS = [
-  [ // Cafés
-    { src:'https://images.unsplash.com/photo-1541167760496-1628856ab772?w=900&q=90', cap:'Espresso — café puro de origen único' },
-    { src:'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=900&q=90', cap:'Cappuccino — espresso con espuma cremosa' },
-    { src:'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=900&q=90', cap:'Latte — suave y disponible en varios sabores' },
-    { src:'https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=900&q=90', cap:'Mocha — chocolate belga y café en perfecta armonía' },
-    { src:'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=90', cap:'Cortado — intensidad suavizada' },
-    { src:'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=900&q=90', cap:'Americano — largo, suave y reconfortante' },
-  ],
-  [ // Fríos
-    { src:'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=900&q=90', cap:'Cold Brew — macerado 24 horas en frío' },
-    { src:'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=900&q=90', cap:'Frappé de vainilla — cremoso y dulce' },
-    { src:'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=900&q=90', cap:'Matcha Latte frío — energía natural desde Japón' },
-    { src:'https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=900&q=90', cap:'Limonada de jengibre — fresca y natural' },
-  ],
-  [ // Panadería
-    { src:'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=900&q=90', cap:'Croissant de mantequilla — horneado cada mañana' },
-    { src:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=900&q=90', cap:'Bagel con queso crema y salmón ahumado' },
-    { src:'https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=900&q=90', cap:'Tostada con aguacate — nutritiva y deliciosa' },
-    { src:'https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=900&q=90', cap:'Waffle belga con frutos rojos y crema batida' },
-  ],
-  [ // Desayunos
-    { src:'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=900&q=90', cap:'Huevos benedictinos con salsa holandesa casera' },
-    { src:'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&q=90', cap:'Bowl de granola artesanal con frutas frescas' },
-    { src:'https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=900&q=90', cap:'Pancakes de arándanos con sirope de maple' },
-    { src:'https://images.unsplash.com/photo-1506619216599-9d16d0903dfd?w=900&q=90', cap:'Revuelto de la casa — queso feta y espinacas' },
-  ],
-  [ // Postres
-    { src:'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=900&q=90', cap:'Tarta de queso — cremosa y con coulis de frutos rojos' },
-    { src:'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=900&q=90', cap:'Brownie con helado de vainilla artesanal' },
-    { src:'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=900&q=90', cap:'Tiramisú italiano — mascarpone y cacao' },
-    { src:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=90', cap:'Flan de la abuela — receta de siempre' },
-  ],
-];
-
-function openLightbox(panelIdx, itemIdx) {
-  _lbImages = PANEL_IMGS[panelIdx];
-  _lbIdx    = itemIdx;
-  showLightbox();
-}
-function openGalleryLightbox(imgs, startIdx) {
-  _lbImages = imgs.map(i => ({ src: i.src, cap: i.cap }));
-  _lbIdx    = startIdx;
-  showLightbox();
-}
-function openSingleLightbox(src, cap) {
-  _lbImages = [{ src, cap }];
-  _lbIdx    = 0;
-  showLightbox();
-}
-
-function showLightbox() {
-  const lb  = document.getElementById('lightbox');
-  const img = document.getElementById('lightbox-img');
-  const cap = document.getElementById('lightbox-caption');
-  const ctr = document.getElementById('lightbox-counter');
-  const prv = document.getElementById('lightbox-prev');
-  const nxt = document.getElementById('lightbox-next');
-
-  img.src = _lbImages[_lbIdx].src;
-  cap.textContent = _lbImages[_lbIdx].cap || '';
-  ctr.textContent = _lbImages.length > 1 ? (_lbIdx + 1) + ' / ' + _lbImages.length : '';
-  prv.style.display = _lbImages.length > 1 ? '' : 'none';
-  nxt.style.display = _lbImages.length > 1 ? '' : 'none';
-  lb.classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeLightbox() {
-  document.getElementById('lightbox').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function lbClose(e) {
-  if (e.target === document.getElementById('lightbox')) closeLightbox();
-}
-
-function lbNav(dir) {
-  _lbIdx = (_lbIdx + dir + _lbImages.length) % _lbImages.length;
-  showLightbox();
-}
-
-document.addEventListener('keydown', e => {
-  if (!document.getElementById('lightbox').classList.contains('open')) return;
-  if (e.key === 'Escape')      closeLightbox();
-  if (e.key === 'ArrowRight')  lbNav(1);
-  if (e.key === 'ArrowLeft')   lbNav(-1);
-});
-
-/* ══════════════════════════
-   PAGE SWITCH
-══════════════════════════ */
-function showPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  window.scrollTo(0, 0);
-  if (name === 'menu') initSlider();
-}
-
-/* ══════════════════════════
-   SLIDER
-══════════════════════════ */
-const TOTAL   = 5;
-let current   = 0;
-let ready     = false;
-let dragging  = false;
-let startX    = 0;
-let dragDelta = 0;
-
-const viewport = document.getElementById('viewport');
-const track    = document.getElementById('track');
-const navEl    = document.getElementById('catNav');
-const catBtns  = document.querySelectorAll('.cat-btn');
-const panels   = document.querySelectorAll('.slide-panel');
-const hint     = document.getElementById('swipeHint');
-
-function layoutPanels(delta) {
-  const vw = viewport.offsetWidth;
-  panels.forEach((p, i) => { p.style.transform = `translateX(${(i - current) * vw + delta}px)`; });
-}
-
-function syncHeight(animate) {
-  const h = panels[current].scrollHeight;
-  track.style.transition = animate ? 'height 0.35s cubic-bezier(0.25,0.46,0.45,0.94)' : 'none';
-  track.style.height = h + 'px';
-}
-
-function initSlider() {
-  if (ready) { syncHeight(false); return; }
-  ready = true;
-  panels.forEach(p => { p.style.position = 'absolute'; p.style.top = '0'; p.style.left = '0'; });
-  layoutPanels(0);
-  syncHeight(false);
-}
-
-function goTo(index, animate) {
-  index = Math.max(0, Math.min(TOTAL - 1, index));
-  current = index;
-  const ease = 'transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94)';
-  panels.forEach(p => { p.style.transition = animate ? ease : 'none'; });
-  layoutPanels(0);
-  syncHeight(animate);
-  catBtns.forEach((b, i) => b.classList.toggle('active', i === index));
-  const btn = catBtns[index];
-  const NAV_PAD = 52;
-  const target = (btn.offsetLeft - NAV_PAD) - (navEl.offsetWidth / 2 - btn.offsetWidth / 2);
-  navEl.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
-  hint.classList.add('hidden');
-}
-
-catBtns.forEach((btn, i) => btn.addEventListener('click', () => goTo(i, true)));
-
-function getX(e) { return e.touches ? e.touches[0].clientX : e.clientX; }
-
-function onStart(e) {
-  if (e.target.closest('.item-thumb, .pg-cell, .pg-cell-img')) return;
-  dragging = true; startX = getX(e); dragDelta = 0;
-  panels.forEach(p => { p.style.transition = 'none'; });
-  track.style.transition = 'none';
-  viewport.classList.add('grabbing');
-}
-function onMove(e) {
-  if (!dragging) return;
-  dragDelta = getX(e) - startX;
-  layoutPanels(dragDelta);
-}
-function onEnd() {
-  if (!dragging) return;
-  dragging = false;
-  viewport.classList.remove('grabbing');
-  const thr = viewport.offsetWidth * 0.2;
-  if      (dragDelta < -thr && current < TOTAL - 1) goTo(current + 1, true);
-  else if (dragDelta >  thr && current > 0)          goTo(current - 1, true);
-  else                                                goTo(current,     true);
-}
-
-viewport.addEventListener('mousedown',  onStart);
-window.addEventListener('mousemove',    onMove);
-window.addEventListener('mouseup',      onEnd);
-viewport.addEventListener('touchstart', onStart, { passive: true });
-viewport.addEventListener('touchmove',  onMove,  { passive: true });
-viewport.addEventListener('touchend',   onEnd);
-window.addEventListener('resize', () => { if (ready) { layoutPanels(0); syncHeight(false); } });
-
-initSlider();
-</script>
+<script src="js/app.js"></script>
+<script src="js/admin.js"></script>
 </body>
 </html>
