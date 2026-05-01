@@ -2,13 +2,13 @@
   "categorias": [
     {
       "id": "cafes",
-      "label": "Cafés",
+      "label": "CafÃ©s",
       "productos": [
         {
-          "nombre": "Espresso",
-          "desc": "Shot puro de café de origen único, tostado artesanal. Intenso y cremoso con crema dorada perfecta.",
+          "nombre": "asdasdsdadadad",
+          "desc": "Shot puro de cafÃ© de origen Ãºnico, tostado artesanal. Intenso y cremoso con crema dorada perfecta.",
           "precio": "$1.80",
-          "badge": "Clásico",
+          "badge": "ClÃ¡sico",
           "img": "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=200&q=80",
           "imgFull": "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=900&q=90"
         },
@@ -22,7 +22,7 @@
         },
         {
           "nombre": "Latte",
-          "desc": "Café suave con abundante leche vaporizada. Disponible en vainilla, caramelo y avellana.",
+          "desc": "CafÃ© suave con abundante leche vaporizada. Disponible en vainilla, caramelo y avellana.",
           "precio": "$3.50",
           "badge": "Popular",
           "img": "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=200&q=80",
@@ -38,7 +38,7 @@
         },
         {
           "nombre": "Cortado",
-          "desc": "Espresso cortado con un toque de leche caliente. Intensidad suavizada sin perder carácter.",
+          "desc": "Espresso cortado con un toque de leche caliente. Intensidad suavizada sin perder carÃ¡cter.",
           "precio": "$2.40",
           "badge": "",
           "img": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=200&q=80",
@@ -54,49 +54,49 @@
         }
       ],
       "galeria": {
-        "titulo": "Momentos con un café",
+        "titulo": "Momentos con un cafÃ©",
         "fotos": [
           {
             "img": "https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=900&q=90",
-            "caption": "Nuestro rincón favorito para tomar un café tranquilo"
+            "caption": "Nuestro rincÃ³n favorito para tomar un cafÃ© tranquilo"
           },
           {
             "img": "https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=900&q=90",
-            "caption": "Cada taza es una obra de arte hecha con pasión"
+            "caption": "Cada taza es una obra de arte hecha con pasiÃ³n"
           },
           {
             "img": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=900&q=90",
-            "caption": "El aroma del café recién hecho te espera cada mañana"
+            "caption": "El aroma del cafÃ© reciÃ©n hecho te espera cada maÃ±ana"
           }
         ]
       }
     },
     {
       "id": "frios",
-      "label": "Fríos",
+      "label": "FrÃ­os",
       "productos": [
         {
           "nombre": "Cold Brew",
-          "desc": "Café macerado en frío durante 24 horas. Suave, sin acidez y muy refrescante.",
+          "desc": "CafÃ© macerado en frÃ­o durante 24 horas. Suave, sin acidez y muy refrescante.",
           "precio": "$4.20",
           "badge": "Verano",
           "img": "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=200&q=80",
           "imgFull": "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=900&q=90"
         },
         {
-          "nombre": "Frappé de vainilla",
-          "desc": "Café mezclado con hielo, leche y jarabe de vainilla. Cremoso, dulce e irresistible.",
+          "nombre": "FrappÃ© de vainilla",
+          "desc": "CafÃ© mezclado con hielo, leche y jarabe de vainilla. Cremoso, dulce e irresistible.",
           "precio": "$4.80",
           "badge": "",
           "img": "https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=200&q=80",
           "imgFull": "https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=900&q=90"
         },
         {
-          "nombre": "Matcha Latte frío",
-          "desc": "Té matcha japonés ceremonial con leche de avena y hielo. Energizante y delicado.",
+          "nombre": "Matcha Latte frÃ­o",
+          "desc": "TÃ© matcha japonÃ©s ceremonial con leche de avena y hielo. Energizante y delicado.",
           "precio": "$4.50",
           "badge": "",
           "img": "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=200&q=80",
@@ -122,31 +122,31 @@
           {
             "img": "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=900&q=90",
-            "caption": "Matcha ceremonial — energía natural desde Japón"
+            "caption": "Matcha ceremonial â energÃ­a natural desde JapÃ³n"
           },
           {
             "img": "https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=900&q=90",
-            "caption": "Sabores frescos y naturales para los días más calurosos"
+            "caption": "Sabores frescos y naturales para los dÃ­as mÃ¡s calurosos"
           }
         ]
       }
     },
     {
       "id": "panaderia",
-      "label": "Panadería",
+      "label": "PanaderÃ­a",
       "productos": [
         {
           "nombre": "Croissant de mantequilla",
-          "desc": "Hojaldre artesanal, crujiente por fuera y esponjoso por dentro. Horneado cada mañana.",
+          "desc": "Hojaldre artesanal, crujiente por fuera y esponjoso por dentro. Horneado cada maÃ±ana.",
           "precio": "$2.50",
-          "badge": "Recién hecho",
+          "badge": "ReciÃ©n hecho",
           "img": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&q=80",
           "imgFull": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=900&q=90"
         },
         {
           "nombre": "Bagel con queso crema",
-          "desc": "Bagel tostado con queso crema y láminas de salmón ahumado. Clásico neoyorquino.",
+          "desc": "Bagel tostado con queso crema y lÃ¡minas de salmÃ³n ahumado. ClÃ¡sico neoyorquino.",
           "precio": "$5.90",
           "badge": "",
           "img": "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&q=80",
@@ -170,12 +170,12 @@
         }
       ],
       "galeria": {
-        "titulo": "Horneado con amor cada mañana",
+        "titulo": "Horneado con amor cada maÃ±ana",
         "fotos": [
           {
             "img": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=900&q=90",
-            "caption": "Croissants recién salidos del horno, crujientes y dorados"
+            "caption": "Croissants reciÃ©n salidos del horno, crujientes y dorados"
           },
           {
             "img": "https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=400&q=80",
@@ -185,7 +185,7 @@
           {
             "img": "https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=900&q=90",
-            "caption": "Pan de masa madre con aguacate — sencillo y delicioso"
+            "caption": "Pan de masa madre con aguacate â sencillo y delicioso"
           }
         ]
       }
@@ -196,7 +196,7 @@
       "productos": [
         {
           "nombre": "Huevos benedictinos",
-          "desc": "Huevos pochados sobre jamón y pan inglés tostado con salsa holandesa casera.",
+          "desc": "Huevos pochados sobre jamÃ³n y pan inglÃ©s tostado con salsa holandesa casera.",
           "precio": "$9.50",
           "badge": "Estrella",
           "img": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=200&q=80",
@@ -211,8 +211,8 @@
           "imgFull": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&q=90"
         },
         {
-          "nombre": "Pancakes de arándanos",
-          "desc": "Esponjosos pancakes con arándanos frescos, mantequilla y sirope de maple puro.",
+          "nombre": "Pancakes de arÃ¡ndanos",
+          "desc": "Esponjosos pancakes con arÃ¡ndanos frescos, mantequilla y sirope de maple puro.",
           "precio": "$8.00",
           "badge": "",
           "img": "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=200&q=80",
@@ -228,17 +228,17 @@
         }
       ],
       "galeria": {
-        "titulo": "Empieza el día con buen pie",
+        "titulo": "Empieza el dÃ­a con buen pie",
         "fotos": [
           {
             "img": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=900&q=90",
-            "caption": "Huevos benedictinos — el desayuno que lo cambia todo"
+            "caption": "Huevos benedictinos â el desayuno que lo cambia todo"
           },
           {
             "img": "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=900&q=90",
-            "caption": "Pancakes esponjosos bañados en sirope de maple puro"
+            "caption": "Pancakes esponjosos baÃ±ados en sirope de maple puro"
           },
           {
             "img": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80",
@@ -269,7 +269,7 @@
           "imgFull": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=900&q=90"
         },
         {
-          "nombre": "Tiramisú",
+          "nombre": "TiramisÃº",
           "desc": "Receta italiana tradicional con bizcochos empapados, mascarpone y cacao en polvo.",
           "precio": "$6.20",
           "badge": "",
@@ -291,17 +291,17 @@
           {
             "img": "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=900&q=90",
-            "caption": "Tarta de queso horneada — cremosa, perfecta, irresistible"
+            "caption": "Tarta de queso horneada â cremosa, perfecta, irresistible"
           },
           {
             "img": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=900&q=90",
-            "caption": "Brownie tibio con helado — contraste de texturas y sabores"
+            "caption": "Brownie tibio con helado â contraste de texturas y sabores"
           },
           {
             "img": "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=900&q=90",
-            "caption": "Tiramisú artesanal — la elegancia del postre italiano clásico"
+            "caption": "TiramisÃº artesanal â la elegancia del postre italiano clÃ¡sico"
           }
         ]
       }
