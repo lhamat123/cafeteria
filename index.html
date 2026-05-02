@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Café Roble</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bd:#2C1A0E;--bm:#3D2210;--bl:#8B5E2F;
+    --gold:#C9A87C;--cream:#F5ECD7;--cs:#FDF6EC;
+    --text:#1a1008;--muted:#6b5340;--bdr:rgba(201,168,124,0.25);
+  }
+  body{font-family:'Lato',sans-serif;background:var(--cs);color:var(--text);overflow-x:hidden}
+
+  /* ── PAGES ── */
+  .page{display:none}.page.active{display:block}
+
+  /* ── BANNER ── */
+  .banner{background:var(--bd);display:flex;align-items:center;min-height:68px;
+    cursor:pointer;text-decoration:none;position:relative;overflow:hidden;transition:filter .18s}
+  .banner:hover{filter:brightness(1.1)}
+  .banner::before{content:'';position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(45deg,transparent,transparent 18px,rgba(255,255,255,.014) 18px,rgba(255,255,255,.014) 36px)}
+  .banner-photo{width:84px;height:68px;object-fit:cover;flex-shrink:0;display:block}
+  .banner-body{flex:1;padding:0 .9rem;position:relative;z-index:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+  .banner-name{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;
+    color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .banner-sub{font-size:.62rem;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;
+    font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .banner-action{flex-shrink:0;padding:0 .9rem;position:relative;z-index:1;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    border-left:1px solid rgba(201,168,124,.2)}
+  .banner-action-icon{font-size:1rem;line-height:1}
+  .banner-action-label{font-size:.52rem;font-weight:700;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--gold);white-space:nowrap}
+
+  /* ── ADMIN BUTTON (floating) ── */
+  #adminBtn{
+    position:fixed;bottom:1rem;right:1rem;z-index:500;
+    background:#1a1a2e;color:var(--gold);border:1.5px solid var(--gold);
+    padding:8px 14px;border-radius:30px;font-family:'Lato',sans-serif;
+    font-size:.72rem;font-weight:700;letter-spacing:.07em;cursor:pointer;
+    box-shadow:0 4px 16px rgba(0,0,0,.3);transition:all .18s;
+  }
+  #adminBtn:hover{background:var(--gold);color:var(--bd)}
+
+  /* ── CAT NAV ── */
+  .cat-nav-wrap{background:var(--bm);padding:.75rem 0;position:relative}
+  .cat-nav-wrap::before,.cat-nav-wrap::after{content:'';position:absolute;top:0;bottom:0;
+    width:52px;z-index:2;pointer-events:none}
+  .cat-nav-wrap::before{left:0;background:linear-gradient(to right,var(--bm) 30%,transparent)}
+  .cat-nav-wrap::after{right:0;background:linear-gradient(to left,var(--bm) 30%,transparent)}
+  .cat-nav{display:flex;gap:9px;overflow-x:auto;scroll-behavior:smooth;scrollbar-width:none;
+    padding:0 52px;justify-content:safe center}
+  .cat-nav::-webkit-scrollbar{display:none}
+  .cat-btn{flex-shrink:0;padding:5px 16px;border-radius:20px;
+    border:1.5px solid rgba(201,168,124,.45);background:transparent;color:var(--gold);
+    font-family:'Lato',sans-serif;font-size:.74rem;font-weight:700;letter-spacing:.07em;
+    text-transform:uppercase;cursor:pointer;white-space:nowrap;
+    transition:background .18s,color .18s,border-color .18s}
+  .cat-btn:hover,.cat-btn.active{background:var(--gold);color:var(--bd);border-color:var(--gold)}
+  .swipe-hint{text-align:center;font-size:.68rem;color:var(--muted);letter-spacing:.06em;
+    padding:.5rem 0 0;transition:opacity .5s;user-select:none}
+  .swipe-hint.hidden{opacity:0;pointer-events:none}
+
+  /* ── SLIDER ── */
+  .slider-vp{overflow:hidden;width:100%;cursor:grab}
+  .slider-vp.grabbing{cursor:grabbing}
+  .slider-track{position:relative;width:100%}
+  .slide-panel{position:absolute;top:0;left:0;width:100%;padding:.4rem 1.2rem 2.5rem;will-change:transform}
+  @media(min-width:860px){
+    .slide-panel{padding-left:calc((100vw - 860px)/2 + 1.2rem);
+      padding-right:calc((100vw - 860px)/2 + 1.2rem)}
+  }
+
+  /* ── SECTION TITLE ── */
+  .sec-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:600;
+    color:var(--bd);padding:.5rem 0 .6rem;border-bottom:2px solid var(--gold);
+    margin-bottom:.4rem}
+
+  /* ── ITEM ROWS ── */
+  .items-list{display:flex;flex-direction:column}
+  .item-row{display:flex;align-items:center;gap:.9rem;padding:.8rem .3rem;
+    border-bottom:1px solid var(--bdr);border-radius:8px;transition:background .15s}
+  .item-row:last-child{border-bottom:none}
+  .item-row:hover{background:rgba(201,168,124,.09)}
+  .item-thumb{width:62px;height:62px;border-radius:9px;overflow:hidden;
+    flex-shrink:0;position:relative;cursor:pointer}
+  .item-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .22s}
+  .item-thumb:hover img{transform:scale(1.08)}
+  .badge{position:absolute;top:-4px;right:-4px;background:var(--gold);color:var(--bd);
+    font-size:.5rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+    padding:2px 5px;border-radius:20px;white-space:nowrap;z-index:2}
+  .item-info{flex:1;min-width:0}
+  .item-name{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:600;
+    color:var(--bd);margin-bottom:.18rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .item-desc{font-size:.74rem;color:var(--muted);line-height:1.5;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .item-right{flex-shrink:0;padding-left:.4rem}
+  .price{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;
+    color:var(--bl);white-space:nowrap}
+
+  /* ── PANEL GALLERY ── */
+  .panel-gal{margin-top:1.4rem;padding-top:1rem;border-top:1.5px solid var(--bdr)}
+  .panel-gal-title{font-family:'Playfair Display',serif;font-size:.88rem;font-weight:600;
+    color:var(--muted);margin-bottom:.7rem;letter-spacing:.04em}
+  .panel-gal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem}
+  .pgc{display:flex;flex-direction:column;gap:.32rem;cursor:pointer}
+  .pgc-img{width:100%;aspect-ratio:4/3;border-radius:7px;overflow:hidden}
+  .pgc-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .22s}
+  .pgc:hover .pgc-img img{transform:scale(1.05)}
+  .pgc-cap{font-size:.67rem;color:var(--muted);line-height:1.35;text-align:center;padding:0 2px}
+
+  /* ── LIGHTBOX ── */
+  #lb{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.93);
+    display:none;align-items:center;justify-content:center;
+    flex-direction:column;gap:.9rem;padding:1rem;cursor:zoom-out}
+  #lb.open{display:flex}
+  #lb img{max-width:min(90vw,900px);max-height:78vh;border-radius:10px;
+    object-fit:contain;box-shadow:0 0 60px rgba(0,0,0,.5);cursor:default}
+  #lb-cap{color:rgba(255,255,255,.85);font-size:.86rem;font-family:'Playfair Display',serif;
+    text-align:center;max-width:600px;line-height:1.5}
+  #lb-close{position:absolute;top:1rem;right:1.2rem;color:rgba(255,255,255,.65);
+    font-size:1.8rem;cursor:pointer;background:none;border:none;line-height:1;transition:color .15s}
+  #lb-close:hover{color:#fff}
+  #lb-prev,#lb-next{position:absolute;top:50%;transform:translateY(-50%);
+    background:rgba(255,255,255,.12);border:none;color:#fff;font-size:1.5rem;
+    width:42px;height:42px;border-radius:50%;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:background .15s}
+  #lb-prev:hover,#lb-next:hover{background:rgba(255,255,255,.25)}
+  #lb-prev{left:1rem}#lb-next{right:1rem}
+  #lb-ctr{position:absolute;bottom:.9rem;color:rgba(255,255,255,.4);font-size:.72rem}
+
+  /* ── INFO PAGE ── */
+  .info-wrap{max-width:900px;margin:0 auto;padding:0 1.2rem 3rem}
+  .info-sec{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:600;
+    color:var(--bd);padding:1.8rem 0 .65rem;border-bottom:2px solid var(--gold);
+    margin-bottom:.9rem;display:flex;align-items:center;gap:.4rem}
+  .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+  @media(max-width:580px){.about-grid{grid-template-columns:1fr}}
+  .about-img{width:100%;height:180px;object-fit:cover;border-radius:11px;display:block}
+  .about-text{display:flex;flex-direction:column;justify-content:center;gap:.55rem}
+  .about-badge{display:inline-block;background:var(--cream);color:var(--bl);font-size:.65rem;
+    font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:3px 9px;
+    border-radius:20px;align-self:flex-start}
+  .about-text h3{font-family:'Playfair Display',serif;font-size:1rem;font-weight:600;color:var(--bd)}
+  .about-text p{font-size:.8rem;color:var(--muted);line-height:1.7}
+  .cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:.8rem}
+  .cc{background:#fff;border:1px solid var(--bdr);border-radius:11px;
+    padding:.9rem 1rem;display:flex;align-items:flex-start;gap:.65rem}
+  .ci{font-size:1.3rem;flex-shrink:0;margin-top:1px}
+  .cl{font-size:.63rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:.18rem}
+  .cv{font-size:.85rem;font-weight:600;color:var(--bd)}
+  .hg{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:.75rem}
+  .hc{background:#fff;border:1px solid var(--bdr);border-radius:11px;padding:.8rem;text-align:center}
+  .hd{font-size:.64rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:.22rem}
+  .ht{font-family:'Playfair Display',serif;font-size:.92rem;font-weight:600;color:var(--bd)}
+  .promo{background:var(--bm);border-radius:13px;overflow:hidden;
+    display:flex;align-items:stretch;min-height:105px}
+  .promo-photo{width:120px;flex-shrink:0;object-fit:cover;display:block}
+  .promo-body{padding:.9rem 1.1rem;display:flex;flex-direction:column;justify-content:center;gap:.3rem}
+  .promo-tag{font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+  .promo-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--cream);line-height:1.3}
+  .promo-desc{font-size:.72rem;color:rgba(245,236,215,.7);line-height:1.4}
+  .promo-price{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--gold)}
+  .feat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:.85rem}
+  .feat-card{background:#fff;border:1px solid var(--bdr);border-radius:11px;overflow:hidden;cursor:pointer}
+  .feat-img{width:100%;height:105px;object-fit:cover;display:block;transition:transform .2s}
+  .feat-card:hover .feat-img{transform:scale(1.04)}
+  .feat-body{padding:.55rem .75rem}
+  .feat-name{font-family:'Playfair Display',serif;font-size:.85rem;font-weight:600;
+    color:var(--bd);margin-bottom:.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .feat-price{font-size:.8rem;font-weight:700;color:var(--bl)}
+  .info-gal{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem}
+  @media(max-width:460px){.info-gal{grid-template-columns:repeat(2,1fr)}}
+  .info-gal-img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:9px;
+    display:block;cursor:pointer;transition:transform .2s}
+  .info-gal-img:hover{transform:scale(1.03)}
+  .map-card{background:#fff;border:1px solid var(--bdr);border-radius:13px;overflow:hidden}
+  .map-frame{width:100%;height:220px;border:none;display:block}
+  .map-info{padding:.8rem 1rem;display:flex;flex-wrap:wrap;gap:.7rem;
+    align-items:center;justify-content:space-between}
+  .map-addr{font-size:.79rem;color:var(--muted);line-height:1.6}
+  .map-addr strong{display:block;font-size:.88rem;color:var(--bd);font-weight:700;margin-bottom:.1rem}
+  .map-lnk{display:inline-block;padding:5px 13px;border-radius:20px;background:var(--bd);
+    color:var(--cream);font-size:.71rem;font-weight:700;text-decoration:none;
+    letter-spacing:.04em;transition:background .2s;white-space:nowrap}
+  .map-lnk:hover{background:var(--gold);color:var(--bd)}
+  footer{background:var(--bd);color:var(--gold);text-align:center;
+    padding:1.6rem 1rem;font-size:.78rem;letter-spacing:.05em}
+  footer p+p{margin-top:.28rem;color:rgba(201,168,124,.45);font-size:.71rem}
+
+  /* ════════════════════════
+     ADMIN PAGE
+  ════════════════════════ */
+  #page-admin{background:#f0ede8;min-height:100vh;padding-bottom:2rem}
+  .adm-bar{background:#1a1a2e;padding:.6rem .9rem;display:flex;align-items:center;
+    gap:.5rem;flex-wrap:wrap;position:sticky;top:0;z-index:200}
+  .adm-bar-title{font-family:'Playfair Display',serif;font-size:.95rem;color:#fff;flex:1;white-space:nowrap}
+  .ab{padding:5px 13px;border-radius:7px;border:none;cursor:pointer;
+    font-family:'Lato',sans-serif;font-size:.71rem;font-weight:700;
+    letter-spacing:.04em;transition:all .16s;white-space:nowrap}
+  .ab-ghost{background:transparent;color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.2)}
+  .ab-ghost:hover{background:rgba(255,255,255,.1);color:#fff}
+  .ab-green{background:#16a34a;color:#fff}.ab-green:hover{filter:brightness(.9)}
+  .ab-gold{background:var(--gold);color:var(--bd)}.ab-gold:hover{filter:brightness(.92)}
+  .ab-blue{background:#2563eb;color:#fff}.ab-blue:hover{filter:brightness(.9)}
+  .ab-red{background:#dc2626;color:#fff}.ab-red:hover{filter:brightness(.9)}
+  .ab-purple{background:#7c3aed;color:#fff}.ab-purple:hover{filter:brightness(.9)}
+  .adm-body{max-width:960px;margin:0 auto;padding:1rem}
+  .adm-tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem}
+  .atab{padding:5px 13px;border-radius:20px;border:1.5px solid rgba(201,168,124,.4);
+    background:transparent;color:var(--muted);font-family:'Lato',sans-serif;
+    font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    cursor:pointer;transition:all .14s}
+  .atab:hover,.atab.active{background:var(--gold);color:var(--bd);border-color:var(--gold)}
+  .acard{background:#fff;border-radius:11px;border:1px solid #e0ddd9;padding:.9rem;margin-bottom:.85rem}
+  .acard-head{font-family:'Playfair Display',serif;font-size:.98rem;font-weight:600;
+    color:var(--bd);margin-bottom:.75rem;padding-bottom:.4rem;
+    border-bottom:1.5px solid var(--gold);display:flex;align-items:center;justify-content:space-between}
+  .prow{display:flex;align-items:flex-start;gap:.7rem;padding:.6rem 0;
+    border-bottom:1px solid #f0ede8}
+  .prow:last-child{border-bottom:none}
+  .athumb{width:52px;height:52px;border-radius:8px;overflow:hidden;flex-shrink:0;
+    border:1px solid #e0ddd9;cursor:pointer;position:relative}
+  .athumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .athumb-ov{position:absolute;inset:0;background:rgba(0,0,0,.4);
+    display:flex;align-items:center;justify-content:center;opacity:0;
+    transition:opacity .14s;font-size:.78rem;color:#fff}
+  .athumb:hover .athumb-ov{opacity:1}
+  .pfields{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:.3rem .45rem}
+  .pf-full{grid-column:1/-1}
+  .ainp{padding:5px 8px;border-radius:6px;border:1.5px solid #d8d5d0;
+    font-family:'Lato',sans-serif;font-size:.77rem;color:var(--text);
+    background:#faf9f7;width:100%;transition:border-color .14s}
+  .ainp:focus{outline:none;border-color:var(--gold)}
+  .albl{font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:2px;display:block}
+  .afw{display:flex;flex-direction:column}
+  .adel{background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:6px;
+    width:26px;height:26px;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-size:.8rem;flex-shrink:0;margin-top:14px;transition:all .14s}
+  .adel:hover{background:#dc2626;color:#fff}
+  .ggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.55rem}
+  .gcell{border-radius:8px;overflow:hidden;position:relative;aspect-ratio:4/3;
+    background:#f0ede8;border:1.5px solid #e0ddd9}
+  .gcell img{width:100%;height:100%;object-fit:cover;display:block}
+  .gcell-ov{position:absolute;inset:0;background:rgba(0,0,0,.5);opacity:0;
+    transition:opacity .14s;display:flex;align-items:center;justify-content:center;gap:.3rem}
+  .gcell:hover .gcell-ov{opacity:1}
+  .gov{background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:5px;
+    padding:3px 6px;cursor:pointer;font-size:.66rem;transition:background .14s}
+  .gov:hover{background:rgba(255,255,255,.35)}
+  .capinp{width:100%;padding:4px 6px;border-radius:5px;border:1.5px solid #d8d5d0;
+    font-family:'Lato',sans-serif;font-size:.69rem;color:var(--text);
+    background:#faf9f7;margin-top:.25rem;transition:border-color .14s}
+  .capinp:focus{outline:none;border-color:var(--gold)}
+  .gtinp{width:100%;padding:5px 8px;border-radius:6px;border:1.5px solid #d8d5d0;
+    font-family:'Lato',sans-serif;font-size:.79rem;color:var(--text);
+    background:#faf9f7;margin-bottom:.6rem;transition:border-color .14s}
+  .gtinp:focus{outline:none;border-color:var(--gold)}
+
+  /* ── GITHUB LOGIN PANEL ── */
+  .gh-panel{background:#1a1a2e;border-radius:10px;padding:1rem;margin-bottom:.85rem;display:flex;flex-wrap:wrap;gap:.6rem;align-items:flex-end}
+  .gh-panel-title{font-family:'Playfair Display',serif;font-size:.9rem;color:var(--gold);width:100%;margin-bottom:.2rem}
+  .gh-field{display:flex;flex-direction:column;gap:3px;flex:1;min-width:160px}
+  .gh-label{font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(201,168,124,.6)}
+  .gh-inp{padding:6px 9px;border-radius:6px;border:1.5px solid rgba(201,168,124,.3);
+    background:rgba(255,255,255,.07);color:#fff;font-family:'Lato',sans-serif;
+    font-size:.77rem;width:100%;transition:border-color .14s}
+  .gh-inp:focus{outline:none;border-color:var(--gold)}
+  .gh-inp[type=password]{letter-spacing:.1em}
+  .gh-status{font-size:.7rem;color:rgba(201,168,124,.5);width:100%;margin-top:.2rem}
+  .gh-status.ok{color:#4ade80}
+  .gh-status.err{color:#f87171}
+
+  /* ── IMAGE CROPPER ── */
+  .cropper-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:3000;
+    display:none;flex-direction:column;align-items:center;justify-content:center;
+    gap:0;padding:16px}
+  .cropper-overlay.open{display:flex}
+  .cropper-title{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;
+    color:var(--gold);margin-bottom:12px;letter-spacing:.5px}
+  .cropper-wrap{position:relative;overflow:hidden;border-radius:10px;cursor:crosshair;flex-shrink:0}
+  .cropper-wrap canvas{display:block}
+  .crop-box{position:absolute;border:2px solid var(--gold);box-shadow:0 0 0 9999px rgba(0,0,0,.55);
+    cursor:move;box-sizing:border-box}
+  .crop-handle{position:absolute;width:12px;height:12px;background:var(--gold);border-radius:2px}
+  .crop-handle.tl{top:-6px;left:-6px;cursor:nw-resize}
+  .crop-handle.tr{top:-6px;right:-6px;cursor:ne-resize}
+  .crop-handle.bl{bottom:-6px;left:-6px;cursor:sw-resize}
+  .crop-handle.br{bottom:-6px;right:-6px;cursor:se-resize}
+  .cropper-info{font-size:11px;color:rgba(255,255,255,.5);margin-top:8px;margin-bottom:10px}
+  .cropper-btns{display:flex;gap:10px;margin-top:4px}
+  .crop-btn{padding:9px 22px;border-radius:8px;font-family:'Lato',sans-serif;
+    font-weight:700;font-size:12px;cursor:pointer;border:none;transition:all .15s}
+  .crop-btn.cancel{background:rgba(255,255,255,.1);color:#fff}
+  .crop-btn.cancel:hover{background:rgba(255,255,255,.18)}
+  .crop-btn.apply{background:var(--gold);color:var(--bd)}
+  .crop-btn.apply:hover{filter:brightness(1.1)}
+  .quality-row{display:flex;align-items:center;gap:10px;font-size:11px;
+    color:rgba(255,255,255,.7);margin-top:6px}
+  .quality-row input[type=range]{width:110px;accent-color:var(--gold)}
+  #crop-target-label{font-size:11px;color:rgba(201,168,124,.6);margin-top:4px}
+  .img-hint{font-size:.67rem;color:var(--muted);margin-top:3px;min-height:14px}
+
+  /* ── TOAST ── */
+  #toast{position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%) translateY(14px);
+    background:#1a1a2e;color:#fff;padding:8px 18px;border-radius:30px;font-size:.77rem;
+    font-weight:500;opacity:0;transition:all .25s;pointer-events:none;z-index:9999;white-space:nowrap}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  #toast.ok{background:#16a34a}
+  #toast.warn{background:#d97706}
+  #toast.err{background:#dc2626}
+
+  /* ── LOADING BAR ── */
+  #loading-bar{height:3px;background:linear-gradient(90deg,var(--gold),var(--bl));
+    width:0;position:fixed;top:0;left:0;z-index:9998;display:none;transition:width .3s}
+  </style>
+</head>
+<body>
+
+<!-- LOADING BAR -->
+<div id="loading-bar"></div>
+
+<!-- LIGHTBOX -->
+<div id="lb" onclick="lbBg(event)">
+  <button id="lb-close" onclick="lbClose()">✕</button>
+  <button id="lb-prev" onclick="lbNav(-1);event.stopPropagation()">&#8249;</button>
+  <img id="lb-img" src="" alt=""/>
+  <div id="lb-cap"></div>
+  <button id="lb-next" onclick="lbNav(1);event.stopPropagation()">&#8250;</button>
+  <span id="lb-ctr"></span>
+</div>
+
+<!-- IMAGE CROPPER -->
+<div class="cropper-overlay" id="cropper-overlay">
+  <div class="cropper-title">✂️ Recortar imagen</div>
+  <div class="cropper-wrap" id="cropper-wrap">
+    <canvas id="cropper-canvas"></canvas>
+    <div class="crop-box" id="crop-box">
+      <div class="crop-handle tl" data-h="tl"></div>
+      <div class="crop-handle tr" data-h="tr"></div>
+      <div class="crop-handle bl" data-h="bl"></div>
+      <div class="crop-handle br" data-h="br"></div>
+    </div>
+  </div>
+  <div id="crop-target-label"></div>
+  <div class="cropper-info">Arrastra para mover · esquinas para redimensionar</div>
+  <div class="quality-row">
+    <span>Calidad:</span>
+    <input type="range" id="crop-quality" min="30" max="95" value="72" oninput="updateQualityLabel()">
+    <span id="crop-qlabel">72%</span>
+    <span id="crop-size-est" style="margin-left:6px;color:var(--gold)"></span>
+  </div>
+  <div class="cropper-btns">
+    <button class="crop-btn cancel" onclick="closeCropper()">Cancelar</button>
+    <button class="crop-btn apply" onclick="applyCrop()">✅ Usar esta imagen</button>
+  </div>
+</div>
+
+<!-- ADMIN FLOATING BUTTON -->
+<button id="adminBtn" onclick="goAdmin()">⚙ Administrar</button>
+
+<!-- ══════════ MENU PAGE ══════════ -->
+<div class="page active" id="page-menu">
+  <a class="banner" href="#" onclick="goPage('info');return false">
+    <img class="banner-photo" id="bannerPhotoMenu" src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=200&q=80" alt="Café Roble"/>
+    <div class="banner-body">
+      <span class="banner-name" id="bannerNameMenu">Café Roble</span>
+      <span class="banner-sub" id="bannerSubMenu">Av. Principal 123 · Desde 1998</span>
+    </div>
+    <div class="banner-action">
+      <span class="banner-action-icon">ℹ️</span>
+      <span class="banner-action-label">Nosotros</span>
+    </div>
+  </a>
+  <nav class="cat-nav-wrap"><div class="cat-nav" id="catNav"></div></nav>
+  <p class="swipe-hint" id="swipeHint">← arrastra para cambiar categoría →</p>
+  <div class="slider-vp" id="viewport"><div class="slider-track" id="track"></div></div>
+  <footer id="footerMenu"><p>Café Roble · Lunes a domingo, 7:00 – 21:00</p><p>Av. Principal 123 · Tel. (555) 000-0000</p></footer>
+</div>
+
+<!-- ══════════ INFO PAGE ══════════ -->
+<div class="page" id="page-info">
+  <a class="banner" href="#" onclick="goPage('menu');return false">
+    <img class="banner-photo" id="bannerPhotoInfo" src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=200&q=80" alt="Café Roble"/>
+    <div class="banner-body">
+      <span class="banner-name" id="bannerNameInfo">Café Roble</span>
+      <span class="banner-sub" id="bannerSubInfo">Av. Principal 123 · Desde 1998</span>
+    </div>
+    <div class="banner-action">
+      <span class="banner-action-icon">📋</span>
+      <span class="banner-action-label">Carta</span>
+    </div>
+  </a>
+  <div class="info-wrap">
+    <h2 class="info-sec">⭐ Oferta del mes</h2>
+    <div class="promo" id="promoBox">
+      <img class="promo-photo" src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&q=80" alt="Promo"/>
+      <div class="promo-body">
+        <span class="promo-tag">Solo en noviembre</span>
+        <p class="promo-title">Desayuno completo + café</p>
+        <p class="promo-desc">Elige tu desayuno favorito y llévate un espresso o americano incluido.</p>
+        <span class="promo-price">$10.90</span>
+      </div>
+    </div>
+    <h2 class="info-sec">🫘 Nuestra historia</h2>
+    <div class="about-grid">
+      <img class="about-img" id="aboutImg" src="https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=600&q=80" alt="Interior"/>
+      <div class="about-text">
+        <span class="about-badge" id="aboutBadge">Desde 1998</span>
+        <h3 id="aboutTitle">Un rincón para los amantes del café</h3>
+        <p id="aboutText1">Café Roble nació con la idea de crear un espacio cálido donde cada taza cuente una historia. Granos de origen único, tostados artesanalmente cada semana.</p>
+        <p id="aboutText2">Más de 25 años perfeccionando recetas y construyendo una comunidad de apasionados del buen café.</p>
+      </div>
+    </div>
+    <h2 class="info-sec">📞 Contacto</h2>
+    <div class="cg" id="contactGrid">
+      <div class="cc"><span class="ci">📍</span><div><p class="cl">Dirección</p><p class="cv" id="contactAddr">Av. Principal 123, Col. Centro</p></div></div>
+      <div class="cc"><span class="ci">📱</span><div><p class="cl">Teléfono</p><p class="cv" id="contactTel">(555) 000-0000</p></div></div>
+      <div class="cc"><span class="ci">✉️</span><div><p class="cl">Email</p><p class="cv" id="contactEmail">info@caferoble.com</p></div></div>
+      <div class="cc"><span class="ci">📸</span><div><p class="cl">Instagram</p><p class="cv" id="contactIg">@caferoble</p></div></div>
+    </div>
+    <h2 class="info-sec">🕐 Horarios</h2>
+    <div class="hg" id="horariosGrid">
+      <div class="hc"><p class="hd">Lun – Vie</p><p class="ht">7:00 – 21:00</p></div>
+      <div class="hc"><p class="hd">Sábado</p><p class="ht">8:00 – 22:00</p></div>
+      <div class="hc"><p class="hd">Domingo</p><p class="ht">9:00 – 19:00</p></div>
+      <div class="hc"><p class="hd">Festivos</p><p class="ht">9:00 – 18:00</p></div>
+    </div>
+    <h2 class="info-sec">✨ Destacados</h2>
+    <div class="feat-grid" id="infoFeat"></div>
+    <h2 class="info-sec">📸 Galería</h2>
+    <div class="info-gal" id="infoGal"></div>
+    <h2 class="info-sec">📍 Ubicación</h2>
+    <div class="map-card">
+      <iframe class="map-frame" id="mapFrame" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.521260322283!2d-99.16869232426222!3d19.427023340975!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDI1JzM3LjMiTiA5OcKwMTAnMDAuMyJX!5e0!3m2!1ses!2smx!4v1699000000000!5m2!1ses!2smx" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <div class="map-info">
+        <div class="map-addr"><strong id="mapName">Café Roble</strong><span id="mapAddr">Av. Principal 123, Col. Centro</span><br>Tel: <span id="mapTel">(555) 000-0000</span></div>
+        <a class="map-lnk" id="mapLink" href="https://maps.google.com" target="_blank">Abrir en Maps →</a>
+      </div>
+    </div>
+  </div>
+  <footer id="footerInfo"><p>Café Roble · Lunes a domingo, 7:00 – 21:00</p><p>Av. Principal 123 · Tel. (555) 000-0000</p></footer>
+</div>
+
+<!-- ══════════ ADMIN PAGE ══════════ -->
+<div class="page" id="page-admin">
+  <div class="adm-bar">
+    <span class="adm-bar-title">⚙️ Administración — Café Roble</span>
+    <button class="ab ab-ghost" onclick="goPage('menu')">← Salir</button>
+    <button class="ab ab-green" onclick="admApply()">✔ Guardar local</button>
+    <button class="ab ab-purple" onclick="admSaveGitHub()">☁ Publicar en GitHub</button>
+    <button class="ab ab-gold" onclick="admExport()">⬇ Exportar JSON</button>
+    <label class="ab ab-blue" style="cursor:pointer">
+      📂 Importar JSON
+      <input type="file" accept=".json" style="display:none" onchange="admImport(this)"/>
+    </label>
+  </div>
+  <div class="adm-body">
+    <!-- GitHub Config Panel -->
+    <div class="gh-panel">
+      <div class="gh-panel-title">☁️ Configuración GitHub Pages</div>
+      <div class="gh-field">
+        <label class="gh-label">Usuario GitHub</label>
+        <input class="gh-inp" id="ghUser" placeholder="lhamat123" value="lhamat123"/>
+      </div>
+      <div class="gh-field">
+        <label class="gh-label">Repositorio</label>
+        <input class="gh-inp" id="ghRepo" placeholder="cafeteria" value="cafeteria"/>
+      </div>
+      <div class="gh-field">
+        <label class="gh-label">Token (github_pat_...)</label>
+        <input class="gh-inp" type="password" id="ghToken" placeholder="github_pat_..." autocomplete="off"/>
+      </div>
+      <div class="gh-field" style="min-width:120px;max-width:160px">
+        <label class="gh-label">Contraseña admin</label>
+        <input class="gh-inp" type="password" id="ghPass" placeholder="••••••" autocomplete="off"/>
+      </div>
+      <div style="width:100%">
+        <div class="gh-status" id="ghStatus">Sin conexión · ingresa tu token para publicar en GitHub Pages</div>
+      </div>
+    </div>
+
+    <div class="adm-tabs" id="admTabs"></div>
+    <div id="admContent"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════
+   CONFIG GITHUB
+═══════════════════════════════════════════ */
+const GH_FILE     = 'menu-data.json';
+const APP_PASS    = 'Cafe2025';   // ← cambia esta contraseña de administrador
+
+/* ═══════════════════════
+   DATOS POR DEFECTO
+═══════════════════════ */
+const DEFAULT_DATA = {
+  info:{
+    nombre:"Café Roble",
+    slogan:"Av. Principal 123 · Desde 1998",
+    bannerImg:"https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=200&q=80",
+    aboutImg:"https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=600&q=80",
+    aboutBadge:"Desde 1998",
+    aboutTitle:"Un rincón para los amantes del café",
+    aboutText1:"Café Roble nació con la idea de crear un espacio cálido donde cada taza cuente una historia. Granos de origen único, tostados artesanalmente cada semana.",
+    aboutText2:"Más de 25 años perfeccionando recetas y construyendo una comunidad de apasionados del buen café.",
+    direccion:"Av. Principal 123, Col. Centro",
+    telefono:"(555) 000-0000",
+    email:"info@caferoble.com",
+    instagram:"@caferoble",
+    mapEmbed:"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.521260322283!2d-99.16869232426222!3d19.427023340975!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDI1JzM3LjMiTiA5OcKwMTAnMDAuMyJX!5e0!3m2!1ses!2smx!4v1699000000000!5m2!1ses!2smx",
+    mapLink:"https://maps.google.com",
+    horariosLV:"7:00 – 21:00",
+    horariosSab:"8:00 – 22:00",
+    horariosDom:"9:00 – 19:00",
+    horariosFest:"9:00 – 18:00",
+    footerLine1:"Café Roble · Lunes a domingo, 7:00 – 21:00",
+    footerLine2:"Av. Principal 123 · Tel. (555) 000-0000",
+    promoImg:"https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&q=80",
+    promoTag:"Solo en noviembre",
+    promoTitle:"Desayuno completo + café",
+    promoDesc:"Elige tu desayuno favorito y llévate un espresso o americano incluido.",
+    promoPrice:"$10.90"
+  },
+  categorias:[
+    {
+      id:"cafes", label:"Cafés",
+      productos:[
+        {nombre:"Espresso",    desc:"Shot puro de café de origen único, tostado artesanal. Intenso y cremoso con crema dorada perfecta.",       precio:"$1.80", badge:"Clásico",      img:"https://images.unsplash.com/photo-1541167760496-1628856ab772?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1541167760496-1628856ab772?w=900&q=90"},
+        {nombre:"Cappuccino",  desc:"Espresso con leche vaporizada y espuma cremosa. Equilibrio perfecto entre intensidad y suavidad.",         precio:"$3.20", badge:"",             img:"https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=900&q=90"},
+        {nombre:"Latte",       desc:"Café suave con abundante leche vaporizada. Disponible en vainilla, caramelo y avellana.",                  precio:"$3.50", badge:"Popular",      img:"https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=900&q=90"},
+        {nombre:"Mocha",       desc:"Espresso con chocolate belga y leche cremosa vaporizada. Un lujo para el paladar.",                        precio:"$4.00", badge:"",             img:"https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=900&q=90"},
+        {nombre:"Cortado",     desc:"Espresso cortado con un toque de leche caliente. Intensidad suavizada sin perder carácter.",               precio:"$2.40", badge:"",             img:"https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=90"},
+        {nombre:"Americano",   desc:"Espresso con agua caliente. Largo, suave y reconfortante, ideal para saborear despacio.",                  precio:"$2.80", badge:"",             img:"https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=900&q=90"}
+      ],
+      galeria:{titulo:"Momentos con un café", fotos:[
+        {img:"https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=90", caption:"El ritual del café de cada mañana"},
+        {img:"https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=900&q=90", caption:"Americano largo, para los momentos de pausa"},
+        {img:"https://images.unsplash.com/photo-1541167760496-1628856ab772?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1541167760496-1628856ab772?w=900&q=90", caption:"Un espresso perfecto siempre tiene su crema"}
+      ]}
+    },
+    {
+      id:"reposteria", label:"Repostería",
+      productos:[
+        {nombre:"Croissant de mantequilla", desc:"Hojaldrado y crujiente por fuera, tierno por dentro. Horneado fresco cada mañana.",           precio:"$2.50", badge:"Hoy",          img:"https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=900&q=90"},
+        {nombre:"Muffin de arándanos",      desc:"Esponjoso, húmedo y lleno de arándanos frescos. Ideal con un latte por la mañana.",           precio:"$2.80", badge:"",             img:"https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=900&q=90"},
+        {nombre:"Tostada de aguacate",      desc:"Pan de masa madre tostado con aguacate, semillas y tomatitos cherry. Fresco y delicioso.",     precio:"$5.90", badge:"Vegano",       img:"https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=900&q=90"},
+        {nombre:"Waffle belga",             desc:"Waffle crujiente con frutas del bosque, nata montada y sirope de maple artesanal.",            precio:"$6.50", badge:"",             img:"https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=900&q=90"}
+      ],
+      galeria:{titulo:"Horneado con amor cada mañana", fotos:[
+        {img:"https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1509440159596-0249088772ff?w=900&q=90", caption:"Croissants recién salidos del horno, crujientes y dorados"},
+        {img:"https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=400&q=80",    imgFull:"https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=900&q=90",    caption:"Waffles belgas con frutas del bosque y crema fresca"},
+        {img:"https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=900&q=90", caption:"Pan de masa madre con aguacate — sencillo y delicioso"}
+      ]}
+    },
+    {
+      id:"desayunos", label:"Desayunos",
+      productos:[
+        {nombre:"Huevos benedictinos",  desc:"Huevos pochados sobre jamón y pan inglés tostado con salsa holandesa casera.",                    precio:"$9.50", badge:"Estrella", img:"https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=900&q=90"},
+        {nombre:"Bowl de granola",      desc:"Granola artesanal tostada, yogur griego, miel de abeja y frutas de temporada.",                  precio:"$7.20", badge:"",         img:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&q=90"},
+        {nombre:"Pancakes de arándanos",desc:"Esponjosos pancakes con arándanos frescos, mantequilla y sirope de maple puro.",                 precio:"$8.00", badge:"",         img:"https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=900&q=90"},
+        {nombre:"Revuelto de la casa",  desc:"Huevos revueltos con queso feta, espinacas frescas y tomatitos cherry asados.",                  precio:"$7.80", badge:"",         img:"https://images.unsplash.com/photo-1506619216599-9d16d0903dfd?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1506619216599-9d16d0903dfd?w=900&q=90"}
+      ],
+      galeria:{titulo:"Empieza el día con buen pie", fotos:[
+        {img:"https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=900&q=90", caption:"Huevos benedictinos — el desayuno que lo cambia todo"},
+        {img:"https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=900&q=90", caption:"Pancakes esponjosos bañados en sirope de maple puro"},
+        {img:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&q=90", caption:"Bowl de granola artesanal con frutas frescas de temporada"}
+      ]}
+    },
+    {
+      id:"postres", label:"Postres",
+      productos:[
+        {nombre:"Tarta de queso",   desc:"Cheesecake cremoso al horno con base de galleta y coulis de frutos rojos.",                           precio:"$5.50", badge:"Favorito", img:"https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=900&q=90"},
+        {nombre:"Brownie con helado",desc:"Brownie de chocolate intenso, tibio, con bola de helado de vainilla artesanal.",                     precio:"$5.80", badge:"",         img:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=900&q=90"},
+        {nombre:"Tiramisú",         desc:"Receta italiana tradicional con bizcochos empapados, mascarpone y cacao en polvo.",                   precio:"$6.20", badge:"",         img:"https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=900&q=90"},
+        {nombre:"Flan de la abuela",desc:"Flan casero de huevo con caramelo tostado y nata montada. Receta de siempre.",                       precio:"$4.80", badge:"",         img:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=90"}
+      ],
+      galeria:{titulo:"El dulce final que mereces", fotos:[
+        {img:"https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=900&q=90", caption:"Tarta de queso horneada — cremosa, perfecta, irresistible"},
+        {img:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=900&q=90", caption:"Brownie tibio con helado — contraste de texturas y sabores"},
+        {img:"https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=900&q=90", caption:"Tiramisú artesanal — la elegancia del postre italiano clásico"}
+      ]}
+    }
+  ]
+};
+
+/* ═══════════════════════
+   LOAD DATA
+═══════════════════════ */
+let DATA;
+let fileSHA = '';
+
+function loadLocalData() {
+  try {
+    const saved = localStorage.getItem('cafeRoble_v3');
+    DATA = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_DATA));
+  } catch(e) {
+    DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
+  }
+}
+
+/* ═══════════════════════
+   GITHUB API
+═══════════════════════ */
+function ghApi() {
+  const user = document.getElementById('ghUser')?.value.trim() || 'lhamat123';
+  const repo = document.getElementById('ghRepo')?.value.trim() || 'cafeteria';
+  return `https://api.github.com/repos/${user}/${repo}/contents/${GH_FILE}`;
+}
+
+async function loadFromGitHub() {
+  showLoad(true);
+  try {
+    const res = await fetch(ghApi(), { headers: {'Accept':'application/vnd.github+json'} });
+    if (!res.ok) throw new Error('status ' + res.status);
+    const json = await res.json();
+    fileSHA = json.sha;
+    DATA = JSON.parse(atob(json.content.replace(/\n/g,'')));
+    localStorage.setItem('cafeRoble_v3', JSON.stringify(DATA));
+    setGhStatus('✅ Datos cargados desde GitHub Pages', 'ok');
+    renderMenu(); renderInfo();
+    toast('✅ Carta cargada desde GitHub Pages','ok');
+  } catch(e) {
+    setGhStatus('⚠️ Sin datos en GitHub — usando datos locales', '');
+  }
+  showLoad(false);
+}
+
+async function saveToGitHub() {
+  const token = document.getElementById('ghToken')?.value.trim();
+  const pass  = document.getElementById('ghPass')?.value.trim();
+  if (!pass || pass !== APP_PASS) { toast('Contraseña incorrecta','err'); return false; }
+  if (!token || !token.startsWith('github_')) { toast('Token GitHub inválido','err'); return false; }
+
+  showLoad(true);
+  setGhStatus('⏳ Publicando en GitHub...', '');
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(DATA, null, 2))));
+  const body = {
+    message: 'Actualizar carta — Café Roble',
+    content,
+    committer: { name: 'Café Roble', email: 'noreply@caferoble.com' }
+  };
+  if (fileSHA) body.sha = fileSHA;
+  try {
+    const res = await fetch(ghApi(), {
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.message || res.status); }
+    const json = await res.json();
+    fileSHA = json.content.sha;
+    setGhStatus('✅ Publicado en GitHub Pages correctamente', 'ok');
+    showLoad(false);
+    return true;
+  } catch(e) {
+    setGhStatus('❌ Error: ' + e.message, 'err');
+    showLoad(false);
+    toast('Error al publicar: ' + e.message, 'err');
+    return false;
+  }
+}
+
+function setGhStatus(msg, cls) {
+  const el = document.getElementById('ghStatus');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'gh-status ' + (cls||'');
+}
+
+/* ═══════════════════════
+   RENDER INFO PAGE
+═══════════════════════ */
+function renderInfo() {
+  const d = DATA.info || {};
+  // Banner
+  ['bannerPhotoMenu','bannerPhotoInfo'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && d.bannerImg) el.src = d.bannerImg;
+  });
+  ['bannerNameMenu','bannerNameInfo'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = d.nombre || 'Café Roble';
+  });
+  ['bannerSubMenu','bannerSubInfo'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = d.slogan || '';
+  });
+  // About
+  const aboutImg = document.getElementById('aboutImg');
+  if (aboutImg && d.aboutImg) aboutImg.src = d.aboutImg;
+  const ab = document.getElementById('aboutBadge');     if(ab) ab.textContent = d.aboutBadge||'';
+  const at = document.getElementById('aboutTitle');     if(at) at.textContent = d.aboutTitle||'';
+  const at1= document.getElementById('aboutText1');     if(at1) at1.textContent = d.aboutText1||'';
+  const at2= document.getElementById('aboutText2');     if(at2) at2.textContent = d.aboutText2||'';
+  // Contact
+  const ca = document.getElementById('contactAddr');    if(ca) ca.textContent = d.direccion||'';
+  const ct = document.getElementById('contactTel');     if(ct) ct.textContent = d.telefono||'';
+  const ce = document.getElementById('contactEmail');   if(ce) ce.textContent = d.email||'';
+  const ci = document.getElementById('contactIg');      if(ci) ci.textContent = d.instagram||'';
+  // Map
+  const mf = document.getElementById('mapFrame');
+  if(mf && d.mapEmbed) mf.src = d.mapEmbed;
+  const mn = document.getElementById('mapName');        if(mn) mn.textContent = d.nombre||'';
+  const ma = document.getElementById('mapAddr');        if(ma) ma.textContent = d.direccion||'';
+  const mt = document.getElementById('mapTel');         if(mt) mt.textContent = d.telefono||'';
+  const ml = document.getElementById('mapLink');        if(ml && d.mapLink) ml.href = d.mapLink;
+  // Promo
+  const pb = document.getElementById('promoBox');
+  if(pb) pb.innerHTML = `
+    <img class="promo-photo" src="${e(d.promoImg||'')}" alt="Promo" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&q=80'"/>
+    <div class="promo-body">
+      <span class="promo-tag">${e(d.promoTag||'')}</span>
+      <p class="promo-title">${e(d.promoTitle||'')}</p>
+      <p class="promo-desc">${e(d.promoDesc||'')}</p>
+      <span class="promo-price">${e(d.promoPrice||'')}</span>
+    </div>`;
+  // Horarios
+  const hg = document.getElementById('horariosGrid');
+  if(hg) hg.innerHTML = `
+    <div class="hc"><p class="hd">Lun – Vie</p><p class="ht">${e(d.horariosLV||'')}</p></div>
+    <div class="hc"><p class="hd">Sábado</p><p class="ht">${e(d.horariosSab||'')}</p></div>
+    <div class="hc"><p class="hd">Domingo</p><p class="ht">${e(d.horariosDom||'')}</p></div>
+    <div class="hc"><p class="hd">Festivos</p><p class="ht">${e(d.horariosFest||'')}</p></div>`;
+  // Footer
+  const fm = document.getElementById('footerMenu');
+  const fi = document.getElementById('footerInfo');
+  const fl = `<p>${e(d.footerLine1||'')}</p><p>${e(d.footerLine2||'')}</p>`;
+  if(fm) fm.innerHTML = fl;
+  if(fi) fi.innerHTML = fl;
+
+  // Featured & Gallery
+  const feat = document.getElementById('infoFeat');
+  const gal  = document.getElementById('infoGal');
+  feat.innerHTML = ''; gal.innerHTML = '';
+  const galAll = [];
+  DATA.categorias.forEach(cat => {
+    if (cat.productos[0]) {
+      const p = cat.productos[0];
+      const card = document.createElement('div'); card.className='feat-card';
+      card.innerHTML = `<div style="overflow:hidden"><img class="feat-img" src="${e(p.img)}" alt="${e(p.nombre)}" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'"></div>
+        <div class="feat-body"><p class="feat-name">${e(p.nombre)}</p><p class="feat-price">${e(p.precio)}</p></div>`;
+      card.addEventListener('click', ()=>lbSingle(p.imgFull||p.img, p.nombre));
+      feat.appendChild(card);
+    }
+    if(cat.galeria?.fotos?.[0]) galAll.push(cat.galeria.fotos[0]);
+  });
+  galAll.forEach((f,i)=>{
+    const img=document.createElement('img'); img.className='info-gal-img';
+    img.src=f.imgFull||f.img; img.alt='';
+    img.addEventListener('click',()=>lbGallery(galAll.map(g=>({src:g.imgFull||g.img,cap:g.caption||''})),i));
+    gal.appendChild(img);
+  });
+}
+
+/* ═══════════════════════
+   RENDER MENU
+═══════════════════════ */
+function renderMenu() {
+  const nav = document.getElementById('catNav');
+  nav.innerHTML = '';
+  DATA.categorias.forEach((cat,i)=>{
+    const b = document.createElement('button');
+    b.className = 'cat-btn'+(i===0?' active':'');
+    b.dataset.index = i;
+    b.textContent = cat.label;
+    b.addEventListener('click', ()=>goTo(i,true));
+    nav.appendChild(b);
+  });
+  const track = document.getElementById('track');
+  track.innerHTML = '';
+  sliderReady = false;
+  DATA.categorias.forEach((cat,ci)=>{
+    const panel = document.createElement('div');
+    panel.className = 'slide-panel';
+    const rows = cat.productos.map((p,pi)=>{
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `
+        <div class="item-thumb">
+          <img src="${e(p.img)}" alt="${e(p.nombre)}" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'">
+          ${p.badge?`<span class="badge">${e(p.badge)}</span>`:''}
+        </div>
+        <div class="item-info">
+          <p class="item-name">${e(p.nombre)}</p>
+          <p class="item-desc">${e(p.desc)}</p>
+        </div>
+        <div class="item-right"><span class="price">${e(p.precio)}</span></div>`;
+      row.querySelector('.item-thumb').addEventListener('click',()=>lbProduct(ci,pi));
+      return row;
+    });
+    const title = document.createElement('h2');
+    title.className='sec-title'; title.textContent=cat.label;
+    panel.appendChild(title);
+    const list=document.createElement('div'); list.className='items-list';
+    rows.forEach(r=>list.appendChild(r));
+    panel.appendChild(list);
+    if(cat.galeria?.fotos?.length){
+      const gal=document.createElement('div'); gal.className='panel-gal';
+      gal.innerHTML=`<p class="panel-gal-title">${e(cat.galeria.titulo||'')}</p>
+        <div class="panel-gal-grid">${cat.galeria.fotos.map((f,fi)=>`
+          <div class="pgc" data-ci="${ci}" data-fi="${fi}">
+            <div class="pgc-img"><img src="${e(f.img)}" alt="" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'"></div>
+            <span class="pgc-cap">${e(f.caption||'')}</span>
+          </div>`).join('')}
+        </div>`;
+      gal.querySelectorAll('.pgc').forEach(c=>{
+        c.addEventListener('click',()=>lbGal(+c.dataset.ci,+c.dataset.fi));
+      });
+      panel.appendChild(gal);
+    }
+    track.appendChild(panel);
+  });
+  currentCat=0; initSlider();
+}
+
+/* ═══════════════════════
+   LIGHTBOX
+═══════════════════════ */
+let _lbImgs=[], _lbIdx=0;
+function lbProduct(ci,pi){ _lbImgs=DATA.categorias[ci].productos.map(p=>({src:p.imgFull||p.img||'',cap:p.nombre})); _lbIdx=pi; lbShow(); }
+function lbGal(ci,fi){ _lbImgs=(DATA.categorias[ci].galeria?.fotos||[]).map(f=>({src:f.imgFull||f.img||'',cap:f.caption||''})); _lbIdx=fi; lbShow(); }
+function lbSingle(src,cap){ _lbImgs=[{src,cap}]; _lbIdx=0; lbShow(); }
+function lbGallery(imgs,idx){ _lbImgs=imgs; _lbIdx=idx; lbShow(); }
+function lbShow(){
+  const cur=_lbImgs[_lbIdx]||{};
+  document.getElementById('lb-img').src=cur.src||'';
+  document.getElementById('lb-cap').textContent=cur.cap||'';
+  document.getElementById('lb-ctr').textContent=_lbImgs.length>1?(_lbIdx+1)+' / '+_lbImgs.length:'';
+  document.getElementById('lb-prev').style.display=_lbImgs.length>1?'':'none';
+  document.getElementById('lb-next').style.display=_lbImgs.length>1?'':'none';
+  document.getElementById('lb').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function lbClose(){ document.getElementById('lb').classList.remove('open'); document.body.style.overflow=''; }
+function lbBg(ev){ if(ev.target===document.getElementById('lb')) lbClose(); }
+function lbNav(d){ _lbIdx=(_lbIdx+d+_lbImgs.length)%_lbImgs.length; lbShow(); }
+document.addEventListener('keydown',ev=>{
+  if(!document.getElementById('lb').classList.contains('open')) return;
+  if(ev.key==='Escape') lbClose();
+  if(ev.key==='ArrowRight') lbNav(1);
+  if(ev.key==='ArrowLeft') lbNav(-1);
+});
+
+/* ═══════════════════════
+   PAGE NAV
+═══════════════════════ */
+function goPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  window.scrollTo(0,0);
+  document.getElementById('adminBtn').style.display = name==='admin' ? 'none' : '';
+}
+function goAdmin(){ goPage('admin'); buildAdmin(); }
+
+/* ═══════════════════════
+   SLIDER
+═══════════════════════ */
+let currentCat=0, sliderReady=false, dragging=false, startX=0, dragDelta=0;
+function getPanels(){ return Array.from(document.querySelectorAll('.slide-panel')); }
+function getCatBtns(){ return Array.from(document.querySelectorAll('.cat-btn')); }
+function initSlider(){
+  if(sliderReady) return; sliderReady=true;
+  const ps=getPanels();
+  ps.forEach(p=>{ p.style.position='absolute'; p.style.top='0'; p.style.left='0'; });
+  layout(0); syncH(false);
+}
+function layout(delta){
+  const vw=document.getElementById('viewport').offsetWidth;
+  getPanels().forEach((p,i)=>{ p.style.transform=`translateX(${(i-currentCat)*vw+delta}px)`; });
+}
+function syncH(anim){
+  const ps=getPanels(); if(!ps[currentCat]) return;
+  const t=document.getElementById('track');
+  t.style.transition=anim?'height .35s cubic-bezier(.25,.46,.45,.94)':'none';
+  t.style.height=ps[currentCat].scrollHeight+'px';
+}
+function goTo(idx,anim){
+  const ps=getPanels(), bs=getCatBtns(), TOTAL=ps.length;
+  idx=Math.max(0,Math.min(TOTAL-1,idx)); currentCat=idx;
+  ps.forEach(p=>{ p.style.transition=anim?'transform .35s cubic-bezier(.25,.46,.45,.94)':'none'; });
+  layout(0); syncH(anim);
+  bs.forEach((b,i)=>b.classList.toggle('active',i===idx));
+  const btn=bs[idx], nav=document.getElementById('catNav');
+  if(btn&&nav) nav.scrollTo({left:Math.max(0,(btn.offsetLeft-52)-(nav.offsetWidth/2-btn.offsetWidth/2)),behavior:'smooth'});
+  document.getElementById('swipeHint').classList.add('hidden');
+}
+const vp=document.getElementById('viewport');
+function gX(ev){ return ev.touches?ev.touches[0].clientX:ev.clientX; }
+function onS(ev){
+  if(ev.target.closest('.item-thumb,.pgc,.pgc-img')) return;
+  dragging=true; startX=gX(ev); dragDelta=0;
+  getPanels().forEach(p=>p.style.transition='none');
+  document.getElementById('track').style.transition='none';
+  vp.classList.add('grabbing');
+}
+function onM(ev){ if(!dragging) return; dragDelta=gX(ev)-startX; layout(dragDelta); }
+function onE(){
+  if(!dragging) return; dragging=false; vp.classList.remove('grabbing');
+  const thr=vp.offsetWidth*.2, TOTAL=getPanels().length;
+  if(dragDelta<-thr&&currentCat<TOTAL-1) goTo(currentCat+1,true);
+  else if(dragDelta>thr&&currentCat>0)   goTo(currentCat-1,true);
+  else                                    goTo(currentCat,true);
+}
+vp.addEventListener('mousedown',onS);
+window.addEventListener('mousemove',onM);
+window.addEventListener('mouseup',onE);
+vp.addEventListener('touchstart',onS,{passive:true});
+vp.addEventListener('touchmove',onM,{passive:true});
+vp.addEventListener('touchend',onE);
+window.addEventListener('resize',()=>{ if(sliderReady){layout(0);syncH(false);} });
+
+/* ═══════════════════════
+   IMAGE CROPPER
+═══════════════════════ */
+let cropperImg=null, cropperTarget=null, cropperCallback=null;
+let cropBox={x:20,y:20,w:200,h:150};
+
+function openCropper(file, target, cb){
+  cropperCallback=cb||null; cropperTarget=target;
+  document.getElementById('crop-target-label').textContent =
+    target==='main'?'Foto del producto':'Imagen de galería';
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      cropperImg=img;
+      const maxW=Math.min(window.innerWidth-40,680);
+      const maxH=Math.min(window.innerHeight-220,400);
+      const scale=Math.min(maxW/img.width, maxH/img.height, 1);
+      const cw=Math.round(img.width*scale), ch=Math.round(img.height*scale);
+      const canvas=document.getElementById('cropper-canvas');
+      canvas.width=cw; canvas.height=ch;
+      canvas.getContext('2d').drawImage(img,0,0,cw,ch);
+      cropBox={x:Math.round(cw*.05),y:Math.round(ch*.05),w:Math.round(cw*.9),h:Math.round(ch*.9)};
+      drawCropBox();
+      document.getElementById('cropper-overlay').classList.add('open');
+      updateQualityLabel();
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function drawCropBox(){
+  const box=document.getElementById('crop-box');
+  box.style.left=cropBox.x+'px'; box.style.top=cropBox.y+'px';
+  box.style.width=cropBox.w+'px'; box.style.height=cropBox.h+'px';
+}
+
+function closeCropper(){ document.getElementById('cropper-overlay').classList.remove('open'); cropperImg=null; cropperCallback=null; }
+
+function applyCrop(){
+  const canvas=document.getElementById('cropper-canvas');
+  const scale=cropperImg.width/canvas.width;
+  const q=Number(document.getElementById('crop-quality').value)/100;
+  const maxPx=1200;
+  const rw=Math.round(cropBox.w*scale), rh=Math.round(cropBox.h*scale);
+  const s2=Math.min(1,maxPx/Math.max(rw,rh));
+  const out=document.createElement('canvas');
+  out.width=Math.round(rw*s2); out.height=Math.round(rh*s2);
+  out.getContext('2d').drawImage(cropperImg, Math.round(cropBox.x*scale), Math.round(cropBox.y*scale), rw, rh, 0, 0, out.width, out.height);
+  const dataUrl=out.toDataURL('image/jpeg',q);
+  document.getElementById('cropper-overlay').classList.remove('open');
+  const cb=cropperCallback; cropperCallback=null;
+  if(cb) cb(dataUrl, `${out.width}×${out.height}px · ~${Math.round(dataUrl.length*.75/1024)} KB`);
+}
+
+function updateQualityLabel(){
+  const q=Number(document.getElementById('crop-quality').value);
+  document.getElementById('crop-qlabel').textContent=q+'%';
+  const canvas=document.getElementById('cropper-canvas');
+  if(!cropperImg||!canvas.width) return;
+  const scale=cropperImg.width/canvas.width;
+  const s2=Math.min(1,1200/Math.max(cropBox.w*scale,cropBox.h*scale));
+  const ow=Math.round(cropBox.w*scale*s2), oh=Math.round(cropBox.h*scale*s2);
+  const tmp=document.createElement('canvas'); tmp.width=ow; tmp.height=oh;
+  tmp.getContext('2d').drawImage(cropperImg, Math.round(cropBox.x*scale), Math.round(cropBox.y*scale), Math.round(cropBox.w*scale), Math.round(cropBox.h*scale),0,0,ow,oh);
+  document.getElementById('crop-size-est').textContent=`~${Math.round(tmp.toDataURL('image/jpeg',q/100).length*.75/1024)} KB`;
+}
+
+// Cropper mouse/touch handlers
+(function(){
+  const wrap=()=>document.getElementById('cropper-wrap');
+  const canvas=()=>document.getElementById('cropper-canvas');
+  let dragStart=null, resizing=null, boxStart=null;
+  function getXY(e){ const r=canvas().getBoundingClientRect(); const pt=e.touches?e.touches[0]:e; return {x:pt.clientX-r.left,y:pt.clientY-r.top}; }
+  function clamp(v,mn,mx){ return Math.max(mn,Math.min(mx,v)); }
+  document.getElementById('crop-box').addEventListener('mousedown',onDown);
+  document.getElementById('crop-box').addEventListener('touchstart',onDown,{passive:false});
+  document.querySelectorAll('.crop-handle').forEach(h=>{
+    h.addEventListener('mousedown',e=>{ e.stopPropagation(); resizing=h.dataset.h; dragStart=getXY(e); boxStart={...cropBox}; e.preventDefault(); });
+    h.addEventListener('touchstart',e=>{ e.stopPropagation(); resizing=h.dataset.h; dragStart=getXY(e.touches[0]); boxStart={...cropBox}; e.preventDefault(); },{passive:false});
+  });
+  function onDown(e){ if(resizing) return; dragStart=getXY(e); boxStart={...cropBox}; e.preventDefault(); }
+  function onMove(e){
+    if(!dragStart) return;
+    const pt=getXY(e), dx=pt.x-dragStart.x, dy=pt.y-dragStart.y;
+    const cw=canvas().width, ch=canvas().height;
+    if(resizing){
+      let {x,y,w,h}=boxStart;
+      if(resizing.includes('r')) w=clamp(w+dx,20,cw-x);
+      if(resizing.includes('b')) h=clamp(h+dy,20,ch-y);
+      if(resizing.includes('l')){ const nx=clamp(x+dx,0,x+w-20); w=w-(nx-x); x=nx; }
+      if(resizing.includes('t')){ const ny=clamp(y+dy,0,y+h-20); h=h-(ny-y); y=ny; }
+      cropBox={x,y,w,h};
+    } else {
+      cropBox.x=clamp(boxStart.x+dx,0,cw-cropBox.w);
+      cropBox.y=clamp(boxStart.y+dy,0,ch-cropBox.h);
+    }
+    drawCropBox(); updateQualityLabel(); e.preventDefault();
+  }
+  function onUp(){ dragStart=null; resizing=null; }
+  document.addEventListener('mousemove',onMove);
+  document.addEventListener('mouseup',onUp);
+  document.addEventListener('touchmove',onMove,{passive:false});
+  document.addEventListener('touchend',onUp);
+})();
+
+/* ═══════════════════════
+   ADMIN PANEL
+═══════════════════════ */
+let admTab=0;
+
+function buildAdmin(){
+  const tabs=document.getElementById('admTabs');
+  tabs.innerHTML='';
+  // Info tab
+  const bi=document.createElement('button');
+  bi.className='atab'+(admTab===-1?' active':'');
+  bi.textContent='⚙ Información';
+  bi.onclick=()=>{ admTab=-1; buildAdmin(); };
+  tabs.appendChild(bi);
+
+  DATA.categorias.forEach((cat,i)=>{
+    const b=document.createElement('button');
+    b.className='atab'+(i===admTab?' active':'');
+    b.textContent=cat.label;
+    b.onclick=()=>{ admTab=i; buildAdmin(); };
+    tabs.appendChild(b);
+  });
+
+  const ba=document.createElement('button');
+  ba.className='atab'+(admTab===-2?' active':'');
+  ba.textContent='+ Categoría';
+  ba.onclick=()=>{
+    DATA.categorias.push({id:'cat'+Date.now(),label:'Nueva categoría',productos:[],galeria:{titulo:'',fotos:[]}});
+    admTab=DATA.categorias.length-1; buildAdmin();
+  };
+  tabs.appendChild(ba);
+
+  if(admTab===-1) renderAdmInfo();
+  else if(admTab>=0) renderAdmTab(admTab);
+}
+
+function renderAdmInfo(){
+  const content=document.getElementById('admContent');
+  content.innerHTML='';
+  const d=DATA.info||{};
+  const card=document.createElement('div'); card.className='acard';
+  card.innerHTML=`<div class="acard-head"><span>Información del Café</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem .6rem">
+      ${infoField('Nombre del café','nombre',d.nombre||'')}
+      ${infoField('Slogan / Dirección corta','slogan',d.slogan||'')}
+      ${infoField('Dirección completa','direccion',d.direccion||'')}
+      ${infoField('Teléfono','telefono',d.telefono||'')}
+      ${infoField('Email','email',d.email||'')}
+      ${infoField('Instagram','instagram',d.instagram||'')}
+      ${infoField('Título historia','aboutTitle',d.aboutTitle||'')}
+      ${infoField('Texto historia 1','aboutText1',d.aboutText1||'')}
+      ${infoField('Texto historia 2','aboutText2',d.aboutText2||'')}
+      ${infoField('Badge (ej: Desde 1998)','aboutBadge',d.aboutBadge||'')}
+      ${infoField('Horario Lun-Vie','horariosLV',d.horariosLV||'')}
+      ${infoField('Horario Sábado','horariosSab',d.horariosSab||'')}
+      ${infoField('Horario Domingo','horariosDom',d.horariosDom||'')}
+      ${infoField('Horario Festivos','horariosFest',d.horariosFest||'')}
+      ${infoField('Footer línea 1','footerLine1',d.footerLine1||'')}
+      ${infoField('Footer línea 2','footerLine2',d.footerLine2||'')}
+      ${infoField('Promo tag','promoTag',d.promoTag||'')}
+      ${infoField('Promo título','promoTitle',d.promoTitle||'')}
+      ${infoField('Promo descripción','promoDesc',d.promoDesc||'')}
+      ${infoField('Promo precio','promoPrice',d.promoPrice||'')}
+      ${infoField('URL Maps embed (iframe src)','mapEmbed',d.mapEmbed||'')}
+      ${infoField('URL Google Maps link','mapLink',d.mapLink||'')}
+    </div>
+    <div style="margin-top:.8rem">
+      <div class="albl" style="margin-bottom:4px">Foto del banner / logo</div>
+      <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+        <div class="athumb" id="bannerThumb" style="width:68px;height:68px;cursor:pointer" onclick="admUploadInfo('bannerImg','bannerThumb','bannerHint')">
+          <img src="${e(d.bannerImg||'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=200&q=80')}" onerror="this.src='https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=200&q=80'" style="width:100%;height:100%;object-fit:cover">
+          <div class="athumb-ov">📷</div>
+        </div>
+        <div>
+          <input class="ainp" style="width:260px" value="${e(d.bannerImg||'')}" placeholder="URL de imagen" oninput="DATA.info.bannerImg=this.value;document.querySelector('#bannerThumb img').src=this.value">
+          <div class="img-hint" id="bannerHint"></div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:.8rem">
+      <div class="albl" style="margin-bottom:4px">Foto de "Nuestra historia"</div>
+      <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+        <div class="athumb" id="aboutThumb" style="width:68px;height:68px;cursor:pointer" onclick="admUploadInfo('aboutImg','aboutThumb','aboutHint')">
+          <img src="${e(d.aboutImg||'https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=200&q=80')}" onerror="this.src='https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=200&q=80'" style="width:100%;height:100%;object-fit:cover">
+          <div class="athumb-ov">📷</div>
+        </div>
+        <div>
+          <input class="ainp" style="width:260px" value="${e(d.aboutImg||'')}" placeholder="URL de imagen" oninput="DATA.info.aboutImg=this.value;document.querySelector('#aboutThumb img').src=this.value">
+          <div class="img-hint" id="aboutHint"></div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:.8rem">
+      <div class="albl" style="margin-bottom:4px">Foto de la promo</div>
+      <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+        <div class="athumb" id="promoThumb" style="width:68px;height:68px;cursor:pointer" onclick="admUploadInfo('promoImg','promoThumb','promoHint')">
+          <img src="${e(d.promoImg||'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80')}" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'" style="width:100%;height:100%;object-fit:cover">
+          <div class="athumb-ov">📷</div>
+        </div>
+        <div>
+          <input class="ainp" style="width:260px" value="${e(d.promoImg||'')}" placeholder="URL de imagen" oninput="DATA.info.promoImg=this.value;document.querySelector('#promoThumb img').src=this.value">
+          <div class="img-hint" id="promoHint"></div>
+        </div>
+      </div>
+    </div>`;
+  content.appendChild(card);
+}
+
+function infoField(label,key,val){
+  return `<div class="afw"><label class="albl">${label}</label>
+    <input class="ainp" value="${e(val)}" oninput="if(!DATA.info)DATA.info={};DATA.info['${key}']=this.value"></div>`;
+}
+
+function admUploadInfo(field, thumbId, hintId){
+  pickFile(file=>{
+    openCropper(file, 'main', (dataUrl, sizeStr)=>{
+      if(!DATA.info) DATA.info={};
+      DATA.info[field]=dataUrl;
+      const th=document.getElementById(thumbId);
+      if(th) th.querySelector('img').src=dataUrl;
+      const inp=th?.parentElement?.querySelector('.ainp');
+      if(inp) inp.value=dataUrl;
+      const hint=document.getElementById(hintId);
+      if(hint) hint.textContent='✅ '+sizeStr;
+      toast('Imagen actualizada','ok');
+    });
+  });
+}
+
+function renderAdmTab(ci){
+  const cat=DATA.categorias[ci];
+  const content=document.getElementById('admContent');
+  content.innerHTML='';
+
+  // Category rename & delete
+  const catCard=document.createElement('div'); catCard.className='acard';
+  catCard.innerHTML=`<div class="acard-head"><span>Categoría</span>
+    <button class="ab ab-red" onclick="if(confirm('¿Eliminar categoría ${e(cat.label)} y todos sus productos?')){DATA.categorias.splice(${ci},1);admTab=Math.max(0,${ci}-1);buildAdmin()}">✕ Eliminar categoría</button>
+  </div>
+  <div class="afw"><label class="albl">Nombre de la categoría</label>
+    <input class="ainp" style="max-width:260px" value="${e(cat.label)}" oninput="DATA.categorias[${ci}].label=this.value"></div>`;
+  content.appendChild(catCard);
+
+  // Products
+  const pc=document.createElement('div'); pc.className='acard';
+  const ph=document.createElement('div'); ph.className='acard-head';
+  ph.innerHTML=`<span>Productos — ${e(cat.label)}</span>`;
+  const addP=document.createElement('button'); addP.className='ab ab-blue'; addP.textContent='+ Producto';
+  addP.onclick=()=>{ cat.productos.push({nombre:'Nuevo producto',desc:'Descripción.',precio:'$0.00',badge:'',img:'',imgFull:''}); renderAdmTab(ci); };
+  ph.appendChild(addP); pc.appendChild(ph);
+
+  cat.productos.forEach((p,pi)=>{
+    const row=document.createElement('div'); row.className='prow';
+    const th=document.createElement('div'); th.className='athumb';
+    th.innerHTML=`<img src="${e(p.img||'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80')}" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'" alt=""><div class="athumb-ov">📷</div>`;
+    th.onclick=()=>admUploadProd(ci,pi,th.querySelector('img'));
+    row.appendChild(th);
+    const pf=document.createElement('div'); pf.className='pfields';
+    pf.innerHTML=`
+      <div class="afw"><label class="albl">Nombre</label><input class="ainp" value="${e(p.nombre)}" oninput="DATA.categorias[${ci}].productos[${pi}].nombre=this.value"></div>
+      <div class="afw"><label class="albl">Precio</label><input class="ainp" value="${e(p.precio)}" oninput="DATA.categorias[${ci}].productos[${pi}].precio=this.value"></div>
+      <div class="afw pf-full"><label class="albl">Descripción</label><input class="ainp" value="${e(p.desc)}" oninput="DATA.categorias[${ci}].productos[${pi}].desc=this.value"></div>
+      <div class="afw"><label class="albl">Badge (opcional)</label><input class="ainp" value="${e(p.badge||'')}" oninput="DATA.categorias[${ci}].productos[${pi}].badge=this.value"></div>
+      <div class="afw"><label class="albl">URL imagen (o sube 📷)</label>
+        <input class="ainp" value="${e(p.img||'')}" oninput="DATA.categorias[${ci}].productos[${pi}].img=this.value;DATA.categorias[${ci}].productos[${pi}].imgFull=this.value;this.closest('.prow').querySelector('img').src=this.value||'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'">
+      </div>
+      <div class="afw pf-full"><div class="img-hint" id="phint-${ci}-${pi}"></div></div>`;
+    row.appendChild(pf);
+    const del=document.createElement('div'); del.className='adel'; del.textContent='✕';
+    del.onclick=()=>{ if(confirm('¿Eliminar este producto?')){ cat.productos.splice(pi,1); renderAdmTab(ci); } };
+    row.appendChild(del);
+    pc.appendChild(row);
+  });
+  content.appendChild(pc);
+
+  // Gallery
+  const gc=document.createElement('div'); gc.className='acard';
+  const gh=document.createElement('div'); gh.className='acard-head';
+  gh.innerHTML=`<span>Galería — ${e(cat.label)}</span>`;
+  const addG=document.createElement('button'); addG.className='ab ab-blue'; addG.textContent='+ Fotos';
+  addG.onclick=()=>admUploadGalMulti(ci);
+  gh.appendChild(addG); gc.appendChild(gh);
+  const gti=document.createElement('div');
+  gti.innerHTML=`<label class="albl" style="margin-bottom:3px;display:block">Título de la galería</label>
+    <input class="gtinp" value="${e(cat.galeria?.titulo||'')}" oninput="DATA.categorias[${ci}].galeria.titulo=this.value">`;
+  gc.appendChild(gti);
+  const gg=document.createElement('div'); gg.className='ggrid';
+  (cat.galeria?.fotos||[]).forEach((f,fi)=>{
+    const wrap=document.createElement('div');
+    const cell=document.createElement('div'); cell.className='gcell';
+    cell.innerHTML=`<img src="${e(f.img)}" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'" alt="">
+      <div class="gcell-ov">
+        <button class="gov" onclick="admUploadGalAt(${ci},${fi},this.closest('.gcell').querySelector('img'))">📷</button>
+        <button class="gov" style="background:rgba(220,38,38,.5)" onclick="if(confirm('¿Eliminar foto?')){DATA.categorias[${ci}].galeria.fotos.splice(${fi},1);renderAdmTab(${ci})}">✕</button>
+      </div>`;
+    const cap=document.createElement('input'); cap.className='capinp';
+    cap.placeholder='Texto de la foto…'; cap.value=f.caption||'';
+    cap.oninput=()=>{ DATA.categorias[ci].galeria.fotos[fi].caption=cap.value; };
+    wrap.appendChild(cell); wrap.appendChild(cap);
+    gg.appendChild(wrap);
+  });
+  gc.appendChild(gg);
+  content.appendChild(gc);
+}
+
+/* image upload helpers */
+function admUploadProd(ci,pi,imgEl){
+  pickFile(file=>{
+    openCropper(file,'main',(dataUrl,sizeStr)=>{
+      DATA.categorias[ci].productos[pi].img=dataUrl;
+      DATA.categorias[ci].productos[pi].imgFull=dataUrl;
+      imgEl.src=dataUrl;
+      const hint=document.getElementById(`phint-${ci}-${pi}`);
+      if(hint) hint.textContent='✅ '+sizeStr;
+      toast('Imagen actualizada','ok');
+    });
+  });
+}
+function admUploadGalMulti(ci){
+  pickFiles(files=>{
+    if(!DATA.categorias[ci].galeria) DATA.categorias[ci].galeria={titulo:'',fotos:[]};
+    let idx=0;
+    function next(){
+      if(idx>=files.length){ renderAdmTab(ci); toast(`${files.length} foto(s) agregada(s)`,'ok'); return; }
+      const f=files[idx++];
+      openCropper(f,'gallery',(dataUrl)=>{
+        DATA.categorias[ci].galeria.fotos.push({img:dataUrl,imgFull:dataUrl,caption:''});
+        setTimeout(next,120);
+      });
+    }
+    next();
+  });
+}
+function admUploadGalAt(ci,fi,imgEl){
+  pickFile(file=>{
+    openCropper(file,'gallery',(dataUrl)=>{
+      DATA.categorias[ci].galeria.fotos[fi].img=dataUrl;
+      DATA.categorias[ci].galeria.fotos[fi].imgFull=dataUrl;
+      imgEl.src=dataUrl;
+      toast('Foto actualizada','ok');
+    });
+  });
+}
+function pickFile(cb){ const i=document.createElement('input'); i.type='file'; i.accept='image/*'; i.onchange=ev=>cb(ev.target.files[0]); i.click(); }
+function pickFiles(cb){ const i=document.createElement('input'); i.type='file'; i.accept='image/*'; i.multiple=true; i.onchange=ev=>cb(Array.from(ev.target.files)); i.click(); }
+
+/* apply / github / export / import */
+function admApply(){
+  localStorage.setItem('cafeRoble_v3', JSON.stringify(DATA));
+  renderMenu(); renderInfo();
+  toast('✔ Cambios guardados localmente','ok');
+}
+
+async function admSaveGitHub(){
+  const pass=document.getElementById('ghPass')?.value.trim();
+  if(!pass||pass!==APP_PASS){ toast('Contraseña incorrecta','err'); return; }
+  const ok=await saveToGitHub();
+  if(ok){
+    localStorage.setItem('cafeRoble_v3',JSON.stringify(DATA));
+    renderMenu(); renderInfo();
+    toast('☁ Carta publicada en GitHub Pages','ok');
+  }
+}
+
+function admExport(){
+  const blob=new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='menu-data.json'; a.click(); URL.revokeObjectURL(a.href);
+  toast('JSON exportado','ok');
+}
+
+function admImport(input){
+  const f=input.files[0]; if(!f) return;
+  const r=new FileReader(); r.onload=ev=>{
+    try{
+      DATA=JSON.parse(ev.target.result);
+      localStorage.setItem('cafeRoble_v3',JSON.stringify(DATA));
+      admTab=0; buildAdmin(); renderMenu(); renderInfo();
+      toast('JSON importado','ok');
+    } catch(_){ toast('Error: JSON inválido','warn'); }
+  }; r.readAsText(f); input.value='';
+}
+
+/* loading / toast */
+function showLoad(on){
+  const b=document.getElementById('loading-bar');
+  b.style.display=on?'block':'none'; b.style.width=on?'70%':'100%';
+  if(!on) setTimeout(()=>b.style.width='0',400);
+}
+function toast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=type; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2800);
+}
+function e(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+/* ── BOOT ── */
+document.addEventListener('DOMContentLoaded', async ()=>{
+  loadLocalData();
+  renderMenu();
+  renderInfo();
+  // Try to load from GitHub in background
+  try { await loadFromGitHub(); } catch(e) {}
+});
+</script>
+</body>
+</html>
