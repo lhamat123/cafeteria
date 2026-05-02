@@ -341,6 +341,15 @@
           }
         ]
       }
+    },
+    {
+      "id": "cat1777738279527",
+      "label": "Nueva categoría",
+      "productos": [],
+      "galeria": {
+        "titulo": "",
+        "fotos": []
+      }
     }
   ]
 }
