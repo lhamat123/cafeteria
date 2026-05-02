@@ -266,6 +266,16 @@
     background:#faf9f7;margin-bottom:.6rem;transition:border-color .14s}
   .gtinp:focus{outline:none;border-color:var(--gold)}
 
+  /* ── INFO DESTACADOS / GALERIA ADMIN ── */
+  .info-dest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.6rem;margin-bottom:.6rem}
+  .info-dest-cell{border-radius:9px;overflow:visible;position:relative;background:#f0ede8;border:1.5px solid #e0ddd9;display:flex;flex-direction:column;gap:.3rem}
+  .info-dest-img{aspect-ratio:4/3;overflow:hidden;border-radius:7px 7px 0 0;position:relative;background:#e0ddd9;cursor:pointer}
+  .info-dest-img img{width:100%;height:100%;object-fit:cover;display:block}
+  .info-dest-ov{position:absolute;inset:0;background:rgba(0,0,0,.5);opacity:0;transition:opacity .14s;display:flex;align-items:center;justify-content:center;gap:.25rem}
+  .info-dest-img:hover .info-dest-ov{opacity:1}
+  .info-dest-body{padding:0 .4rem .45rem;display:flex;flex-direction:column;gap:.2rem}
+  .info-dest-del{position:absolute;top:-7px;right:-7px;background:#dc2626;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+
   /* ── GITHUB LOGIN PANEL ── */
   .gh-panel{background:#1a1a2e;border-radius:10px;padding:1rem;margin-bottom:.85rem;display:flex;flex-wrap:wrap;gap:.6rem;align-items:flex-end}
   .gh-panel-title{font-family:'Playfair Display',serif;font-size:.9rem;color:var(--gold);width:100%;margin-bottom:.2rem}
@@ -660,22 +670,27 @@ function renderInfo() {
   const feat = document.getElementById('infoFeat');
   const gal  = document.getElementById('infoGal');
   feat.innerHTML = ''; gal.innerHTML = '';
-  const galAll = [];
-  DATA.categorias.forEach(cat => {
-    if (cat.productos[0]) {
-      const p = cat.productos[0];
-      const card = document.createElement('div'); card.className='feat-card';
-      card.innerHTML = `<div style="overflow:hidden"><img class="feat-img" src="${e(p.img)}" alt="${e(p.nombre)}"></div>
-        <div class="feat-body"><p class="feat-name">${e(p.nombre)}</p><p class="feat-price">${e(p.precio)}</p></div>`;
-      card.addEventListener('click', ()=>lbSingle(p.imgFull||p.img, p.nombre));
-      feat.appendChild(card);
-    }
-    if(cat.galeria?.fotos?.[0]) galAll.push(cat.galeria.fotos[0]);
+
+  // DESTACADOS: usa info.destacados[] si existe, si no fallback a primer producto de cada categoría
+  const destacados = (d.destacados && d.destacados.length)
+    ? d.destacados
+    : DATA.categorias.filter(c=>c.productos[0]).map(c=>({img:c.productos[0].img,imgFull:c.productos[0].imgFull||c.productos[0].img,nombre:c.productos[0].nombre,precio:c.productos[0].precio}));
+  destacados.forEach((item,i)=>{
+    const card = document.createElement('div'); card.className='feat-card';
+    card.innerHTML = `<div style="overflow:hidden"><img class="feat-img" src="${e(item.img||'')}" alt="${e(item.nombre||'')}"></div>
+      <div class="feat-body"><p class="feat-name">${e(item.nombre||'')}</p><p class="feat-price">${e(item.precio||'')}</p></div>`;
+    card.addEventListener('click', ()=>lbSingle(item.imgFull||item.img, item.nombre||''));
+    feat.appendChild(card);
   });
-  galAll.forEach((f,i)=>{
+
+  // GALERÍA NOSOTROS: usa info.galeria[] si existe, si no fallback a primera foto de cada categoría
+  const galItems = (d.galeria && d.galeria.length)
+    ? d.galeria
+    : DATA.categorias.filter(c=>c.galeria?.fotos?.[0]).map(c=>c.galeria.fotos[0]);
+  galItems.forEach((f,i)=>{
     const img=document.createElement('img'); img.className='info-gal-img';
-    img.src=f.imgFull||f.img; img.alt='';
-    img.addEventListener('click',()=>lbGallery(galAll.map(g=>({src:g.imgFull||g.img,cap:g.caption||''})),i));
+    img.src=f.imgFull||f.img; img.alt=f.caption||'';
+    img.addEventListener('click',()=>lbGallery(galItems.map(g=>({src:g.imgFull||g.img,cap:g.caption||''})),i));
     gal.appendChild(img);
   });
 }
@@ -984,6 +999,8 @@ function renderAdmInfo(){
   const content=document.getElementById('admContent');
   content.innerHTML='';
   const d=DATA.info||{};
+
+  // ── Card: Datos generales e imágenes únicas ──
   const card=document.createElement('div'); card.className='acard';
   card.innerHTML=`<div class="acard-head"><span>Información del Café</span></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem .6rem">
@@ -1050,6 +1067,150 @@ function renderAdmInfo(){
       </div>
     </div>`;
   content.appendChild(card);
+
+  // ── Card: Destacados (múltiples) ──
+  const destCard=document.createElement('div'); destCard.className='acard';
+  const destHead=document.createElement('div'); destHead.className='acard-head';
+  destHead.innerHTML='<span>✨ Destacados — Nosotros</span>';
+  const addDestBtn=document.createElement('button'); addDestBtn.className='ab ab-blue'; addDestBtn.textContent='+ Agregar destacado';
+  addDestBtn.onclick=()=>admAddDestacado();
+  destHead.appendChild(addDestBtn); destCard.appendChild(destHead);
+  const destNote=document.createElement('p');
+  destNote.style.cssText='font-size:.72rem;color:var(--muted);margin-bottom:.6rem';
+  destNote.textContent='Estos son los productos que aparecen en la sección "Destacados" de Nosotros. Si está vacío, se muestra automáticamente el primer producto de cada categoría.';
+  destCard.appendChild(destNote);
+  const destGrid=document.createElement('div'); destGrid.className='info-dest-grid'; destGrid.id='admDestGrid';
+  destCard.appendChild(destGrid);
+  content.appendChild(destCard);
+  renderAdmDestacados();
+
+  // ── Card: Galería Nosotros (múltiples) ──
+  const galCard=document.createElement('div'); galCard.className='acard';
+  const galHead=document.createElement('div'); galHead.className='acard-head';
+  galHead.innerHTML='<span>📸 Galería — Nosotros</span>';
+  const addGalBtn=document.createElement('button'); addGalBtn.className='ab ab-blue'; addGalBtn.textContent='+ Agregar fotos';
+  addGalBtn.onclick=()=>admAddInfoGalMulti();
+  galHead.appendChild(addGalBtn); galCard.appendChild(galHead);
+  const galNote=document.createElement('p');
+  galNote.style.cssText='font-size:.72rem;color:var(--muted);margin-bottom:.6rem';
+  galNote.textContent='Fotos que aparecen en la sección "Galería" de Nosotros. Si está vacía, se muestra automáticamente la primera foto de la galería de cada categoría.';
+  galCard.appendChild(galNote);
+  const galGrid=document.createElement('div'); galGrid.className='ggrid'; galGrid.id='admInfoGalGrid';
+  galCard.appendChild(galGrid);
+  content.appendChild(galCard);
+  renderAdmInfoGaleria();
+}
+
+function renderAdmDestacados(){
+  if(!DATA.info) DATA.info={};
+  if(!DATA.info.destacados) DATA.info.destacados=[];
+  const grid=document.getElementById('admDestGrid');
+  if(!grid) return;
+  grid.innerHTML='';
+  DATA.info.destacados.forEach((item,i)=>{
+    const cell=document.createElement('div'); cell.className='info-dest-cell';
+    const delBtn=document.createElement('button'); delBtn.className='info-dest-del'; delBtn.textContent='✕';
+    delBtn.title='Eliminar'; delBtn.onclick=()=>{ if(confirm('¿Eliminar este destacado?')){ DATA.info.destacados.splice(i,1); renderAdmDestacados(); } };
+    cell.appendChild(delBtn);
+    const imgDiv=document.createElement('div'); imgDiv.className='info-dest-img';
+    imgDiv.innerHTML=`<img src="${e(item.img||'')}" alt="">
+      <div class="info-dest-ov">
+        <button class="gov" title="Cambiar imagen" onclick="admUploadDestacado(${i},this.closest('.info-dest-img').querySelector('img'))">📷</button>
+      </div>`;
+    cell.appendChild(imgDiv);
+    const body=document.createElement('div'); body.className='info-dest-body';
+    const nameInp=document.createElement('input'); nameInp.className='capinp'; nameInp.placeholder='Nombre…'; nameInp.value=item.nombre||'';
+    nameInp.oninput=()=>{ DATA.info.destacados[i].nombre=nameInp.value; };
+    const precioInp=document.createElement('input'); precioInp.className='capinp'; precioInp.placeholder='Precio…'; precioInp.value=item.precio||'';
+    precioInp.oninput=()=>{ DATA.info.destacados[i].precio=precioInp.value; };
+    body.appendChild(nameInp); body.appendChild(precioInp);
+    cell.appendChild(body);
+    grid.appendChild(cell);
+  });
+  if(DATA.info.destacados.length===0){
+    grid.innerHTML='<p style="font-size:.75rem;color:var(--muted);grid-column:1/-1">Sin destacados personalizados — se usarán los primeros productos de cada categoría.</p>';
+  }
+}
+
+function admAddDestacado(){
+  if(!DATA.info) DATA.info={};
+  if(!DATA.info.destacados) DATA.info.destacados=[];
+  pickFiles(files=>{
+    let idx=0;
+    function next(){
+      if(idx>=files.length){ renderAdmDestacados(); toast(`${files.length} destacado(s) agregado(s)`,'ok'); return; }
+      const f=files[idx++];
+      openCropper(f,'main',(dataUrl)=>{
+        DATA.info.destacados.push({img:dataUrl,imgFull:dataUrl,nombre:'',precio:''});
+        setTimeout(next,120);
+      });
+    }
+    next();
+  });
+}
+
+function admUploadDestacado(i,imgEl){
+  pickFile(file=>{
+    openCropper(file,'main',(dataUrl)=>{
+      DATA.info.destacados[i].img=dataUrl;
+      DATA.info.destacados[i].imgFull=dataUrl;
+      if(imgEl) imgEl.src=dataUrl;
+      toast('Imagen actualizada','ok');
+    });
+  });
+}
+
+function renderAdmInfoGaleria(){
+  if(!DATA.info) DATA.info={};
+  if(!DATA.info.galeria) DATA.info.galeria=[];
+  const grid=document.getElementById('admInfoGalGrid');
+  if(!grid) return;
+  grid.innerHTML='';
+  DATA.info.galeria.forEach((f,fi)=>{
+    const wrap=document.createElement('div');
+    const cell=document.createElement('div'); cell.className='gcell';
+    cell.innerHTML=`<img src="${e(f.img)}" alt="">
+      <div class="gcell-ov">
+        <button class="gov" onclick="admUploadInfoGalAt(${fi},this.closest('.gcell').querySelector('img'))">📷</button>
+        <button class="gov" style="background:rgba(220,38,38,.5)" onclick="if(confirm('¿Eliminar foto?')){DATA.info.galeria.splice(${fi},1);renderAdmInfoGaleria()}">✕</button>
+      </div>`;
+    const cap=document.createElement('input'); cap.className='capinp';
+    cap.placeholder='Texto de la foto…'; cap.value=f.caption||'';
+    cap.oninput=()=>{ DATA.info.galeria[fi].caption=cap.value; };
+    wrap.appendChild(cell); wrap.appendChild(cap);
+    grid.appendChild(wrap);
+  });
+  if(DATA.info.galeria.length===0){
+    grid.innerHTML='<p style="font-size:.75rem;color:var(--muted);grid-column:1/-1">Sin fotos en galería — se usará la primera foto de la galería de cada categoría.</p>';
+  }
+}
+
+function admAddInfoGalMulti(){
+  if(!DATA.info) DATA.info={};
+  if(!DATA.info.galeria) DATA.info.galeria=[];
+  pickFiles(files=>{
+    let idx=0;
+    function next(){
+      if(idx>=files.length){ renderAdmInfoGaleria(); toast(`${files.length} foto(s) agregada(s)`,'ok'); return; }
+      const f=files[idx++];
+      openCropper(f,'gallery',(dataUrl)=>{
+        DATA.info.galeria.push({img:dataUrl,imgFull:dataUrl,caption:''});
+        setTimeout(next,120);
+      });
+    }
+    next();
+  });
+}
+
+function admUploadInfoGalAt(fi,imgEl){
+  pickFile(file=>{
+    openCropper(file,'gallery',(dataUrl)=>{
+      DATA.info.galeria[fi].img=dataUrl;
+      DATA.info.galeria[fi].imgFull=dataUrl;
+      if(imgEl) imgEl.src=dataUrl;
+      toast('Foto actualizada','ok');
+    });
+  });
 }
 
 function infoField(label,key,val){
