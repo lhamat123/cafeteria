@@ -146,7 +146,7 @@
     },
     {
       "id": "reposteria",
-      "label": "REPOSTERÃÂA",
+      "label": "REPOSTERIA",
       "productos": [
         {
           "nombre": "Croissant de mantequilla",
@@ -204,7 +204,7 @@
     },
     {
       "id": "desayunos",
-      "label": "Desayunos",
+      "label": "DESAYUNOS",
       "productos": [
         {
           "nombre": "Huevos benedictinos",
@@ -262,8 +262,16 @@
     },
     {
       "id": "postres",
-      "label": "Postres",
+      "label": "PROSTRES",
       "productos": [
+        {
+          "nombre": "TIRAMISU",
+          "desc": "Receta italiana tradicional con bizcochos empapados, mascarpone y cacao en polvo.",
+          "precio": "$6.20",
+          "badge": "",
+          "img": "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=200&q=80",
+          "imgFull": "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=900&q=90"
+        },
         {
           "nombre": "Tarta de queso",
           "desc": "Cheesecake cremoso al horno con base de galleta y coulis de frutos rojos.",
@@ -279,14 +287,6 @@
           "badge": "",
           "img": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=200&q=80",
           "imgFull": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=900&q=90"
-        },
-        {
-          "nombre": "TiramisÃÂÃÂÃÂÃÂº",
-          "desc": "Receta italiana tradicional con bizcochos empapados, mascarpone y cacao en polvo.",
-          "precio": "$6.20",
-          "badge": "",
-          "img": "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=200&q=80",
-          "imgFull": "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=900&q=90"
         },
         {
           "nombre": "Flan de la abuela",
@@ -320,7 +320,7 @@
     },
     {
       "id": "cat1777729276420",
-      "label": "3333333",
+      "label": "GALERIA",
       "productos": [],
       "galeria": {
         "titulo": "",
