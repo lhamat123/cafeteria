@@ -207,28 +207,12 @@
       "label": "DESAYUNOS",
       "productos": [
         {
-          "nombre": "Huevos benedictinos",
-          "desc": "Huevos pochados sobre jamÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ³n y pan inglÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ©s tostado con salsa holandesa casera.",
-          "precio": "$9.50",
-          "badge": "Estrella",
-          "img": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=200&q=80",
-          "imgFull": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=900&q=90"
-        },
-        {
           "nombre": "Bowl de granola",
           "desc": "Granola artesanal tostada, yogur griego, miel de abeja y frutas de temporada.",
           "precio": "$7.20",
           "badge": "",
           "img": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200&q=80",
           "imgFull": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&q=90"
-        },
-        {
-          "nombre": "Pancakes de arÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¡ndanos",
-          "desc": "Esponjosos pancakes con arÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¡ndanos frescos, mantequilla y sirope de maple puro.",
-          "precio": "$8.00",
-          "badge": "",
-          "img": "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=200&q=80",
-          "imgFull": "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=900&q=90"
         },
         {
           "nombre": "Revuelto de la casa",
@@ -240,17 +224,17 @@
         }
       ],
       "galeria": {
-        "titulo": "Empieza el dÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ­a con buen pie",
+        "titulo": "Empieza el día  con buen pie",
         "fotos": [
           {
             "img": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=900&q=90",
-            "caption": "Huevos benedictinos ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ el desayuno que lo cambia todo"
+            "caption": "Huevos benedictinos el desayuno que lo cambia todo"
           },
           {
             "img": "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=900&q=90",
-            "caption": "Pancakes esponjosos baÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ±ados en sirope de maple puro"
+            "caption": "Pancakes esponjosos en sirope de maple puro"
           },
           {
             "img": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80",
