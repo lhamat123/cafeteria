@@ -1,41 +1,41 @@
 {
   "info": {
-    "nombre": "Café Roble",
-    "slogan": "Av. Principal 123 · Desde 1998",
+    "nombre": "CafÃ© Roble",
+    "slogan": "Av. Principal 123 Â· Desde 1998",
     "bannerImg": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=200&q=80",
     "aboutImg": "https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=600&q=80",
     "aboutBadge": "Desde 1998",
-    "aboutTitle": "Un rincón para los amantes del café",
-    "aboutText1": "Café Roble nació con la idea de crear un espacio cálido donde cada taza cuente una historia. Granos de origen único, tostados artesanalmente cada semana.",
-    "aboutText2": "Más de 25 años perfeccionando recetas y construyendo una comunidad de apasionados del buen café.",
+    "aboutTitle": "Un rincÃ³n para los amantes del cafÃ©",
+    "aboutText1": "CafÃ© Roble naciÃ³ con la idea de crear un espacio cÃ¡lido donde cada taza cuente una historia. Granos de origen Ãºnico, tostados artesanalmente cada semana.",
+    "aboutText2": "MÃ¡s de 25 aÃ±os perfeccionando recetas y construyendo una comunidad de apasionados del buen cafÃ©.",
     "direccion": "Av. Principal 123, Col. Centro",
     "telefono": "(555) 000-0000",
     "email": "info@caferoble.com",
     "instagram": "@caferoble",
     "mapEmbed": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.521260322283!2d-99.16869232426222!3d19.427023340975!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDI1JzM3LjMiTiA5OcKwMTAnMDAuMyJX!5e0!3m2!1ses!2smx!4v1699000000000!5m2!1ses!2smx",
     "mapLink": "https://maps.google.com",
-    "horariosLV": "7:00 – 21:00",
-    "horariosSab": "8:00 – 22:00",
-    "horariosDom": "9:00 – 19:00",
-    "horariosFest": "9:00 – 18:00",
-    "footerLine1": "Café Roble · Lunes a domingo, 7:00 – 21:00",
-    "footerLine2": "Av. Principal 123 · Tel. (555) 000-0000",
+    "horariosLV": "7:00 â 21:00",
+    "horariosSab": "8:00 â 22:00",
+    "horariosDom": "9:00 â 19:00",
+    "horariosFest": "9:00 â 18:00",
+    "footerLine1": "CafÃ© Roble Â· Lunes a domingo, 7:00 â 21:00",
+    "footerLine2": "Av. Principal 123 Â· Tel. (555) 000-0000",
     "promoImg": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&q=80",
     "promoTag": "Solo en noviembre",
-    "promoTitle": "Desayuno completo + café",
-    "promoDesc": "Elige tu desayuno favorito y llévate un espresso o americano incluido.",
+    "promoTitle": "Desayuno completo + cafÃ©",
+    "promoDesc": "Elige tu desayuno favorito y llÃ©vate un espresso o americano incluido.",
     "promoPrice": "$10.90"
   },
   "categorias": [
     {
       "id": "cafes",
-      "label": "Cafés",
+      "label": "KKKKKKK222",
       "productos": [
         {
-          "nombre": "Espresso",
-          "desc": "Shot puro de café de origen único, tostado artesanal. Intenso y cremoso con crema dorada perfecta.",
-          "precio": "$1.80",
-          "badge": "Clásico",
+          "nombre": "ASDASDASD",
+          "desc": "Shot puro de cafÃ© de origen Ãºnico, tostado artesanal. Intenso y cremoso con crema dorada perfecta.",
+          "precio": "222",
+          "badge": "ClÃ¡sico",
           "img": "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=200&q=80",
           "imgFull": "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=900&q=90"
         },
@@ -49,7 +49,7 @@
         },
         {
           "nombre": "Latte",
-          "desc": "Café suave con abundante leche vaporizada. Disponible en vainilla, caramelo y avellana.",
+          "desc": "CafÃ© suave con abundante leche vaporizada. Disponible en vainilla, caramelo y avellana.",
           "precio": "$3.50",
           "badge": "Popular",
           "img": "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=200&q=80",
@@ -65,7 +65,7 @@
         },
         {
           "nombre": "Cortado",
-          "desc": "Espresso cortado con un toque de leche caliente. Intensidad suavizada sin perder carácter.",
+          "desc": "Espresso cortado con un toque de leche caliente. Intensidad suavizada sin perder carÃ¡cter.",
           "precio": "$2.40",
           "badge": "",
           "img": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=200&q=80",
@@ -81,12 +81,12 @@
         }
       ],
       "galeria": {
-        "titulo": "Momentos con un café",
+        "titulo": "Momentos con un cafÃ©",
         "fotos": [
           {
             "img": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=90",
-            "caption": "El ritual del café de cada mañana"
+            "caption": "El ritual del cafÃ© de cada maÃ±ana"
           },
           {
             "img": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=400&q=80",
@@ -103,19 +103,19 @@
     },
     {
       "id": "reposteria",
-      "label": "Repostería",
+      "label": "ReposterÃ­a",
       "productos": [
         {
           "nombre": "Croissant de mantequilla",
-          "desc": "Hojaldrado y crujiente por fuera, tierno por dentro. Horneado fresco cada mañana.",
+          "desc": "Hojaldrado y crujiente por fuera, tierno por dentro. Horneado fresco cada maÃ±ana.",
           "precio": "$2.50",
           "badge": "Hoy",
           "img": "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=200&q=80",
           "imgFull": "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=900&q=90"
         },
         {
-          "nombre": "Muffin de arándanos",
-          "desc": "Esponjoso, húmedo y lleno de arándanos frescos. Ideal con un latte por la mañana.",
+          "nombre": "Muffin de arÃ¡ndanos",
+          "desc": "Esponjoso, hÃºmedo y lleno de arÃ¡ndanos frescos. Ideal con un latte por la maÃ±ana.",
           "precio": "$2.80",
           "badge": "",
           "img": "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=200&q=80",
@@ -139,12 +139,12 @@
         }
       ],
       "galeria": {
-        "titulo": "Horneado con amor cada mañana",
+        "titulo": "Horneado con amor cada maÃ±ana",
         "fotos": [
           {
             "img": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=900&q=90",
-            "caption": "Croissants recién salidos del horno, crujientes y dorados"
+            "caption": "Croissants reciÃ©n salidos del horno, crujientes y dorados"
           },
           {
             "img": "https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=400&q=80",
@@ -154,7 +154,7 @@
           {
             "img": "https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=900&q=90",
-            "caption": "Pan de masa madre con aguacate — sencillo y delicioso"
+            "caption": "Pan de masa madre con aguacate â sencillo y delicioso"
           }
         ]
       }
@@ -165,7 +165,7 @@
       "productos": [
         {
           "nombre": "Huevos benedictinos",
-          "desc": "Huevos pochados sobre jamón y pan inglés tostado con salsa holandesa casera.",
+          "desc": "Huevos pochados sobre jamÃ³n y pan inglÃ©s tostado con salsa holandesa casera.",
           "precio": "$9.50",
           "badge": "Estrella",
           "img": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=200&q=80",
@@ -180,8 +180,8 @@
           "imgFull": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&q=90"
         },
         {
-          "nombre": "Pancakes de arándanos",
-          "desc": "Esponjosos pancakes con arándanos frescos, mantequilla y sirope de maple puro.",
+          "nombre": "Pancakes de arÃ¡ndanos",
+          "desc": "Esponjosos pancakes con arÃ¡ndanos frescos, mantequilla y sirope de maple puro.",
           "precio": "$8.00",
           "badge": "",
           "img": "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=200&q=80",
@@ -197,17 +197,17 @@
         }
       ],
       "galeria": {
-        "titulo": "Empieza el día con buen pie",
+        "titulo": "Empieza el dÃ­a con buen pie",
         "fotos": [
           {
             "img": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=900&q=90",
-            "caption": "Huevos benedictinos — el desayuno que lo cambia todo"
+            "caption": "Huevos benedictinos â el desayuno que lo cambia todo"
           },
           {
             "img": "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=900&q=90",
-            "caption": "Pancakes esponjosos bañados en sirope de maple puro"
+            "caption": "Pancakes esponjosos baÃ±ados en sirope de maple puro"
           },
           {
             "img": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80",
@@ -238,7 +238,7 @@
           "imgFull": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=900&q=90"
         },
         {
-          "nombre": "Tiramisú",
+          "nombre": "TiramisÃº",
           "desc": "Receta italiana tradicional con bizcochos empapados, mascarpone y cacao en polvo.",
           "precio": "$6.20",
           "badge": "",
@@ -260,17 +260,17 @@
           {
             "img": "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=900&q=90",
-            "caption": "Tarta de queso horneada — cremosa, perfecta, irresistible"
+            "caption": "Tarta de queso horneada â cremosa, perfecta, irresistible"
           },
           {
             "img": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=900&q=90",
-            "caption": "Brownie tibio con helado — contraste de texturas y sabores"
+            "caption": "Brownie tibio con helado â contraste de texturas y sabores"
           },
           {
             "img": "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=900&q=90",
-            "caption": "Tiramisú artesanal — la elegancia del postre italiano clásico"
+            "caption": "TiramisÃº artesanal â la elegancia del postre italiano clÃ¡sico"
           }
         ]
       }
