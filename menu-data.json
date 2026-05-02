@@ -1,29 +1,29 @@
 {
   "info": {
-    "nombre": "CafÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ© Roble",
-    "slogan": "Av. Principal 123 ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ· Desde 1998",
+    "nombre": "Carralero",
+    "slogan": "Av. Principal 123 · Desde 1998",
     "bannerImg": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=200&q=80",
     "aboutImg": "https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=600&q=80",
     "aboutBadge": "Desde 1998",
-    "aboutTitle": "Un rincÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ³n para los amantes del cafÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ©",
-    "aboutText1": "CafÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ© Roble naciÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ³ con la idea de crear un espacio cÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¡lido donde cada taza cuente una historia. Granos de origen ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂºnico, tostados artesanalmente cada semana.",
-    "aboutText2": "MÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¡s de 25 aÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ±os perfeccionando recetas y construyendo una comunidad de apasionados del buen cafÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ©.",
+    "aboutTitle": "Un Rincón para el Amor",
+    "aboutText1": "Único, tostados artesanalmente cada semana.",
+    "aboutText2": "asdasdadadad a dad ad ad ad ad",
     "direccion": "Av. Principal 123, Col. Centro",
     "telefono": "(555) 000-0000",
     "email": "info@caferoble.com",
     "instagram": "@caferoble",
     "mapEmbed": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.521260322283!2d-99.16869232426222!3d19.427023340975!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDI1JzM3LjMiTiA5OcKwMTAnMDAuMyJX!5e0!3m2!1ses!2smx!4v1699000000000!5m2!1ses!2smx",
     "mapLink": "https://maps.google.com",
-    "horariosLV": "7:00 ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ 21:00",
-    "horariosSab": "8:00 ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ 22:00",
-    "horariosDom": "9:00 ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ 19:00",
-    "horariosFest": "9:00 ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ 18:00",
-    "footerLine1": "CafÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ© Roble ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ· Lunes a domingo, 7:00 ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ 21:00",
-    "footerLine2": "Av. Principal 123 ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ· Tel. (555) 000-0000",
+    "horariosLV": "7:00  a 21:00",
+    "horariosSab": "8:00  a 22:00",
+    "horariosDom": "9:00 a 19:00",
+    "horariosFest": "9:00  a 18:00",
+    "footerLine1": "12 a 21:00",
+    "footerLine2": "Av. Principal 123 · Tel. (555) 000-0000",
     "promoImg": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&q=80",
     "promoTag": "Solo en noviembre",
-    "promoTitle": "Desayuno completo + cafÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ©",
-    "promoDesc": "Elige tu desayuno favorito y llÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ©vate un espresso o americano incluido.",
+    "promoTitle": "Desayuno completo + café",
+    "promoDesc": "Elige tu desayuno favorito y  un espresso o americano incluido.",
     "promoPrice": "$10.90",
     "destacados": [
       {
@@ -340,15 +340,6 @@
             "caption": ""
           }
         ]
-      }
-    },
-    {
-      "id": "cat1777738279527",
-      "label": "Nueva categoría",
-      "productos": [],
-      "galeria": {
-        "titulo": "",
-        "fotos": []
       }
     }
   ]
