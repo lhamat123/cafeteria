@@ -465,25 +465,16 @@
   <div class="adm-body">
     <!-- GitHub Config Panel -->
     <div class="gh-panel">
-      <div class="gh-panel-title">☁️ Configuración GitHub Pages</div>
+      <div class="gh-panel-title">☁️ Publicar en GitHub Pages</div>
+      <input type="hidden" id="ghUser" value="lhamat123"/>
+      <input type="hidden" id="ghRepo" value="cafeteria"/>
       <div class="gh-field">
-        <label class="gh-label">Usuario GitHub</label>
-        <input class="gh-inp" id="ghUser" placeholder="lhamat123" value="lhamat123"/>
-      </div>
-      <div class="gh-field">
-        <label class="gh-label">Repositorio</label>
-        <input class="gh-inp" id="ghRepo" placeholder="cafeteria" value="cafeteria"/>
-      </div>
-      <div class="gh-field">
-        <label class="gh-label">Token (github_pat_...)</label>
+        <label class="gh-label">Token de acceso</label>
         <input class="gh-inp" type="password" id="ghToken" placeholder="github_pat_..." autocomplete="off"/>
       </div>
-      <div class="gh-field" style="min-width:120px;max-width:160px">
-        <label class="gh-label">Contraseña admin</label>
-        <input class="gh-inp" type="password" id="ghPass" placeholder="••••••" autocomplete="off"/>
-      </div>
+      <input type="hidden" id="ghPass" value=""/>
       <div style="width:100%">
-        <div class="gh-status" id="ghStatus">Sin conexión · ingresa tu token para publicar en GitHub Pages</div>
+        <div class="gh-status" id="ghStatus">Ingresa tu token para publicar</div>
       </div>
     </div>
 
@@ -562,8 +553,6 @@ async function loadFromGitHub() {
 
 async function saveToGitHub() {
   const token = document.getElementById('ghToken')?.value.trim();
-  const pass  = document.getElementById('ghPass')?.value.trim();
-  if (!pass || pass !== APP_PASS) { toast('Contraseña incorrecta','err'); return false; }
   if (!token || !token.startsWith('github_')) { toast('Token GitHub inválido','err'); return false; }
 
   showLoad(true);
@@ -801,7 +790,7 @@ function goPage(name){
   if(name==='info') renderInfo();
 }
 function goAdmin(){
-  const pass=prompt('Contraseña:');
+  const pass=prompt('Acceso limitado:');
   if(!pass||pass!==APP_PASS){ if(pass!==null) toast('Contraseña incorrecta','err'); return; }
   goPage('admin'); buildAdmin();
 }
@@ -1399,8 +1388,6 @@ function admApply(){
 }
 
 async function admSaveGitHub(){
-  const pass=document.getElementById('ghPass')?.value.trim();
-  if(!pass||pass!==APP_PASS){ toast('Contraseña incorrecta','err'); return; }
   const ok=await saveToGitHub();
   if(ok){
     localStorage.setItem('cafeRoble_v3',JSON.stringify(DATA));
