@@ -150,15 +150,15 @@
       "productos": [
         {
           "nombre": "Croissant de mantequilla",
-          "desc": "Hojaldrado y crujiente por fuera, tierno por dentro. Horneado fresco cada maÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ±ana.",
+          "desc": "Hojaldrado y crujiente por fuera, tierno por dentro. Horneado fresco.",
           "precio": "$2.50",
           "badge": "Hoy",
           "img": "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=200&q=80",
           "imgFull": "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=900&q=90"
         },
         {
-          "nombre": "Muffin de arÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¡ndanos",
-          "desc": "Esponjoso, hÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂºmedo y lleno de arÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¡ndanos frescos. Ideal con un latte por la maÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ±ana.",
+          "nombre": "Muffin",
+          "desc": "Esponjoso",
           "precio": "$2.80",
           "badge": "",
           "img": "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=200&q=80",
@@ -182,12 +182,12 @@
         }
       ],
       "galeria": {
-        "titulo": "Horneado con amor cada maÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ±ana",
+        "titulo": "Horneado con amor",
         "fotos": [
           {
             "img": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=900&q=90",
-            "caption": "Croissants reciÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ©n salidos del horno, crujientes y dorados"
+            "caption": "Croissants  crujientes y dorados"
           },
           {
             "img": "https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=400&q=80",
@@ -197,7 +197,7 @@
           {
             "img": "https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=900&q=90",
-            "caption": "Pan de masa madre con aguacate ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ sencillo y delicioso"
+            "caption": "Pan de masa madre con aguacate sencillo y delicioso"
           }
         ]
       }
