@@ -661,19 +661,16 @@ function renderInfo() {
   const gal  = document.getElementById('infoGal');
   feat.innerHTML = ''; gal.innerHTML = '';
   const galAll = [];
-  DATA.categorias.forEach((cat, ci) => {
-    const featIdx = DATA.info?.featIdx?.[ci] ?? 0;
-    const p = cat.productos[featIdx];
-    if (p) {
+  DATA.categorias.forEach(cat => {
+    if (cat.productos[0]) {
+      const p = cat.productos[0];
       const card = document.createElement('div'); card.className='feat-card';
       card.innerHTML = `<div style="overflow:hidden"><img class="feat-img" src="${e(p.img)}" alt="${e(p.nombre)}"></div>
         <div class="feat-body"><p class="feat-name">${e(p.nombre)}</p><p class="feat-price">${e(p.precio)}</p></div>`;
       card.addEventListener('click', ()=>lbSingle(p.imgFull||p.img, p.nombre));
       feat.appendChild(card);
     }
-    const galIdx = DATA.info?.galIdx?.[ci] ?? 0;
-    const f = cat.galeria?.fotos?.[galIdx];
-    if(f) galAll.push(f);
+    if(cat.galeria?.fotos?.[0]) galAll.push(cat.galeria.fotos[0]);
   });
   galAll.forEach((f,i)=>{
     const img=document.createElement('img'); img.className='info-gal-img';
@@ -1053,81 +1050,9 @@ function renderAdmInfo(){
       </div>
     </div>`;
   content.appendChild(card);
-
-  // ── DESTACADOS ──
-  const featCard=document.createElement('div'); featCard.className='acard';
-  featCard.innerHTML=`<div class="acard-head"><span>✨ Destacados — producto visible en Nosotros</span></div>
-    <p style="font-size:.74rem;color:var(--muted);margin-bottom:.7rem">Elige qué producto de cada categoría aparece en la sección Destacados de la página Nosotros.</p>`;
-  DATA.categorias.forEach((cat,ci)=>{
-    const row=document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:.7rem;padding:.5rem 0;border-bottom:1px solid #f0ede8';
-    const currentIdx = DATA.info?.featIdx?.[ci] ?? 0;
-    const thumb=document.createElement('div'); thumb.className='athumb';
-    thumb.style.cssText='width:52px;height:52px;flex-shrink:0;cursor:pointer';
-    const curProd = cat.productos[currentIdx];
-    thumb.innerHTML=`<img src="${e(curProd?.img||'')}" style="width:100%;height:100%;object-fit:cover" id="feat-thumb-${ci}"><div class="athumb-ov">📷</div>`;
-    thumb.onclick=()=>admUploadFeat(ci);
-    const info=document.createElement('div'); info.style.flex='1';
-    info.innerHTML=`<div class="albl" style="margin-bottom:3px">${e(cat.label)}</div>
-      <select class="ainp" style="width:100%" onchange="admSetFeatIdx(${ci},+this.value)">
-        ${cat.productos.map((p,pi)=>`<option value="${pi}"${pi===currentIdx?' selected':''}>${e(p.nombre)}</option>`).join('')}
-      </select>`;
-    row.appendChild(thumb); row.appendChild(info);
-    featCard.appendChild(row);
-  });
-  content.appendChild(featCard);
-
-  // ── GALERÍA NOSOTROS ──
-  const galCard=document.createElement('div'); galCard.className='acard';
-  galCard.innerHTML=`<div class="acard-head"><span>📸 Galería Nosotros — foto visible en Nosotros</span></div>
-    <p style="font-size:.74rem;color:var(--muted);margin-bottom:.7rem">Elige qué foto de la galería de cada categoría aparece en la sección Galería de la página Nosotros.</p>`;
-  DATA.categorias.forEach((cat,ci)=>{
-    const fotos=cat.galeria?.fotos||[];
-    if(!fotos.length){ return; }
-    const row=document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:.7rem;padding:.5rem 0;border-bottom:1px solid #f0ede8';
-    const currentIdx = DATA.info?.galIdx?.[ci] ?? 0;
-    const thumb=document.createElement('div'); thumb.className='athumb';
-    thumb.style.cssText='width:52px;height:52px;flex-shrink:0;cursor:pointer';
-    const curFoto = fotos[currentIdx];
-    thumb.innerHTML=`<img src="${e(curFoto?.img||'')}" style="width:100%;height:100%;object-fit:cover" id="gal-thumb-${ci}"><div class="athumb-ov">📷</div>`;
-    thumb.onclick=()=>admUploadGalNosotros(ci);
-    const info=document.createElement('div'); info.style.flex='1';
-    info.innerHTML=`<div class="albl" style="margin-bottom:3px">${e(cat.label)}</div>
-      <select class="ainp" style="width:100%" onchange="admSetGalIdx(${ci},+this.value)">
-        ${fotos.map((f,fi)=>`<option value="${fi}"${fi===currentIdx?' selected':''}>${f.caption||('Foto '+(fi+1))}</option>`).join('')}
-      </select>`;
-    row.appendChild(thumb); row.appendChild(info);
-    galCard.appendChild(row);
-  });
-  content.appendChild(galCard);
 }
 
-function admSetFeatIdx(ci, idx){
-  if(!DATA.info) DATA.info={};
-  if(!DATA.info.featIdx) DATA.info.featIdx=[];
-  DATA.info.featIdx[ci]=idx;
-  const p=DATA.categorias[ci].productos[idx];
-  const th=document.getElementById(`feat-thumb-${ci}`);
-  if(th) th.src=p?.img||'';
-}
-function admSetGalIdx(ci, idx){
-  if(!DATA.info) DATA.info={};
-  if(!DATA.info.galIdx) DATA.info.galIdx=[];
-  DATA.info.galIdx[ci]=idx;
-  const f=DATA.categorias[ci].galeria?.fotos?.[idx];
-  const th=document.getElementById(`gal-thumb-${ci}`);
-  if(th) th.src=f?.img||'';
-}
-function admUploadFeat(ci){
-  const idx=DATA.info?.featIdx?.[ci]??0;
-  admUploadProd(ci, idx, document.getElementById(`feat-thumb-${ci}`));
-}
-function admUploadGalNosotros(ci){
-  const idx=DATA.info?.galIdx?.[ci]??0;
-  admUploadGalAt(ci, idx, document.getElementById(`gal-thumb-${ci}`));
-}
-
+function infoField(label,key,val){
   return `<div class="afw"><label class="albl">${label}</label>
     <input class="ainp" value="${e(val)}" oninput="if(!DATA.info)DATA.info={};DATA.info['${key}']=this.value"></div>`;
 }
