@@ -306,7 +306,23 @@
   .gh-status.ok{color:#4ade80}
   .gh-status.err{color:#f87171}
 
-  /* ── IMAGE CROPPER ── */
+  /* ── ORDEN FLECHAS ── */
+  .order-btns{display:flex;flex-direction:column;gap:2px;flex-shrink:0}
+  .obtn{background:rgba(201,168,124,.15);border:1px solid rgba(201,168,124,.3);color:var(--gold);
+    border-radius:4px;width:22px;height:22px;cursor:pointer;font-size:.7rem;line-height:1;
+    display:flex;align-items:center;justify-content:center;transition:background .14s}
+  .obtn:hover{background:var(--gold);color:var(--bd)}
+  .obtn:disabled{opacity:.2;cursor:default}
+  .atab-wrap{display:flex;align-items:center;gap:2px;border-radius:20px;
+    border:1.5px solid rgba(201,168,124,.4);background:transparent;overflow:hidden}
+  .atab-wrap .atab{border:none;border-radius:0;margin:0}
+  .atab-wrap .cat-arrow{background:rgba(201,168,124,.08);border:none;color:var(--gold);
+    cursor:pointer;padding:5px 5px;font-size:.7rem;transition:background .14s}
+  .atab-wrap .cat-arrow:hover{background:var(--gold);color:var(--bd)}
+  .atab-wrap .cat-arrow:disabled{opacity:.2;cursor:default}
+  .atab-wrap.active-wrap{background:var(--gold)}
+  .atab-wrap.active-wrap .atab{color:var(--bd)}
+  .atab-wrap.active-wrap .cat-arrow{color:var(--bd);background:rgba(0,0,0,.1)}
   .cropper-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:3000;
     display:none;flex-direction:column;align-items:center;justify-content:center;
     gap:0;padding:16px}
@@ -985,7 +1001,6 @@ let admTab=0;
 function buildAdmin(){
   const tabs=document.getElementById('admTabs');
   tabs.innerHTML='';
-  // Info tab
   const bi=document.createElement('button');
   bi.className='atab'+(admTab===-1?' active':'');
   bi.textContent='⚙ Información';
@@ -993,16 +1008,29 @@ function buildAdmin(){
   tabs.appendChild(bi);
 
   DATA.categorias.forEach((cat,i)=>{
+    const wrap=document.createElement('div');
+    wrap.className='atab-wrap'+(i===admTab?' active-wrap':'');
+
+    const arrL=document.createElement('button');
+    arrL.className='cat-arrow'; arrL.textContent='◀';
+    arrL.title='Mover izquierda'; arrL.disabled=(i===0);
+    arrL.onclick=()=>{ moveCat(i,-1); };
+
     const b=document.createElement('button');
-    b.className='atab'+(i===admTab?' active':'');
-    b.textContent=cat.label;
+    b.className='atab'; b.textContent=cat.label;
     b.onclick=()=>{ admTab=i; buildAdmin(); };
-    tabs.appendChild(b);
+
+    const arrR=document.createElement('button');
+    arrR.className='cat-arrow'; arrR.textContent='▶';
+    arrR.title='Mover derecha'; arrR.disabled=(i===DATA.categorias.length-1);
+    arrR.onclick=()=>{ moveCat(i,1); };
+
+    wrap.appendChild(arrL); wrap.appendChild(b); wrap.appendChild(arrR);
+    tabs.appendChild(wrap);
   });
 
   const ba=document.createElement('button');
-  ba.className='atab'+(admTab===-2?' active':'');
-  ba.textContent='+ Categoría';
+  ba.className='atab'; ba.textContent='+ Categoría';
   ba.onclick=()=>{
     DATA.categorias.push({id:'cat'+Date.now(),label:'Nueva categoría',productos:[],galeria:{titulo:'',fotos:[]}});
     admTab=DATA.categorias.length-1; buildAdmin();
@@ -1011,6 +1039,15 @@ function buildAdmin(){
 
   if(admTab===-1) renderAdmInfo();
   else if(admTab>=0) renderAdmTab(admTab);
+}
+
+function moveCat(i, dir){
+  const j=i+dir;
+  if(j<0||j>=DATA.categorias.length) return;
+  [DATA.categorias[i],DATA.categorias[j]]=[DATA.categorias[j],DATA.categorias[i]];
+  if(admTab===i) admTab=j;
+  else if(admTab===j) admTab=i;
+  buildAdmin();
 }
 
 function renderAdmInfo(){
@@ -1307,6 +1344,18 @@ function renderAdmTab(ci){
 
   cat.productos.forEach((p,pi)=>{
     const row=document.createElement('div'); row.className='prow';
+
+    // ↑↓ order buttons
+    const ob=document.createElement('div'); ob.className='order-btns';
+    const bu=document.createElement('button'); bu.className='obtn'; bu.textContent='▲';
+    bu.title='Subir'; bu.disabled=(pi===0);
+    bu.onclick=()=>{ moveProd(ci,pi,-1); };
+    const bd=document.createElement('button'); bd.className='obtn'; bd.textContent='▼';
+    bd.title='Bajar'; bd.disabled=(pi===cat.productos.length-1);
+    bd.onclick=()=>{ moveProd(ci,pi,1); };
+    ob.appendChild(bu); ob.appendChild(bd);
+    row.appendChild(ob);
+
     const th=document.createElement('div'); th.className='athumb';
     th.innerHTML=`<img src="${e(p.img||'')}" alt=""><div class="athumb-ov">📷</div>`;
     th.onclick=()=>admUploadProd(ci,pi,th.querySelector('img'));
@@ -1396,6 +1445,14 @@ function admUploadGalAt(ci,fi,imgEl){
 }
 function pickFile(cb){ const i=document.createElement('input'); i.type='file'; i.accept='image/*'; i.onchange=ev=>cb(ev.target.files[0]); i.click(); }
 function pickFiles(cb){ const i=document.createElement('input'); i.type='file'; i.accept='image/*'; i.multiple=true; i.onchange=ev=>cb(Array.from(ev.target.files)); i.click(); }
+
+function moveProd(ci, pi, dir){
+  const arr=DATA.categorias[ci].productos;
+  const j=pi+dir;
+  if(j<0||j>=arr.length) return;
+  [arr[pi],arr[j]]=[arr[j],arr[pi]];
+  renderAdmTab(ci);
+}
 
 /* apply / github / export / import */
 function admApply(){
