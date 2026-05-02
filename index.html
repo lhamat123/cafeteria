@@ -371,10 +371,10 @@
 <!-- ══════════ MENU PAGE ══════════ -->
 <div class="page active" id="page-menu">
   <a class="banner" href="#" onclick="goPage('info');return false">
-    <img class="banner-photo" id="bannerPhotoMenu" src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=200&q=80" alt="Café Roble"/>
+    <img class="banner-photo" id="bannerPhotoMenu" src="" alt=""/>
     <div class="banner-body">
-      <span class="banner-name" id="bannerNameMenu">Café Roble</span>
-      <span class="banner-sub" id="bannerSubMenu">Av. Principal 123 · Desde 1998</span>
+      <span class="banner-name" id="bannerNameMenu"></span>
+      <span class="banner-sub" id="bannerSubMenu"></span>
     </div>
     <div class="banner-action">
       <span class="banner-action-icon">ℹ️</span>
@@ -384,16 +384,16 @@
   <nav class="cat-nav-wrap"><div class="cat-nav" id="catNav"></div></nav>
   <p class="swipe-hint" id="swipeHint">← arrastra para cambiar categoría →</p>
   <div class="slider-vp" id="viewport"><div class="slider-track" id="track"></div></div>
-  <footer id="footerMenu"><p>Café Roble · Lunes a domingo, 7:00 – 21:00</p><p>Av. Principal 123 · Tel. (555) 000-0000</p></footer>
+  <footer id="footerMenu"></footer>
 </div>
 
 <!-- ══════════ INFO PAGE ══════════ -->
 <div class="page" id="page-info">
   <a class="banner" href="#" onclick="goPage('menu');return false">
-    <img class="banner-photo" id="bannerPhotoInfo" src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=200&q=80" alt="Café Roble"/>
+    <img class="banner-photo" id="bannerPhotoInfo" src="" alt=""/>
     <div class="banner-body">
-      <span class="banner-name" id="bannerNameInfo">Café Roble</span>
-      <span class="banner-sub" id="bannerSubInfo">Av. Principal 123 · Desde 1998</span>
+      <span class="banner-name" id="bannerNameInfo"></span>
+      <span class="banner-sub" id="bannerSubInfo"></span>
     </div>
     <div class="banner-action">
       <span class="banner-action-icon">📋</span>
@@ -402,53 +402,40 @@
   </a>
   <div class="info-wrap">
     <h2 class="info-sec">⭐ Oferta del mes</h2>
-    <div class="promo" id="promoBox">
-      <img class="promo-photo" src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&q=80" alt="Promo"/>
-      <div class="promo-body">
-        <span class="promo-tag">Solo en noviembre</span>
-        <p class="promo-title">Desayuno completo + café</p>
-        <p class="promo-desc">Elige tu desayuno favorito y llévate un espresso o americano incluido.</p>
-        <span class="promo-price">$10.90</span>
-      </div>
-    </div>
+    <div class="promo" id="promoBox"></div>
     <h2 class="info-sec">🫘 Nuestra historia</h2>
     <div class="about-grid">
-      <img class="about-img" id="aboutImg" src="https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=600&q=80" alt="Interior"/>
+      <img class="about-img" id="aboutImg" src="" alt="Interior"/>
       <div class="about-text">
-        <span class="about-badge" id="aboutBadge">Desde 1998</span>
-        <h3 id="aboutTitle">Un rincón para los amantes del café</h3>
-        <p id="aboutText1">Café Roble nació con la idea de crear un espacio cálido donde cada taza cuente una historia. Granos de origen único, tostados artesanalmente cada semana.</p>
-        <p id="aboutText2">Más de 25 años perfeccionando recetas y construyendo una comunidad de apasionados del buen café.</p>
+        <span class="about-badge" id="aboutBadge"></span>
+        <h3 id="aboutTitle"></h3>
+        <p id="aboutText1"></p>
+        <p id="aboutText2"></p>
       </div>
     </div>
     <h2 class="info-sec">📞 Contacto</h2>
     <div class="cg" id="contactGrid">
-      <div class="cc"><span class="ci">📍</span><div><p class="cl">Dirección</p><p class="cv" id="contactAddr">Av. Principal 123, Col. Centro</p></div></div>
-      <div class="cc"><span class="ci">📱</span><div><p class="cl">Teléfono</p><p class="cv" id="contactTel">(555) 000-0000</p></div></div>
-      <div class="cc"><span class="ci">✉️</span><div><p class="cl">Email</p><p class="cv" id="contactEmail">info@caferoble.com</p></div></div>
-      <div class="cc"><span class="ci">📸</span><div><p class="cl">Instagram</p><p class="cv" id="contactIg">@caferoble</p></div></div>
+      <div class="cc"><span class="ci">📍</span><div><p class="cl">Dirección</p><p class="cv" id="contactAddr"></p></div></div>
+      <div class="cc"><span class="ci">📱</span><div><p class="cl">Teléfono</p><p class="cv" id="contactTel"></p></div></div>
+      <div class="cc"><span class="ci">✉️</span><div><p class="cl">Email</p><p class="cv" id="contactEmail"></p></div></div>
+      <div class="cc"><span class="ci">📸</span><div><p class="cl">Instagram</p><p class="cv" id="contactIg"></p></div></div>
     </div>
     <h2 class="info-sec">🕐 Horarios</h2>
-    <div class="hg" id="horariosGrid">
-      <div class="hc"><p class="hd">Lun – Vie</p><p class="ht">7:00 – 21:00</p></div>
-      <div class="hc"><p class="hd">Sábado</p><p class="ht">8:00 – 22:00</p></div>
-      <div class="hc"><p class="hd">Domingo</p><p class="ht">9:00 – 19:00</p></div>
-      <div class="hc"><p class="hd">Festivos</p><p class="ht">9:00 – 18:00</p></div>
-    </div>
+    <div class="hg" id="horariosGrid"></div>
     <h2 class="info-sec">✨ Destacados</h2>
     <div class="feat-grid" id="infoFeat"></div>
     <h2 class="info-sec">📸 Galería</h2>
     <div class="info-gal" id="infoGal"></div>
     <h2 class="info-sec">📍 Ubicación</h2>
     <div class="map-card">
-      <iframe class="map-frame" id="mapFrame" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.521260322283!2d-99.16869232426222!3d19.427023340975!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDI1JzM3LjMiTiA5OcKwMTAnMDAuMyJX!5e0!3m2!1ses!2smx!4v1699000000000!5m2!1ses!2smx" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <iframe class="map-frame" id="mapFrame" src="" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       <div class="map-info">
-        <div class="map-addr"><strong id="mapName">Café Roble</strong><span id="mapAddr">Av. Principal 123, Col. Centro</span><br>Tel: <span id="mapTel">(555) 000-0000</span></div>
-        <a class="map-lnk" id="mapLink" href="https://maps.google.com" target="_blank">Abrir en Maps →</a>
+        <div class="map-addr"><strong id="mapName"></strong><span id="mapAddr"></span><br>Tel: <span id="mapTel"></span></div>
+        <a class="map-lnk" id="mapLink" href="#" target="_blank">Abrir en Maps →</a>
       </div>
     </div>
   </div>
-  <footer id="footerInfo"><p>Café Roble · Lunes a domingo, 7:00 – 21:00</p><p>Av. Principal 123 · Tel. (555) 000-0000</p></footer>
+  <footer id="footerInfo"></footer>
 </div>
 
 <!-- ══════════ ADMIN PAGE ══════════ -->
@@ -505,95 +492,19 @@ const APP_PASS    = 'Cafe2025';   // ← cambia esta contraseña de administrado
 
 /* ═══════════════════════
    DATOS POR DEFECTO
+   (vacío — se carga siempre desde GitHub / JSON)
 ═══════════════════════ */
 const DEFAULT_DATA = {
   info:{
-    nombre:"Café Roble",
-    slogan:"Av. Principal 123 · Desde 1998",
-    bannerImg:"https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=200&q=80",
-    aboutImg:"https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=600&q=80",
-    aboutBadge:"Desde 1998",
-    aboutTitle:"Un rincón para los amantes del café",
-    aboutText1:"Café Roble nació con la idea de crear un espacio cálido donde cada taza cuente una historia. Granos de origen único, tostados artesanalmente cada semana.",
-    aboutText2:"Más de 25 años perfeccionando recetas y construyendo una comunidad de apasionados del buen café.",
-    direccion:"Av. Principal 123, Col. Centro",
-    telefono:"(555) 000-0000",
-    email:"info@caferoble.com",
-    instagram:"@caferoble",
-    mapEmbed:"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.521260322283!2d-99.16869232426222!3d19.427023340975!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDI1JzM3LjMiTiA5OcKwMTAnMDAuMyJX!5e0!3m2!1ses!2smx!4v1699000000000!5m2!1ses!2smx",
-    mapLink:"https://maps.google.com",
-    horariosLV:"7:00 – 21:00",
-    horariosSab:"8:00 – 22:00",
-    horariosDom:"9:00 – 19:00",
-    horariosFest:"9:00 – 18:00",
-    footerLine1:"Café Roble · Lunes a domingo, 7:00 – 21:00",
-    footerLine2:"Av. Principal 123 · Tel. (555) 000-0000",
-    promoImg:"https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&q=80",
-    promoTag:"Solo en noviembre",
-    promoTitle:"Desayuno completo + café",
-    promoDesc:"Elige tu desayuno favorito y llévate un espresso o americano incluido.",
-    promoPrice:"$10.90"
+    nombre:"", slogan:"", bannerImg:"", aboutImg:"", aboutBadge:"",
+    aboutTitle:"", aboutText1:"", aboutText2:"",
+    direccion:"", telefono:"", email:"", instagram:"",
+    mapEmbed:"", mapLink:"",
+    horariosLV:"", horariosSab:"", horariosDom:"", horariosFest:"",
+    footerLine1:"", footerLine2:"",
+    promoImg:"", promoTag:"", promoTitle:"", promoDesc:"", promoPrice:""
   },
-  categorias:[
-    {
-      id:"cafes", label:"Cafés",
-      productos:[
-        {nombre:"Espresso",    desc:"Shot puro de café de origen único, tostado artesanal. Intenso y cremoso con crema dorada perfecta.",       precio:"$1.80", badge:"Clásico",      img:"https://images.unsplash.com/photo-1541167760496-1628856ab772?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1541167760496-1628856ab772?w=900&q=90"},
-        {nombre:"Cappuccino",  desc:"Espresso con leche vaporizada y espuma cremosa. Equilibrio perfecto entre intensidad y suavidad.",         precio:"$3.20", badge:"",             img:"https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=900&q=90"},
-        {nombre:"Latte",       desc:"Café suave con abundante leche vaporizada. Disponible en vainilla, caramelo y avellana.",                  precio:"$3.50", badge:"Popular",      img:"https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=900&q=90"},
-        {nombre:"Mocha",       desc:"Espresso con chocolate belga y leche cremosa vaporizada. Un lujo para el paladar.",                        precio:"$4.00", badge:"",             img:"https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=900&q=90"},
-        {nombre:"Cortado",     desc:"Espresso cortado con un toque de leche caliente. Intensidad suavizada sin perder carácter.",               precio:"$2.40", badge:"",             img:"https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=90"},
-        {nombre:"Americano",   desc:"Espresso con agua caliente. Largo, suave y reconfortante, ideal para saborear despacio.",                  precio:"$2.80", badge:"",             img:"https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=900&q=90"}
-      ],
-      galeria:{titulo:"Momentos con un café", fotos:[
-        {img:"https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=90", caption:"El ritual del café de cada mañana"},
-        {img:"https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=900&q=90", caption:"Americano largo, para los momentos de pausa"},
-        {img:"https://images.unsplash.com/photo-1541167760496-1628856ab772?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1541167760496-1628856ab772?w=900&q=90", caption:"Un espresso perfecto siempre tiene su crema"}
-      ]}
-    },
-    {
-      id:"reposteria", label:"Repostería",
-      productos:[
-        {nombre:"Croissant de mantequilla", desc:"Hojaldrado y crujiente por fuera, tierno por dentro. Horneado fresco cada mañana.",           precio:"$2.50", badge:"Hoy",          img:"https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=900&q=90"},
-        {nombre:"Muffin de arándanos",      desc:"Esponjoso, húmedo y lleno de arándanos frescos. Ideal con un latte por la mañana.",           precio:"$2.80", badge:"",             img:"https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=900&q=90"},
-        {nombre:"Tostada de aguacate",      desc:"Pan de masa madre tostado con aguacate, semillas y tomatitos cherry. Fresco y delicioso.",     precio:"$5.90", badge:"Vegano",       img:"https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=900&q=90"},
-        {nombre:"Waffle belga",             desc:"Waffle crujiente con frutas del bosque, nata montada y sirope de maple artesanal.",            precio:"$6.50", badge:"",             img:"https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=900&q=90"}
-      ],
-      galeria:{titulo:"Horneado con amor cada mañana", fotos:[
-        {img:"https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1509440159596-0249088772ff?w=900&q=90", caption:"Croissants recién salidos del horno, crujientes y dorados"},
-        {img:"https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=400&q=80",    imgFull:"https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=900&q=90",    caption:"Waffles belgas con frutas del bosque y crema fresca"},
-        {img:"https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=900&q=90", caption:"Pan de masa madre con aguacate — sencillo y delicioso"}
-      ]}
-    },
-    {
-      id:"desayunos", label:"Desayunos",
-      productos:[
-        {nombre:"Huevos benedictinos",  desc:"Huevos pochados sobre jamón y pan inglés tostado con salsa holandesa casera.",                    precio:"$9.50", badge:"Estrella", img:"https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=900&q=90"},
-        {nombre:"Bowl de granola",      desc:"Granola artesanal tostada, yogur griego, miel de abeja y frutas de temporada.",                  precio:"$7.20", badge:"",         img:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&q=90"},
-        {nombre:"Pancakes de arándanos",desc:"Esponjosos pancakes con arándanos frescos, mantequilla y sirope de maple puro.",                 precio:"$8.00", badge:"",         img:"https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=900&q=90"},
-        {nombre:"Revuelto de la casa",  desc:"Huevos revueltos con queso feta, espinacas frescas y tomatitos cherry asados.",                  precio:"$7.80", badge:"",         img:"https://images.unsplash.com/photo-1506619216599-9d16d0903dfd?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1506619216599-9d16d0903dfd?w=900&q=90"}
-      ],
-      galeria:{titulo:"Empieza el día con buen pie", fotos:[
-        {img:"https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=900&q=90", caption:"Huevos benedictinos — el desayuno que lo cambia todo"},
-        {img:"https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=900&q=90", caption:"Pancakes esponjosos bañados en sirope de maple puro"},
-        {img:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&q=90", caption:"Bowl de granola artesanal con frutas frescas de temporada"}
-      ]}
-    },
-    {
-      id:"postres", label:"Postres",
-      productos:[
-        {nombre:"Tarta de queso",   desc:"Cheesecake cremoso al horno con base de galleta y coulis de frutos rojos.",                           precio:"$5.50", badge:"Favorito", img:"https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=900&q=90"},
-        {nombre:"Brownie con helado",desc:"Brownie de chocolate intenso, tibio, con bola de helado de vainilla artesanal.",                     precio:"$5.80", badge:"",         img:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=900&q=90"},
-        {nombre:"Tiramisú",         desc:"Receta italiana tradicional con bizcochos empapados, mascarpone y cacao en polvo.",                   precio:"$6.20", badge:"",         img:"https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=900&q=90"},
-        {nombre:"Flan de la abuela",desc:"Flan casero de huevo con caramelo tostado y nata montada. Receta de siempre.",                       precio:"$4.80", badge:"",         img:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=90"}
-      ],
-      galeria:{titulo:"El dulce final que mereces", fotos:[
-        {img:"https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=900&q=90", caption:"Tarta de queso horneada — cremosa, perfecta, irresistible"},
-        {img:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=900&q=90", caption:"Brownie tibio con helado — contraste de texturas y sabores"},
-        {img:"https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=900&q=90", caption:"Tiramisú artesanal — la elegancia del postre italiano clásico"}
-      ]}
-    }
-  ]
+  categorias:[]
 };
 
 /* ═══════════════════════
@@ -724,7 +635,7 @@ function renderInfo() {
   // Promo
   const pb = document.getElementById('promoBox');
   if(pb) pb.innerHTML = `
-    <img class="promo-photo" src="${e(d.promoImg||'')}" alt="Promo" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&q=80'"/>
+    <img class="promo-photo" src="${e(d.promoImg||'')}" alt="Promo"/>
     <div class="promo-body">
       <span class="promo-tag">${e(d.promoTag||'')}</span>
       <p class="promo-title">${e(d.promoTitle||'')}</p>
@@ -754,7 +665,7 @@ function renderInfo() {
     if (cat.productos[0]) {
       const p = cat.productos[0];
       const card = document.createElement('div'); card.className='feat-card';
-      card.innerHTML = `<div style="overflow:hidden"><img class="feat-img" src="${e(p.img)}" alt="${e(p.nombre)}" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'"></div>
+      card.innerHTML = `<div style="overflow:hidden"><img class="feat-img" src="${e(p.img)}" alt="${e(p.nombre)}"></div>
         <div class="feat-body"><p class="feat-name">${e(p.nombre)}</p><p class="feat-price">${e(p.precio)}</p></div>`;
       card.addEventListener('click', ()=>lbSingle(p.imgFull||p.img, p.nombre));
       feat.appendChild(card);
@@ -794,7 +705,7 @@ function renderMenu() {
       row.className = 'item-row';
       row.innerHTML = `
         <div class="item-thumb">
-          <img src="${e(p.img)}" alt="${e(p.nombre)}" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'">
+          <img src="${e(p.img)}" alt="${e(p.nombre)}">
           ${p.badge?`<span class="badge">${e(p.badge)}</span>`:''}
         </div>
         <div class="item-info">
@@ -816,7 +727,7 @@ function renderMenu() {
       gal.innerHTML=`<p class="panel-gal-title">${e(cat.galeria.titulo||'')}</p>
         <div class="panel-gal-grid">${cat.galeria.fotos.map((f,fi)=>`
           <div class="pgc" data-ci="${ci}" data-fi="${fi}">
-            <div class="pgc-img"><img src="${e(f.img)}" alt="" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'"></div>
+            <div class="pgc-img"><img src="${e(f.img)}" alt=""></div>
             <span class="pgc-cap">${e(f.caption||'')}</span>
           </div>`).join('')}
         </div>`;
@@ -1103,7 +1014,7 @@ function renderAdmInfo(){
       <div class="albl" style="margin-bottom:4px">Foto del banner / logo</div>
       <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
         <div class="athumb" id="bannerThumb" style="width:68px;height:68px;cursor:pointer" onclick="admUploadInfo('bannerImg','bannerThumb','bannerHint')">
-          <img src="${e(d.bannerImg||'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=200&q=80')}" onerror="this.src='https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=200&q=80'" style="width:100%;height:100%;object-fit:cover">
+          <img src="${e(d.bannerImg||'')}" style="width:100%;height:100%;object-fit:cover">
           <div class="athumb-ov">📷</div>
         </div>
         <div>
@@ -1116,7 +1027,7 @@ function renderAdmInfo(){
       <div class="albl" style="margin-bottom:4px">Foto de "Nuestra historia"</div>
       <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
         <div class="athumb" id="aboutThumb" style="width:68px;height:68px;cursor:pointer" onclick="admUploadInfo('aboutImg','aboutThumb','aboutHint')">
-          <img src="${e(d.aboutImg||'https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=200&q=80')}" onerror="this.src='https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=200&q=80'" style="width:100%;height:100%;object-fit:cover">
+          <img src="${e(d.aboutImg||'')}" style="width:100%;height:100%;object-fit:cover">
           <div class="athumb-ov">📷</div>
         </div>
         <div>
@@ -1129,7 +1040,7 @@ function renderAdmInfo(){
       <div class="albl" style="margin-bottom:4px">Foto de la promo</div>
       <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
         <div class="athumb" id="promoThumb" style="width:68px;height:68px;cursor:pointer" onclick="admUploadInfo('promoImg','promoThumb','promoHint')">
-          <img src="${e(d.promoImg||'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80')}" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'" style="width:100%;height:100%;object-fit:cover">
+          <img src="${e(d.promoImg||'')}" style="width:100%;height:100%;object-fit:cover">
           <div class="athumb-ov">📷</div>
         </div>
         <div>
@@ -1187,7 +1098,7 @@ function renderAdmTab(ci){
   cat.productos.forEach((p,pi)=>{
     const row=document.createElement('div'); row.className='prow';
     const th=document.createElement('div'); th.className='athumb';
-    th.innerHTML=`<img src="${e(p.img||'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80')}" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'" alt=""><div class="athumb-ov">📷</div>`;
+    th.innerHTML=`<img src="${e(p.img||'')}" alt=""><div class="athumb-ov">📷</div>`;
     th.onclick=()=>admUploadProd(ci,pi,th.querySelector('img'));
     row.appendChild(th);
     const pf=document.createElement('div'); pf.className='pfields';
@@ -1196,9 +1107,6 @@ function renderAdmTab(ci){
       <div class="afw"><label class="albl">Precio</label><input class="ainp" value="${e(p.precio)}" oninput="DATA.categorias[${ci}].productos[${pi}].precio=this.value"></div>
       <div class="afw pf-full"><label class="albl">Descripción</label><input class="ainp" value="${e(p.desc)}" oninput="DATA.categorias[${ci}].productos[${pi}].desc=this.value"></div>
       <div class="afw"><label class="albl">Badge (opcional)</label><input class="ainp" value="${e(p.badge||'')}" oninput="DATA.categorias[${ci}].productos[${pi}].badge=this.value"></div>
-      <div class="afw"><label class="albl">URL imagen (o sube 📷)</label>
-        <input class="ainp" value="${e(p.img||'')}" oninput="DATA.categorias[${ci}].productos[${pi}].img=this.value;DATA.categorias[${ci}].productos[${pi}].imgFull=this.value;this.closest('.prow').querySelector('img').src=this.value||'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'">
-      </div>
       <div class="afw pf-full"><div class="img-hint" id="phint-${ci}-${pi}"></div></div>`;
     row.appendChild(pf);
     const del=document.createElement('div'); del.className='adel'; del.textContent='✕';
@@ -1223,7 +1131,7 @@ function renderAdmTab(ci){
   (cat.galeria?.fotos||[]).forEach((f,fi)=>{
     const wrap=document.createElement('div');
     const cell=document.createElement('div'); cell.className='gcell';
-    cell.innerHTML=`<img src="${e(f.img)}" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'" alt="">
+    cell.innerHTML=`<img src="${e(f.img)}" alt="">
       <div class="gcell-ov">
         <button class="gov" onclick="admUploadGalAt(${ci},${fi},this.closest('.gcell').querySelector('img'))">📷</button>
         <button class="gov" style="background:rgba(220,38,38,.5)" onclick="if(confirm('¿Eliminar foto?')){DATA.categorias[${ci}].galeria.fotos.splice(${fi},1);renderAdmTab(${ci})}">✕</button>
