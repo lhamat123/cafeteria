@@ -40,13 +40,14 @@
 
   /* ── ADMIN BUTTON (floating) ── */
   #adminBtn{
+    opacity:0.18;
     position:fixed;bottom:1rem;right:1rem;z-index:500;
     background:#1a1a2e;color:var(--gold);border:1.5px solid var(--gold);
     padding:8px 14px;border-radius:30px;font-family:'Lato',sans-serif;
     font-size:.72rem;font-weight:700;letter-spacing:.07em;cursor:pointer;
     box-shadow:0 4px 16px rgba(0,0,0,.3);transition:all .18s;
   }
-  #adminBtn:hover{background:var(--gold);color:var(--bd)}
+  #adminBtn:hover{background:var(--gold);color:var(--bd);opacity:1}
 
   /* ── CAT NAV ── */
   .cat-nav-wrap{background:var(--bm);padding:.75rem 0;position:relative}
@@ -376,7 +377,7 @@
 </div>
 
 <!-- ADMIN FLOATING BUTTON -->
-<button id="adminBtn" onclick="goAdmin()">⚙ Administrar</button>
+<button id="adminBtn" onclick="goAdmin()">⚙</button>
 
 <!-- ══════════ MENU PAGE ══════════ -->
 <div class="page active" id="page-menu">
@@ -799,7 +800,11 @@ function goPage(name){
   if(name==='menu'){ renderMenu(); try{ const last=parseInt(localStorage.getItem('cafeRoble_lastCat')||'0'); setTimeout(()=>goTo(last,false),50); }catch(_){} }
   if(name==='info') renderInfo();
 }
-function goAdmin(){ goPage('admin'); buildAdmin(); }
+function goAdmin(){
+  const pass=prompt('Contraseña:');
+  if(!pass||pass!==APP_PASS){ if(pass!==null) toast('Contraseña incorrecta','err'); return; }
+  goPage('admin'); buildAdmin();
+}
 
 /* ═══════════════════════
    SLIDER
