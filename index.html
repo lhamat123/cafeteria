@@ -19,7 +19,8 @@
   /* ── THEME PICKER ── */
   #themePicker, #themePickerInfo{
     display:grid;grid-template-columns:1fr 1fr;gap:.3rem;align-items:center;
-    background:none;border:none;padding:.2rem .4rem;flex-shrink:0;
+    background:rgba(0,0,0,.35);border:none;border-radius:6px;
+    padding:.3rem .35rem;flex-shrink:0;
   }
   #themeBtn{display:none}
   .tswatch{width:12px;height:12px;border-radius:50%;cursor:pointer;border:2px solid transparent;
@@ -1500,13 +1501,14 @@ function buildThemePicker(){
     const picker = document.getElementById(pid);
     if(!picker) return;
     picker.innerHTML = '';
+    picker.addEventListener('click', e=>e.preventDefault(), {capture:true});
     THEMES.forEach(t=>{
       const sw = document.createElement('div');
       sw.className = 'tswatch' + (t.id===currentTheme?' active':'');
       sw.dataset.tid = t.id;
       sw.style.background = t.swatch;
       sw.title = t.name;
-      sw.onclick = (e)=>{ e.preventDefault(); applyTheme(t.id); };
+      sw.onclick = (e)=>{ e.preventDefault(); e.stopPropagation(); applyTheme(t.id); };
       picker.appendChild(sw);
     });
   });
