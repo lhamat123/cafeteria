@@ -14,6 +14,31 @@
     --gold:#C9A87C;--cream:#F5ECD7;--cs:#FDF6EC;
     --text:#1a1008;--muted:#6b5340;--bdr:rgba(201,168,124,0.25);
   }
+
+  /* ── THEME PICKER ── */
+  #themePicker{
+    position:fixed;bottom:3.8rem;right:1rem;z-index:499;
+    display:none;flex-direction:column;gap:.35rem;
+    background:#1a1a2e;border:1.5px solid rgba(201,168,124,.3);
+    border-radius:14px;padding:.6rem .55rem;
+    box-shadow:0 8px 28px rgba(0,0,0,.35);
+  }
+  #themePicker.open{display:flex}
+  #themeBtn{
+    position:fixed;bottom:1rem;right:3.6rem;z-index:500;
+    background:#1a1a2e;color:var(--gold);border:1.5px solid var(--gold);
+    width:34px;height:34px;border-radius:50%;font-size:.9rem;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.3);
+    transition:all .18s;opacity:.18;
+  }
+  #themeBtn:hover{opacity:1;background:var(--gold);color:var(--bd)}
+  .tswatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;
+    transition:transform .15s,border-color .15s;flex-shrink:0}
+  .tswatch:hover{transform:scale(1.18)}
+  .tswatch.active{border-color:#fff}
+  .tpick-label{font-size:.55rem;color:rgba(255,255,255,.4);text-align:center;
+    letter-spacing:.06em;text-transform:uppercase;margin-top:.1rem}
   body{font-family:'Lato',sans-serif;background:var(--cs);color:var(--text);overflow-x:hidden}
 
   /* ── PAGES ── */
@@ -378,6 +403,8 @@
 
 <!-- ADMIN FLOATING BUTTON -->
 <button id="adminBtn" onclick="goAdmin()">⚙</button>
+<button id="themeBtn" onclick="toggleThemePicker()" title="Cambiar estilo">🎨</button>
+<div id="themePicker"></div>
 
 <!-- ══════════ MENU PAGE ══════════ -->
 <div class="page active" id="page-menu">
@@ -1429,8 +1456,83 @@ function toast(msg,type=''){
 function e(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
 /* ── BOOT ── */
+/* ═══════════════════════
+   THEMES
+═══════════════════════ */
+const THEMES = [
+  { id:'cafe',    name:'Café Clásico',  swatch:'#C9A87C',
+    bd:'#2C1A0E', bm:'#3D2210', bl:'#8B5E2F',
+    gold:'#C9A87C', cream:'#F5ECD7', cs:'#FDF6EC',
+    text:'#1a1008', muted:'#6b5340', bdr:'rgba(201,168,124,0.25)' },
+  { id:'noche',   name:'Noche Elegante', swatch:'#7C9CB0',
+    bd:'#0D1B2A', bm:'#1B2A3B', bl:'#4A7FA5',
+    gold:'#7CB5C9', cream:'#D6E8F5', cs:'#0F2030',
+    text:'#D6E8F5', muted:'#7C9CB0', bdr:'rgba(124,181,201,0.2)' },
+  { id:'verde',   name:'Jardín',        swatch:'#7BAE7F',
+    bd:'#1A2E1A', bm:'#243D24', bl:'#4A7A4A',
+    gold:'#7BAE7F', cream:'#EAF4EA', cs:'#F2F9F2',
+    text:'#0F1F0F', muted:'#4A7A4A', bdr:'rgba(123,174,127,0.25)' },
+  { id:'rosa',    name:'Rosa Suave',    swatch:'#C9899A',
+    bd:'#2E1A1F', bm:'#3D2229', bl:'#8B4A5A',
+    gold:'#C9899A', cream:'#F5DDE3', cs:'#FDF0F2',
+    text:'#1a0810', muted:'#7a4050', bdr:'rgba(201,137,154,0.25)' },
+  { id:'pizarra', name:'Pizarra',       swatch:'#9B9B9B',
+    bd:'#1C1C1C', bm:'#2A2A2A', bl:'#555555',
+    gold:'#AAAAAA', cream:'#EDEDED', cs:'#F5F5F5',
+    text:'#111111', muted:'#666666', bdr:'rgba(150,150,150,0.25)' },
+  { id:'indigo',  name:'Índigo',        swatch:'#7B7FBF',
+    bd:'#1A1A3E', bm:'#24245A', bl:'#4A4A9A',
+    gold:'#9B9FDF', cream:'#E8E8F8', cs:'#F2F2FD',
+    text:'#0F0F2A', muted:'#5A5A8A', bdr:'rgba(123,127,191,0.25)' },
+];
+
+let currentTheme = 'cafe';
+
+function applyTheme(id){
+  const t = THEMES.find(x=>x.id===id) || THEMES[0];
+  const r = document.documentElement.style;
+  r.setProperty('--bd',   t.bd);
+  r.setProperty('--bm',   t.bm);
+  r.setProperty('--bl',   t.bl);
+  r.setProperty('--gold', t.gold);
+  r.setProperty('--cream',t.cream);
+  r.setProperty('--cs',   t.cs);
+  r.setProperty('--text', t.text);
+  r.setProperty('--muted',t.muted);
+  r.setProperty('--bdr',  t.bdr);
+  currentTheme = id;
+  try{ localStorage.setItem('cafeRoble_theme', id); }catch(_){}
+  document.querySelectorAll('.tswatch').forEach(s=>s.classList.toggle('active', s.dataset.tid===id));
+}
+
+function buildThemePicker(){
+  const picker = document.getElementById('themePicker');
+  picker.innerHTML = '<p class="tpick-label">Estilo</p>';
+  THEMES.forEach(t=>{
+    const sw = document.createElement('div');
+    sw.className = 'tswatch' + (t.id===currentTheme?' active':'');
+    sw.dataset.tid = t.id;
+    sw.style.background = t.swatch;
+    sw.title = t.name;
+    sw.onclick = ()=>{ applyTheme(t.id); };
+    picker.appendChild(sw);
+  });
+}
+
+function toggleThemePicker(){
+  const p = document.getElementById('themePicker');
+  p.classList.toggle('open');
+}
+
+document.addEventListener('click', ev=>{
+  if(!ev.target.closest('#themePicker,#themeBtn'))
+    document.getElementById('themePicker')?.classList.remove('open');
+});
+
 document.addEventListener('DOMContentLoaded', async ()=>{
   loadLocalData();
+  buildThemePicker();
+  try{ const saved=localStorage.getItem('cafeRoble_theme'); if(saved) applyTheme(saved); }catch(_){}
   renderMenu();
   renderInfo();
   // Try to load from GitHub in background
