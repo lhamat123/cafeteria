@@ -53,7 +53,7 @@
 
   /* ── ADMIN BUTTON (floating) ── */
   #adminBtn{
-    opacity:0.18;
+    display:none;
     position:fixed;bottom:0;right:0;z-index:500;
     background:#1a1a2e;color:var(--gold);border:1.5px solid var(--gold);
     border-radius:8px 0 0 0;
@@ -818,7 +818,8 @@ function goPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   window.scrollTo(0,0);
-  document.getElementById('adminBtn').style.display = name==='admin' ? 'none' : '';
+  const btn=document.getElementById('adminBtn');
+  if(btn) btn.style.display = name==='admin' ? 'none' : (_doradoTaps>=0&&btn.style.display==='block'?'block':'none');
   if(name==='menu'){ renderMenu(); try{ const last=parseInt(localStorage.getItem('cafeRoble_lastCat')||'0'); setTimeout(()=>goTo(last,false),50); }catch(_){} }
   if(name==='info') renderInfo();
 }
@@ -1535,7 +1536,26 @@ const THEMES = [
 
 let currentTheme = 'cafe';
 
+let _doradoTaps=0, _doradoTimer=null;
+
 function applyTheme(id){
+  if(id==='dorado'){
+    clearTimeout(_doradoTimer);
+    _doradoTaps++;
+    if(_doradoTaps>=4){
+      _doradoTaps=0;
+      const btn=document.getElementById('adminBtn');
+      if(btn){
+        btn.style.display='block';
+        btn.style.opacity='1';
+        toast('🔓 Acceso admin desbloqueado','ok');
+      }
+    } else {
+      _doradoTimer=setTimeout(()=>{ _doradoTaps=0; }, 1200);
+    }
+  } else {
+    _doradoTaps=0;
+  }
   const t = THEMES.find(x=>x.id===id) || THEMES[0];
   const r = document.documentElement.style;
   r.setProperty('--bd',   t.bd);
