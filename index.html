@@ -796,7 +796,7 @@ function goPage(name){
   document.getElementById('page-'+name).classList.add('active');
   window.scrollTo(0,0);
   document.getElementById('adminBtn').style.display = name==='admin' ? 'none' : '';
-  if(name==='menu') renderMenu();
+  if(name==='menu'){ renderMenu(); try{ const last=parseInt(localStorage.getItem('cafeRoble_lastCat')||'0'); setTimeout(()=>goTo(last,false),50); }catch(_){} }
   if(name==='info') renderInfo();
 }
 function goAdmin(){ goPage('admin'); buildAdmin(); }
@@ -832,6 +832,7 @@ function goTo(idx,anim){
   const btn=bs[idx], nav=document.getElementById('catNav');
   if(btn&&nav) nav.scrollTo({left:Math.max(0,(btn.offsetLeft-52)-(nav.offsetWidth/2-btn.offsetWidth/2)),behavior:'smooth'});
   document.getElementById('swipeHint').classList.add('hidden');
+  try{ localStorage.setItem('cafeRoble_lastCat', idx); }catch(_){}
 }
 const vp=document.getElementById('viewport');
 function gX(ev){ return ev.touches?ev.touches[0].clientX:ev.clientX; }
