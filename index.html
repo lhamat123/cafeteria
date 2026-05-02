@@ -796,6 +796,8 @@ function goPage(name){
   document.getElementById('page-'+name).classList.add('active');
   window.scrollTo(0,0);
   document.getElementById('adminBtn').style.display = name==='admin' ? 'none' : '';
+  if(name==='menu') renderMenu();
+  if(name==='info') renderInfo();
 }
 function goAdmin(){ goPage('admin'); buildAdmin(); }
 
