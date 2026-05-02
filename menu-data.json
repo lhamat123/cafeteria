@@ -1,29 +1,29 @@
 {
   "info": {
-    "nombre": "CafÃ© Roble",
-    "slogan": "Av. Principal 123 Â· Desde 1998",
-    "bannerImg": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=200&q=80",
-    "aboutImg": "https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=600&q=80",
+    "nombre": "CafÃÂ© Roble",
+    "slogan": "Av. Principal 123 ÃÂ· Desde 1998",
+    "bannerImg": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5Ojf/2wBDAQoKCg0MDRoPDxo3JR8lNzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzf/wAARCABjAG8DASIAAhEBAxEB/8QAGwAAAQUBAQAAAAAAAAAAAAAAAwACBAUGAQf/xABEEAABAwICBgYECwUJAAAAAAABAAIDBBEFIQYSIjFBURNhkZKh0RQjMnEVFiUzQlJTc4GywXKEk8LwJDRFVGJkgqLS/8QAGAEBAQEBAQAAAAAAAAAAAAAAAQACAwT/xAAcEQEBAAIDAQEAAAAAAAAAAAAAAQIREzFRQRL/2gAMAwEAAhEDEQA/APRRSw83do8lz0SHm/tHkj2SsjRRjSQ839o8k30OHm/tHkpJC5ZWkjmjh5v8PJIUkP8Ar8PJHK5da1BsL0WPhfw8kOWANUm6DUnZRqJEIA3JAJpK6Csk4JwTAU8bkoRqrsdq5qOka6neGuMgGta+Vj5KxaFVaRwTT0TGQxPkd0gNmNJO48lqM1peGa5dvMdqUg9U/wDZKiGTUaAcyrStSnOb9YdqY57frDtUUz9R7U1+vK0dHJqE/StfLLJP5GxnVMLXFrpowRvBcMk30mD7ePvhUtNFFW4tVRyglrJCMuJsCrE4TR/Ud3laW0n0qD7eLvhAnqYHRlrZoyeQcEF2E0ZPsO7yF8FU0bi9odrDdtFWqtuh4PFPDlCjk/t1RCDcRuA8LqYGrGmjwU8HrshgJwuMwCbKSLiuKR4dEz1ZknkdZjBxJNhc8t/ij+lwvGpKz1g3tvl7wVHihjmcHupmunF/WSNuG34AnduHYk3D3sqWOa9xiaywF8iTbeFmfrbplcLjJj39aR8sOo4dKwkiwGuM1njizrC+G1BcMtbXjz/7XUmFznwB8jNV1r2ORWfrNK8Fo6iammrGRyQuAeC07N+ZXWVxq2OKSH/DKj+JH/6QZcakiN/gyfV1bW6Rm/tVP8d9H93wnT+Pkmu0pwedpdFWRvHMbu1OwusAc6bEqqpDdVsshcGm1wLW/RX7lmNFq+nmjbMyZmo4OdfgRfer44hScaqPvBMApQnobq+j/wAxF3wguxCiv/eYf4gSlVRu1scxFvKRv5QrdrVSYc9rsdxNzXAt6RuYOXstV21/Wud7bnR1kguEroz4oJU0zZmv1W21X6pUgBDiAFy1oFzc9aKqb+qgtdE5nzrvwssBjOGyyVkksODYPWNnmIMkrndJYZXdtAcOC9GbDCCLMN78RdeeO0QixeGjq31FU17YRHF0T2NAaXOdxjJ3uPWtxhAhwR9Qx4k0dwONzTkHdJY92/mhw4ZUgAN0WoImlxBDJ5RbMWNhfwzUxugEMZZJDU1bXMyaRLGNUWt9ly7U2bQESvD5KurL2gAEyRm1hb7PkrR202i9GaE08Zp4Yth2yxx2RcmwvnYXAF81pSGu3tCw+iWikOAYx6THNI6SWN7SHlvUScmhbe60ya5jR9FvYhljSQcsupPc5DccilM/Qk/GDFTc/ON3m/0GlXAVNQn5fxX7xn5ArcLle250ICnhDBTwgjxlEQYyi3SBmu2h71Q4K3X0fpbC5MDbdeSvG2LhYjes/gU08eC0TWUU0jRAwazXR2Oz1uC1Ga8cZgekQaA7BsQuLXPQOOfYrvQjDcbg0noH1uG18EDekL5JYHtaPVutcnLeQvSpMWfE9zX0FWLcjGf512HEnzG8WH1jjxziH86dLaSBavp/2JP0U0lVEdRI/FKYSUs0Pq5fnCzP2PquPNWTnJDrnJhcml/WmlyUpKE/L+K/eM/IFcAqloD8vYr94z8gVxdc723OhGogQ2pwWSkR7k9CjRLpCh+M0QGcxPvgdn4Kug00w2hhjpTSVxEIEYc2ncWm2WWSrNnPadlu2CiRtaYtpxvv9k71y5cnXixTXaa4W5xf0FcP3V/kuR6a4U11xHXC/wDtZD+irXuaGkCQdxMaCd0h7gTy5Lhx9XNFpHQ4njdN0LpGNip5i900Low25ZldwHIq1GO4O++pi1A73VLD+qyD42ue0OALc8tUEJpo6QEDoIwAMhqNsnmvg4Z615xfDd4xOhP7wzzQnY7hbTY4pQX5ekMufFZJ1FTHdHTj3xNTDRUzQdaOH8GtTzXwcM9abB3wVOLYrNTzNkBma0FrgQbRt3eKuL2NisDRVXwfUuNNLG2P6UZIII/ritlhuJU+JRAB95GjNpO03zCJnMqLhcUzpmMcxpObnFovzRtbrUaWnN43OzDHXBH9daICnYS4yiXQITki3WoGGMbOSaWANNr7uZSSXlelHqGgNuLj8UBsTXe1rH/mUkkoeOKMEbIPvzRnMbqkhoGXBJJSAebgXt2JNa08AkkpBGKPXOyE+P1EvSw7EjXABzcjvSSUb03NG5zo2BxuHNuV0gNebZJJLv8AHnFi3IqSS1GX/9k=",
+    "aboutImg": "data:image/jpeg;base64,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",
     "aboutBadge": "Desde 1998",
-    "aboutTitle": "Un rincÃ³n para los amantes del cafÃ©",
-    "aboutText1": "CafÃ© Roble naciÃ³ con la idea de crear un espacio cÃ¡lido donde cada taza cuente una historia. Granos de origen Ãºnico, tostados artesanalmente cada semana.",
-    "aboutText2": "MÃ¡s de 25 aÃ±os perfeccionando recetas y construyendo una comunidad de apasionados del buen cafÃ©.",
+    "aboutTitle": "Un rincÃÂ³n para los amantes del cafÃÂ©",
+    "aboutText1": "CafÃÂ© Roble naciÃÂ³ con la idea de crear un espacio cÃÂ¡lido donde cada taza cuente una historia. Granos de origen ÃÂºnico, tostados artesanalmente cada semana.",
+    "aboutText2": "MÃÂ¡s de 25 aÃÂ±os perfeccionando recetas y construyendo una comunidad de apasionados del buen cafÃÂ©.",
     "direccion": "Av. Principal 123, Col. Centro",
     "telefono": "(555) 000-0000",
     "email": "info@caferoble.com",
     "instagram": "@caferoble",
     "mapEmbed": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.521260322283!2d-99.16869232426222!3d19.427023340975!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDI1JzM3LjMiTiA5OcKwMTAnMDAuMyJX!5e0!3m2!1ses!2smx!4v1699000000000!5m2!1ses!2smx",
     "mapLink": "https://maps.google.com",
-    "horariosLV": "7:00 â 21:00",
-    "horariosSab": "8:00 â 22:00",
-    "horariosDom": "9:00 â 19:00",
-    "horariosFest": "9:00 â 18:00",
-    "footerLine1": "CafÃ© Roble Â· Lunes a domingo, 7:00 â 21:00",
-    "footerLine2": "Av. Principal 123 Â· Tel. (555) 000-0000",
-    "promoImg": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&q=80",
+    "horariosLV": "7:00 Ã¢ÂÂ 21:00",
+    "horariosSab": "8:00 Ã¢ÂÂ 22:00",
+    "horariosDom": "9:00 Ã¢ÂÂ 19:00",
+    "horariosFest": "9:00 Ã¢ÂÂ 18:00",
+    "footerLine1": "CafÃÂ© Roble ÃÂ· Lunes a domingo, 7:00 Ã¢ÂÂ 21:00",
+    "footerLine2": "Av. Principal 123 ÃÂ· Tel. (555) 000-0000",
+    "promoImg": "data:image/jpeg;base64,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",
     "promoTag": "Solo en noviembre",
-    "promoTitle": "Desayuno completo + cafÃ©",
-    "promoDesc": "Elige tu desayuno favorito y llÃ©vate un espresso o americano incluido.",
+    "promoTitle": "Desayuno completo + cafÃÂ©",
+    "promoDesc": "Elige tu desayuno favorito y llÃÂ©vate un espresso o americano incluido.",
     "promoPrice": "$10.90",
     "destacados": [
       {
@@ -103,9 +103,9 @@
       "productos": [
         {
           "nombre": "Espresso",
-          "desc": "Shot puro de cafÃ© de origen Ãºnico, tostado artesanal. Intenso y cremoso con crema dorada perfecta.",
+          "desc": "Shot puro de cafÃÂ© de origen ÃÂºnico, tostado artesanal. Intenso y cremoso con crema dorada perfecta.",
           "precio": "$1.80",
-          "badge": "ClÃ¡sico",
+          "badge": "ClÃÂ¡sico",
           "img": "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=200&q=80",
           "imgFull": "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=900&q=90"
         },
@@ -119,7 +119,7 @@
         },
         {
           "nombre": "Latte",
-          "desc": "CafÃ© suave con abundante leche vaporizada. Disponible en vainilla, caramelo y avellana.",
+          "desc": "CafÃÂ© suave con abundante leche vaporizada. Disponible en vainilla, caramelo y avellana.",
           "precio": "$3.50",
           "badge": "Popular",
           "img": "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=200&q=80",
@@ -135,7 +135,7 @@
         },
         {
           "nombre": "Cortado",
-          "desc": "Espresso cortado con un toque de leche caliente. Intensidad suavizada sin perder carÃ¡cter.",
+          "desc": "Espresso cortado con un toque de leche caliente. Intensidad suavizada sin perder carÃÂ¡cter.",
           "precio": "$2.40",
           "badge": "",
           "img": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=200&q=80",
@@ -151,12 +151,12 @@
         }
       ],
       "galeria": {
-        "titulo": "Momentos con un cafÃ©",
+        "titulo": "Momentos con un cafÃÂ©",
         "fotos": [
           {
             "img": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=90",
-            "caption": "El ritual del cafÃ© de cada maÃ±ana"
+            "caption": "El ritual del cafÃÂ© de cada maÃÂ±ana"
           },
           {
             "img": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=400&q=80",
@@ -173,19 +173,19 @@
     },
     {
       "id": "reposteria",
-      "label": "ReposterÃ­a",
+      "label": "ReposterÃÂ­a",
       "productos": [
         {
           "nombre": "Croissant de mantequilla",
-          "desc": "Hojaldrado y crujiente por fuera, tierno por dentro. Horneado fresco cada maÃ±ana.",
+          "desc": "Hojaldrado y crujiente por fuera, tierno por dentro. Horneado fresco cada maÃÂ±ana.",
           "precio": "$2.50",
           "badge": "Hoy",
           "img": "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=200&q=80",
           "imgFull": "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=900&q=90"
         },
         {
-          "nombre": "Muffin de arÃ¡ndanos",
-          "desc": "Esponjoso, hÃºmedo y lleno de arÃ¡ndanos frescos. Ideal con un latte por la maÃ±ana.",
+          "nombre": "Muffin de arÃÂ¡ndanos",
+          "desc": "Esponjoso, hÃÂºmedo y lleno de arÃÂ¡ndanos frescos. Ideal con un latte por la maÃÂ±ana.",
           "precio": "$2.80",
           "badge": "",
           "img": "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=200&q=80",
@@ -209,12 +209,12 @@
         }
       ],
       "galeria": {
-        "titulo": "Horneado con amor cada maÃ±ana",
+        "titulo": "Horneado con amor cada maÃÂ±ana",
         "fotos": [
           {
             "img": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=900&q=90",
-            "caption": "Croissants reciÃ©n salidos del horno, crujientes y dorados"
+            "caption": "Croissants reciÃÂ©n salidos del horno, crujientes y dorados"
           },
           {
             "img": "https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=400&q=80",
@@ -224,7 +224,7 @@
           {
             "img": "https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=900&q=90",
-            "caption": "Pan de masa madre con aguacate â sencillo y delicioso"
+            "caption": "Pan de masa madre con aguacate Ã¢ÂÂ sencillo y delicioso"
           }
         ]
       }
@@ -235,7 +235,7 @@
       "productos": [
         {
           "nombre": "Huevos benedictinos",
-          "desc": "Huevos pochados sobre jamÃ³n y pan inglÃ©s tostado con salsa holandesa casera.",
+          "desc": "Huevos pochados sobre jamÃÂ³n y pan inglÃÂ©s tostado con salsa holandesa casera.",
           "precio": "$9.50",
           "badge": "Estrella",
           "img": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=200&q=80",
@@ -250,8 +250,8 @@
           "imgFull": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&q=90"
         },
         {
-          "nombre": "Pancakes de arÃ¡ndanos",
-          "desc": "Esponjosos pancakes con arÃ¡ndanos frescos, mantequilla y sirope de maple puro.",
+          "nombre": "Pancakes de arÃÂ¡ndanos",
+          "desc": "Esponjosos pancakes con arÃÂ¡ndanos frescos, mantequilla y sirope de maple puro.",
           "precio": "$8.00",
           "badge": "",
           "img": "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=200&q=80",
@@ -267,17 +267,17 @@
         }
       ],
       "galeria": {
-        "titulo": "Empieza el dÃ­a con buen pie",
+        "titulo": "Empieza el dÃÂ­a con buen pie",
         "fotos": [
           {
             "img": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=900&q=90",
-            "caption": "Huevos benedictinos â el desayuno que lo cambia todo"
+            "caption": "Huevos benedictinos Ã¢ÂÂ el desayuno que lo cambia todo"
           },
           {
             "img": "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=900&q=90",
-            "caption": "Pancakes esponjosos baÃ±ados en sirope de maple puro"
+            "caption": "Pancakes esponjosos baÃÂ±ados en sirope de maple puro"
           },
           {
             "img": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80",
@@ -308,7 +308,7 @@
           "imgFull": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=900&q=90"
         },
         {
-          "nombre": "TiramisÃº",
+          "nombre": "TiramisÃÂº",
           "desc": "Receta italiana tradicional con bizcochos empapados, mascarpone y cacao en polvo.",
           "precio": "$6.20",
           "badge": "",
@@ -330,17 +330,17 @@
           {
             "img": "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=900&q=90",
-            "caption": "Tarta de queso horneada â cremosa, perfecta, irresistible"
+            "caption": "Tarta de queso horneada Ã¢ÂÂ cremosa, perfecta, irresistible"
           },
           {
             "img": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=900&q=90",
-            "caption": "Brownie tibio con helado â contraste de texturas y sabores"
+            "caption": "Brownie tibio con helado Ã¢ÂÂ contraste de texturas y sabores"
           },
           {
             "img": "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400&q=80",
             "imgFull": "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=900&q=90",
-            "caption": "TiramisÃº artesanal â la elegancia del postre italiano clÃ¡sico"
+            "caption": "TiramisÃÂº artesanal Ã¢ÂÂ la elegancia del postre italiano clÃÂ¡sico"
           }
         ]
       }
