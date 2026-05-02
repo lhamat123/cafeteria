@@ -75,6 +75,22 @@
       "label": "CAFE",
       "productos": [
         {
+          "nombre": "Cortado",
+          "desc": "Espresso cortado con un toque de leche caliente. Intensidad suavizada sin perder carÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¡cter.",
+          "precio": "$2.40",
+          "badge": "",
+          "img": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=200&q=80",
+          "imgFull": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=90"
+        },
+        {
+          "nombre": "Rico facesito",
+          "desc": "Shot puro de café de origen Âºnico, tostado artesanal. Intenso y cremoso con crema dorada perfecta.",
+          "precio": "$1.80",
+          "badge": "ClÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¡sico",
+          "img": "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=200&q=80",
+          "imgFull": "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=900&q=90"
+        },
+        {
           "nombre": "Cappuccino",
           "desc": "Espresso con leche vaporizada y espuma cremosa. Equilibrio perfecto entre intensidad y suavidad.",
           "precio": "$3.20",
@@ -91,14 +107,6 @@
           "imgFull": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=900&q=90"
         },
         {
-          "nombre": "EEEEEEEE",
-          "desc": "Shot puro de café de origen Âºnico, tostado artesanal. Intenso y cremoso con crema dorada perfecta.",
-          "precio": "$1.80",
-          "badge": "ClÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¡sico",
-          "img": "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=200&q=80",
-          "imgFull": "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=900&q=90"
-        },
-        {
           "nombre": "Latte",
           "desc": "CafÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ© suave con abundante leche vaporizada. Disponible en vainilla, caramelo y avellana.",
           "precio": "$3.50",
@@ -113,14 +121,6 @@
           "badge": "",
           "img": "https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=200&q=80",
           "imgFull": "https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=900&q=90"
-        },
-        {
-          "nombre": "Cortado",
-          "desc": "Espresso cortado con un toque de leche caliente. Intensidad suavizada sin perder carÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¡cter.",
-          "precio": "$2.40",
-          "badge": "",
-          "img": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=200&q=80",
-          "imgFull": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=90"
         }
       ],
       "galeria": {
