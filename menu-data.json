@@ -1,30 +1,30 @@
 {
   "info": {
-    "nombre": "",
-    "slogan": "",
+    "nombre": "Café Roble",
+    "slogan": "Esquina de Independencia y Martí",
     "bannerImg": "",
     "aboutImg": "",
-    "aboutBadge": "",
-    "aboutTitle": "",
-    "aboutText1": "",
-    "aboutText2": "",
-    "direccion": "",
-    "telefono": "",
-    "email": "",
-    "instagram": "",
+    "aboutBadge": "Desde 2010",
+    "aboutTitle": "Nuestra Historia",
+    "aboutText1": "Café Roble nació con la idea de ofrecer un espacio cálido donde cada taza cuenta una historia. Usamos granos seleccionados y preparaciones artesanales.",
+    "aboutText2": "Más de 14 años sirviendo a la comunidad con sabor, calidad y mucho cariño en cada pedido.",
+    "direccion": "Independencia #45 esq. Martí, Centro",
+    "telefono": "5358024452",
+    "email": "caferoble@correo.cu",
+    "instagram": "@caferoble",
     "mapEmbed": "",
     "mapLink": "",
-    "horariosLV": "",
-    "horariosSab": "",
-    "horariosDom": "",
-    "horariosFest": "",
-    "footerLine1": "",
-    "footerLine2": "",
+    "horariosLV": "8:00 am – 9:00 pm",
+    "horariosSab": "9:00 am – 10:00 pm",
+    "horariosDom": "10:00 am – 6:00 pm",
+    "horariosFest": "Cerrado",
+    "footerLine1": "© 2025 Café Roble — Todos los derechos reservados",
+    "footerLine2": "Hecho con ☕ y mucho cariño",
     "promoImg": "",
-    "promoTag": "",
-    "promoTitle": "",
-    "promoDesc": "",
-    "promoPrice": "",
+    "promoTag": "Oferta del día",
+    "promoTitle": "Combo Mañanero",
+    "promoDesc": "Café con leche + tostada con mantequilla + jugo natural. El desayuno perfecto para empezar bien el día.",
+    "promoPrice": "$85.00",
     "destacados": [],
     "galeria": [],
     "repartos": {
@@ -55,5 +55,171 @@
       }
     }
   },
-  "categorias": []
+  "categorias": [
+    {
+      "id": "cat_cafes",
+      "label": "Cafés",
+      "productos": [
+        {
+          "nombre": "Espresso Doble",
+          "desc": "Doble carga de café molido fino, intenso y con crema perfecta. Ideal para los amantes del café puro.",
+          "precio": "$45.00",
+          "badge": "Popular",
+          "img": "",
+          "imgFull": "",
+          "disponible": true
+        },
+        {
+          "nombre": "Café con Leche",
+          "desc": "Espresso suave combinado con leche vaporizada al punto justo. Clásico e irresistible.",
+          "precio": "$50.00",
+          "badge": "",
+          "img": "",
+          "imgFull": "",
+          "disponible": true
+        },
+        {
+          "nombre": "Cappuccino",
+          "desc": "Espresso con espuma de leche cremosa y un toque de canela en polvo. Reconfortante y aromático.",
+          "precio": "$60.00",
+          "badge": "",
+          "img": "",
+          "imgFull": "",
+          "disponible": true
+        },
+        {
+          "nombre": "Frappé de Café",
+          "desc": "Café frío batido con hielo, leche y azúcar. Perfecto para los días calurosos.",
+          "precio": "$75.00",
+          "badge": "Frío",
+          "img": "",
+          "imgFull": "",
+          "disponible": true
+        },
+        {
+          "nombre": "Café Americano",
+          "desc": "Espresso suavizado con agua caliente. Largo, equilibrado y con todo el sabor del café.",
+          "precio": "$40.00",
+          "badge": "",
+          "img": "",
+          "imgFull": "",
+          "disponible": true
+        }
+      ],
+      "galeria": {
+        "titulo": "Nuestros Cafés",
+        "fotos": []
+      }
+    },
+    {
+      "id": "cat_comidas",
+      "label": "Comidas",
+      "productos": [
+        {
+          "nombre": "Sandwich Cubano",
+          "desc": "Pan crujiente relleno de cerdo asado, jamón, queso y mostaza. Prensado al momento.",
+          "precio": "$120.00",
+          "badge": "Favorito",
+          "img": "",
+          "imgFull": "",
+          "disponible": true
+        },
+        {
+          "nombre": "Tostada con Mantequilla",
+          "desc": "Pan de barra tostado con mantequilla derretida. Simple, clásico y delicioso para el desayuno.",
+          "precio": "$35.00",
+          "badge": "",
+          "img": "",
+          "imgFull": "",
+          "disponible": true
+        },
+        {
+          "nombre": "Arroz con Pollo",
+          "desc": "Arroz amarillo con pollo tierno, ajíes y especias. Plato del día cocinado con receta tradicional.",
+          "precio": "$150.00",
+          "badge": "Del día",
+          "img": "",
+          "imgFull": "",
+          "disponible": true
+        },
+        {
+          "nombre": "Ensalada Fresca",
+          "desc": "Lechuga, tomate, pepino, zanahoria rallada y aderezo de limón. Ligera y nutritiva.",
+          "precio": "$55.00",
+          "badge": "",
+          "img": "",
+          "imgFull": "",
+          "disponible": true
+        },
+        {
+          "nombre": "Croquetas de Jamón",
+          "desc": "Croquetas caseras crujientes por fuera y suaves por dentro. Porción de 6 unidades.",
+          "precio": "$90.00",
+          "badge": "",
+          "img": "",
+          "imgFull": "",
+          "disponible": true
+        }
+      ],
+      "galeria": {
+        "titulo": "Nuestras Comidas",
+        "fotos": []
+      }
+    },
+    {
+      "id": "cat_postres",
+      "label": "Postres",
+      "productos": [
+        {
+          "nombre": "Flan de Caramelo",
+          "desc": "Flan casero con salsa de caramelo dorada. Suave, cremoso y con el sabor de siempre.",
+          "precio": "$65.00",
+          "badge": "Casero",
+          "img": "",
+          "imgFull": "",
+          "disponible": true
+        },
+        {
+          "nombre": "Cake de Chocolate",
+          "desc": "Bizcocho húmedo de chocolate con cubierta de ganache. Porción generosa para los más golosos.",
+          "precio": "$80.00",
+          "badge": "",
+          "img": "",
+          "imgFull": "",
+          "disponible": true
+        },
+        {
+          "nombre": "Natilla Criolla",
+          "desc": "Natilla tradicional cubana con canela. Suave, dulce y con ese sabor que recuerda a casa.",
+          "precio": "$50.00",
+          "badge": "",
+          "img": "",
+          "imgFull": "",
+          "disponible": true
+        },
+        {
+          "nombre": "Arroz con Leche",
+          "desc": "Arroz cocinado en leche con azúcar, canela y ralladura de limón. Postre clásico y reconfortante.",
+          "precio": "$45.00",
+          "badge": "",
+          "img": "",
+          "imgFull": "",
+          "disponible": true
+        },
+        {
+          "nombre": "Helado de Vainilla",
+          "desc": "Bola de helado artesanal de vainilla con galleta. Fresco y perfecto para cerrar cualquier comida.",
+          "precio": "$55.00",
+          "badge": "Frío",
+          "img": "",
+          "imgFull": "",
+          "disponible": true
+        }
+      ],
+      "galeria": {
+        "titulo": "Nuestros Postres",
+        "fotos": []
+      }
+    }
+  ]
 }
