@@ -7,7 +7,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
@@ -430,56 +429,7 @@
   #crop-target-label{font-size:11px;color:rgba(201,168,124,.6);margin-top:4px}
   .img-hint{font-size:.67rem;color:var(--muted);margin-top:3px;min-height:14px}
 
-  /* ── QR WELCOME MODAL ── */
-  #qrWelcome{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.7);
-    display:none;align-items:center;justify-content:center;padding:1.2rem}
-  #qrWelcome.open{display:flex}
-  .qrw-box{background:var(--cs);border-radius:18px;padding:1.6rem 1.4rem;
-    max-width:360px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.35);
-    display:flex;flex-direction:column;gap:.9rem;text-align:center}
-  .qrw-icon{font-size:2.8rem;line-height:1}
-  .qrw-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--text)}
-  .qrw-mesa{display:inline-block;background:var(--gold);color:var(--bd);
-    font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;
-    padding:4px 18px;border-radius:30px;margin:-.2rem auto 0}
-  .qrw-sub{font-size:.8rem;color:var(--muted);line-height:1.5}
-  .qrw-field{display:flex;flex-direction:column;gap:4px;text-align:left}
-  .qrw-label{font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-  .qrw-inp{padding:10px 12px;border-radius:10px;border:1.5px solid var(--bdr);
-    background:#fff;color:var(--text);font-family:'Lato',sans-serif;font-size:.9rem;
-    width:100%;transition:border-color .15s}
-  .qrw-inp:focus{outline:none;border-color:var(--gold)}
-  .qrw-btn{padding:13px;border-radius:12px;border:none;background:var(--gold);
-    color:var(--bd);font-family:'Lato',sans-serif;font-size:.92rem;font-weight:700;
-    letter-spacing:.04em;cursor:pointer;transition:filter .18s;margin-top:.2rem}
-  .qrw-btn:hover{filter:brightness(1.08)}
-  .qrw-btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
-  /* ── QR MESAS ── */
-  .qr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-top:.8rem}
-  .qr-cell{background:#fff;border:1.5px solid #e0ddd9;border-radius:12px;padding:.8rem;
-    display:flex;flex-direction:column;align-items:center;gap:.5rem;text-align:center}
-  .qr-cell canvas,.qr-cell img{border-radius:6px}
-  .qr-mesa-label{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--bd)}
-  .qr-url-label{font-size:.58rem;color:var(--muted);word-break:break-all;max-width:140px}
-  .qr-print-btn{padding:4px 12px;border-radius:20px;border:none;background:var(--gold);
-    color:var(--bd);font-family:'Lato',sans-serif;font-size:.65rem;font-weight:700;
-    cursor:pointer;letter-spacing:.04em;transition:filter .15s}
-  .qr-print-btn:hover{filter:brightness(.92)}
-  .qr-num-inp{padding:5px 8px;border-radius:6px;border:1.5px solid #d8d5d0;
-    font-family:'Lato',sans-serif;font-size:.77rem;color:var(--text);
-    background:#faf9f7;width:70px;text-align:center;transition:border-color .14s}
-  .qr-num-inp:focus{outline:none;border-color:var(--gold)}
-  @media print{
-    body > *{display:none!important}
-    #qr-print-area{display:block!important}
-  }
-  #qr-print-area{display:none}
-  .qr-print-page{page-break-after:always;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;min-height:100vh;font-family:'Lato',sans-serif}
-  .qr-print-title{font-size:2rem;font-weight:700;margin-bottom:.5rem;color:#2C1A0E}
-  .qr-print-sub{font-size:.9rem;color:#6b5340;margin-bottom:1.5rem}
-  .qr-print-canvas{border:3px solid #C9A87C;border-radius:12px;padding:12px;background:#fff}
-  
+  /* ── TOAST ── */
   #toast{position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%) translateY(14px);
     background:#1a1a2e;color:#fff;padding:8px 18px;border-radius:30px;font-size:.77rem;
     font-weight:500;opacity:0;transition:all .25s;pointer-events:none;z-index:9999;white-space:nowrap}
@@ -751,16 +701,6 @@
       <div class="mesa-custom-row">
         <input class="mesa-custom-inp" id="mesaCustom" type="number" min="1" max="99" placeholder="Otra mesa (número)..." oninput="selectMesa(null,this.value)"/>
       </div>
-      <div class="ped-field-group" style="margin-top:.75rem">
-        <div class="ped-field">
-          <label class="ped-label">Tu nombre <span style="color:#dc2626">*</span></label>
-          <input class="ped-inp" id="mesaNombre" type="text" placeholder="¿Cómo te llamamos?" oninput="updateSendBtn()"/>
-        </div>
-        <div class="ped-field">
-          <label class="ped-label">Teléfono <span style="color:var(--muted);font-weight:400">(opcional)</span></label>
-          <input class="ped-inp" id="mesaTelefono" type="tel" placeholder="Para avisarte"/>
-        </div>
-      </div>
     </div>
     <div class="ped-section" id="pedDomicilioSection" style="display:none">
       <h3 class="ped-sec-title">📦 Datos de entrega</h3>
@@ -858,24 +798,6 @@
   </div>
 </div>
 
-<div id="qrWelcome">
-  <div class="qrw-box">
-    <div class="qrw-icon">☕</div>
-    <div class="qrw-title">¡Bienvenido!</div>
-    <div class="qrw-mesa" id="qrwMesaLabel">Mesa 1</div>
-    <div class="qrw-sub">Cuéntanos tu nombre para personalizar tu pedido</div>
-    <div class="qrw-field">
-      <label class="qrw-label">Tu nombre <span style="color:#dc2626">*</span></label>
-      <input class="qrw-inp" id="qrwNombre" type="text" placeholder="¿Cómo te llamamos?" oninput="qrwValidar()"/>
-    </div>
-    <div class="qrw-field">
-      <label class="qrw-label">Teléfono <span style="font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label>
-      <input class="qrw-inp" id="qrwTelefono" type="tel" placeholder="Para avisarte si hay algo"/>
-    </div>
-    <button class="qrw-btn" id="qrwConfirm" onclick="qrwConfirmar()" disabled>Continuar al pedido →</button>
-  </div>
-</div>
-<div id="qr-print-area"></div>
 <div id="toast"></div>
 
 <script>
@@ -1417,14 +1339,7 @@ function buildAdmin(){
   };
   tabs.appendChild(ba);
 
-  const bqr=document.createElement('button');
-  bqr.className='atab'+(admTab===-2?' active':'');
-  bqr.textContent='📱 QR Mesas';
-  bqr.onclick=()=>{ admTab=-2; buildAdmin(); };
-  tabs.appendChild(bqr);
-
   if(admTab===-1) renderAdmInfo();
-  else if(admTab===-2) renderAdmQR();
   else if(admTab>=0) renderAdmTab(admTab);
 }
 
@@ -2113,53 +2028,18 @@ function abrirPedido(mesaNum){
   goPage('pedido');
 }
 
-/* ── Detectar ?mesa=N en URL (QR) → modal bienvenida ── */
-let _qrMesaNum = null;
+/* ── Detectar ?mesa=N en URL (QR) ── */
 (function detectQRMesa(){
   try{
     const params = new URLSearchParams(window.location.search);
     const m = params.get('mesa');
     if(m && !isNaN(m)){
-      _qrMesaNum = parseInt(m);
       window.addEventListener('DOMContentLoaded', ()=>{
-        setTimeout(()=>abrirQRWelcome(_qrMesaNum), 800);
+        setTimeout(()=>abrirPedido(parseInt(m)), 800);
       }, {once:true});
     }
   }catch(_){}
 })();
-
-function abrirQRWelcome(mesaNum){
-  const label = document.getElementById('qrwMesaLabel');
-  if(label) label.textContent = 'Mesa ' + mesaNum;
-  const inp = document.getElementById('qrwNombre');
-  if(inp){ inp.value=''; inp.focus(); }
-  const tel = document.getElementById('qrwTelefono');
-  if(tel) tel.value='';
-  qrwValidar();
-  document.getElementById('qrWelcome').classList.add('open');
-}
-
-function qrwValidar(){
-  const nombre = (document.getElementById('qrwNombre')?.value||'').trim();
-  const btn = document.getElementById('qrwConfirm');
-  if(btn) btn.disabled = !nombre;
-}
-
-function qrwConfirmar(){
-  const nombre = (document.getElementById('qrwNombre')?.value||'').trim();
-  const tel    = (document.getElementById('qrwTelefono')?.value||'').trim();
-  if(!nombre) return;
-  document.getElementById('qrWelcome').classList.remove('open');
-  abrirPedido(_qrMesaNum);
-  // Pre-fill name/phone in mesa fields
-  setTimeout(()=>{
-    const n = document.getElementById('mesaNombre');
-    const t = document.getElementById('mesaTelefono');
-    if(n) n.value = nombre;
-    if(t) t.value = tel;
-    updateSendBtn();
-  }, 100);
-}
 
 /* ── Modo ── */
 function setPedMode(mode){
@@ -2396,10 +2276,7 @@ function updateSendBtn(){
   if(!btn) return;
   const tieneProductos = Object.keys(pedCart).length > 0;
   let valido = tieneProductos;
-  if(pedMode==='mesa'){
-    const nombre = (document.getElementById('mesaNombre')?.value||'').trim();
-    valido = valido && !!pedMesaSeleccionada && !!nombre;
-  }
+  if(pedMode==='mesa') valido = valido && !!pedMesaSeleccionada;
   if(pedMode==='domicilio'){
     const nombre = (document.getElementById('domNombre')?.value||'').trim();
     const dir    = (document.getElementById('domDireccion')?.value||'').trim();
@@ -2415,7 +2292,7 @@ function updateSendBtn(){
 document.addEventListener('DOMContentLoaded', ()=>{
   loadCart();
   updateFloatBadge();
-  ['domNombre','domTelefono','domDireccion','domCiudad','domReferencia','recNombre','recTelefono','mesaNombre']
+  ['domNombre','domTelefono','domDireccion','domCiudad','domReferencia','recNombre','recTelefono']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('input', updateSendBtn); });
 });
 
@@ -2427,11 +2304,7 @@ function enviarPedido(){
 
   let lineas = [];
   if(pedMode==='mesa'){
-    const nombre = (document.getElementById('mesaNombre')?.value||'').trim();
-    const tel    = (document.getElementById('mesaTelefono')?.value||'').trim();
     lineas.push('🍽️ *PEDIDO MESA ' + pedMesaSeleccionada + '*');
-    if(nombre) lineas.push('👤 Cliente: ' + nombre);
-    if(tel)    lineas.push('📱 Tel: ' + tel);
   } else if(pedMode==='domicilio'){
     const nombre = (document.getElementById('domNombre')?.value||'').trim();
     const tel    = (document.getElementById('domTelefono')?.value||'').trim();
@@ -2483,108 +2356,7 @@ function enviarPedido(){
   toast('✅ Pedido enviado por WhatsApp','ok');
 }
 
-/* ── QR MESAS ADMIN ── */
-function renderAdmQR(){
-  const content = document.getElementById('admContent');
-  if(!content) return;
-  const totalMesas = PED_MESAS;
-  const baseUrl = window.location.href.split('?')[0];
-  const cafeName = (DATA.info&&DATA.info.nombre) ? DATA.info.nombre : 'Café Roble';
-
-  content.innerHTML = `
-    <div class="acard">
-      <div class="acard-head">
-        <span>📱 Códigos QR por Mesa</span>
-        <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
-          <label style="font-size:.7rem;color:var(--muted);font-weight:600">Mesas a mostrar:
-            <input class="qr-num-inp" type="number" min="1" max="99" value="${totalMesas}" id="qrNumMesas" oninput="renderAdmQR()">
-          </label>
-          <button class="ab ab-gold" onclick="imprimirTodosQR()">🖨️ Imprimir todos</button>
-        </div>
-      </div>
-      <p style="font-size:.75rem;color:var(--muted);margin-bottom:.4rem">
-        Cada QR lleva al cliente directamente a la página de pedido con su mesa ya seleccionada.
-        Imprímelos y ponlos sobre cada mesa.
-      </p>
-      <div class="qr-grid" id="qrGrid"></div>
-    </div>`;
-
-  const num = parseInt(document.getElementById('qrNumMesas')?.value)||totalMesas;
-  const grid = document.getElementById('qrGrid');
-  if(!grid) return;
-  grid.innerHTML = '';
-
-  for(let i=1; i<=num; i++){
-    const url = baseUrl + '?mesa=' + i;
-    const cell = document.createElement('div');
-    cell.className = 'qr-cell';
-    cell.innerHTML = `
-      <div class="qr-mesa-label">Mesa ${i}</div>
-      <div id="qrc-${i}"></div>
-      <div class="qr-url-label">${url}</div>
-      <button class="qr-print-btn" onclick="imprimirQR(${i})">🖨️ Imprimir</button>`;
-    grid.appendChild(cell);
-    new QRCode(document.getElementById('qrc-'+i), {
-      text: url,
-      width: 130,
-      height: 130,
-      colorDark: '#2C1A0E',
-      colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.H
-    });
-  }
-}
-
-function imprimirQR(mesaNum){
-  const baseUrl = window.location.href.split('?')[0];
-  const url = baseUrl + '?mesa=' + mesaNum;
-  const cafeName = (DATA.info&&DATA.info.nombre) ? DATA.info.nombre : 'Café Roble';
-  const area = document.getElementById('qr-print-area');
-  area.innerHTML = `<div class="qr-print-page">
-    <div class="qr-print-title">${cafeName}</div>
-    <div class="qr-print-sub">Escanea para hacer tu pedido — Mesa ${mesaNum}</div>
-    <div class="qr-print-canvas" id="qr-print-qr"></div>
-    <div style="margin-top:1rem;font-size:.8rem;color:#6b5340">Mesa ${mesaNum}</div>
-  </div>`;
-  new QRCode(document.getElementById('qr-print-qr'), {
-    text: url, width:250, height:250,
-    colorDark:'#2C1A0E', colorLight:'#ffffff',
-    correctLevel: QRCode.CorrectLevel.H
-  });
-  setTimeout(()=>{ window.print(); }, 300);
-}
-
-function imprimirTodosQR(){
-  const num = parseInt(document.getElementById('qrNumMesas')?.value)||PED_MESAS;
-  const baseUrl = window.location.href.split('?')[0];
-  const cafeName = (DATA.info&&DATA.info.nombre) ? DATA.info.nombre : 'Café Roble';
-  const area = document.getElementById('qr-print-area');
-  area.innerHTML = '';
-  let pages = '';
-  for(let i=1; i<=num; i++){
-    pages += `<div class="qr-print-page">
-      <div class="qr-print-title">${cafeName}</div>
-      <div class="qr-print-sub">Escanea para hacer tu pedido</div>
-      <div class="qr-print-canvas" id="qr-all-${i}"></div>
-      <div style="margin-top:1rem;font-size:1.1rem;font-weight:700;color:#2C1A0E">Mesa ${i}</div>
-    </div>`;
-  }
-  area.innerHTML = pages;
-  // generate QRs then print
-  setTimeout(()=>{
-    for(let i=1; i<=num; i++){
-      const el = document.getElementById('qr-all-'+i);
-      if(el) new QRCode(el, {
-        text: baseUrl+'?mesa='+i, width:250, height:250,
-        colorDark:'#2C1A0E', colorLight:'#ffffff',
-        correctLevel: QRCode.CorrectLevel.H
-      });
-    }
-    setTimeout(()=>window.print(), 600);
-  }, 100);
-}
-
-
+function getQRUrl(mesaNum){
   return window.location.href.split('?')[0] + '?mesa=' + mesaNum;
 }
 </script>
