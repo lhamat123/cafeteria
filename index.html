@@ -544,6 +544,46 @@
   /* Domicilio mode toggle */
   .ped-domicilio-fields{display:none}
   .ped-domicilio-fields.visible{display:block}
+
+  /* ── PRODUCTOS NO DISPONIBLES ── */
+  .item-row.no-disponible{
+    opacity:.38;pointer-events:none;filter:grayscale(.6);
+    position:relative;
+  }
+  .item-row.no-disponible::after{
+    content:'No disponible';
+    position:absolute;right:.7rem;top:50%;transform:translateY(-50%);
+    background:rgba(220,38,38,.12);color:#dc2626;
+    font-size:.58rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+    padding:2px 7px;border-radius:20px;border:1px solid rgba(220,38,38,.25);
+    white-space:nowrap;pointer-events:none;
+  }
+  .item-row.no-disponible .item-qty-wrap{visibility:hidden}
+  /* Toggle switch admin */
+  .disp-toggle{display:flex;align-items:center;gap:5px;cursor:pointer;user-select:none;margin-top:2px}
+  .disp-toggle input{display:none}
+  .disp-toggle-track{
+    width:32px;height:18px;border-radius:9px;background:#d1d5db;
+    position:relative;transition:background .18s;flex-shrink:0;
+  }
+  .disp-toggle input:checked + .disp-toggle-track{background:#16a34a}
+  .disp-toggle-thumb{
+    position:absolute;top:2px;left:2px;width:14px;height:14px;
+    border-radius:50%;background:#fff;transition:left .18s;
+    box-shadow:0 1px 3px rgba(0,0,0,.25);
+  }
+  .disp-toggle input:checked + .disp-toggle-track .disp-toggle-thumb{left:16px}
+  .disp-toggle-lbl{font-size:.62rem;font-weight:700;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--muted)}
+  /* Botón ocultar no disponibles en menú */
+  #hideUnavailBtn{
+    padding:4px 10px;border-radius:7px;border:1.5px solid rgba(201,168,124,.35);
+    background:transparent;color:var(--gold);font-family:'Lato',sans-serif;
+    font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    cursor:pointer;white-space:nowrap;transition:all .16s;flex-shrink:0;
+  }
+  #hideUnavailBtn.active{background:var(--gold);color:var(--bd);border-color:var(--gold)}
+  #hideUnavailBtn:hover:not(.active){background:rgba(201,168,124,.15)}
   </style>
 </head>
 <body>
@@ -610,6 +650,7 @@
   <div class="sec-title-row" id="secTitleRow">
     <h2 class="sec-title" id="secTitleLabel"></h2>
     <div id="pedidoBarWrap">
+      <button id="hideUnavailBtn" onclick="toggleHideUnavail()" title="Ocultar productos no disponibles" style="display:none">👁 No disp.</button>
       <button id="pedClearBtn" onclick="cancelarPedido()" title="Cancelar pedido">✕</button>
       <button id="pedFloatBtn" onclick="activarPedido()">
         <div id="pedFloatLeft">📲 &nbsp;HACER PEDIDO</div>
@@ -1027,8 +1068,11 @@ function renderMenu() {
     const rows = cat.productos.map((p,pi)=>{
       const key = ci+'-'+pi;
       const qty = pedCart[key]||0;
+      const noDisp = p.disponible === false;
+      // Si hideUnavail está activo y el producto no está disponible, no renderizar
+      if(hideUnavail && noDisp) return null;
       const row = document.createElement('div');
-      row.className = 'item-row';
+      row.className = 'item-row' + (noDisp ? ' no-disponible' : '');
       row.innerHTML = `
         <div class="item-thumb">
           <img src="${e(p.img)}" alt="${e(p.nombre)}">
@@ -1046,15 +1090,17 @@ function renderMenu() {
             <button class="iqbtn" data-key="${key}" data-d="1">+</button>
           </div>
         </div>`;
-      row.querySelector('.item-thumb').addEventListener('click',()=>lbProduct(ci,pi));
-      row.querySelectorAll('.iqbtn').forEach(btn=>{
-        btn.addEventListener('click', ev=>{
-          ev.stopPropagation();
-          menuCambiarQty(btn.dataset.key, parseInt(btn.dataset.d));
+      if(!noDisp){
+        row.querySelector('.item-thumb').addEventListener('click',()=>lbProduct(ci,pi));
+        row.querySelectorAll('.iqbtn').forEach(btn=>{
+          btn.addEventListener('click', ev=>{
+            ev.stopPropagation();
+            menuCambiarQty(btn.dataset.key, parseInt(btn.dataset.d));
+          });
         });
-      });
+      }
       return row;
-    });
+    }).filter(Boolean);
     const list=document.createElement('div'); list.className='items-list';
     rows.forEach(r=>list.appendChild(r));
     panel.appendChild(list);
@@ -1079,6 +1125,13 @@ function renderMenu() {
   const lbl=document.getElementById('secTitleLabel');
   if(lbl && DATA?.categorias?.[0]) lbl.textContent=DATA.categorias[0].label;
   updateFloatBadge();
+  checkUnavailBtn();
+  // Sync estado del botón
+  const huBtn=document.getElementById('hideUnavailBtn');
+  if(huBtn){
+    huBtn.classList.toggle('active', hideUnavail);
+    huBtn.textContent = hideUnavail ? '👁 Mostrar todos' : '👁 No disp.';
+  }
 }
 
 /* ═══════════════════════
@@ -1668,6 +1721,13 @@ function renderAdmTab(ci){
       <div class="afw"><label class="albl">Precio</label><input class="ainp" value="${e(p.precio)}" oninput="DATA.categorias[${ci}].productos[${pi}].precio=this.value"></div>
       <div class="afw pf-full"><label class="albl">Descripción</label><input class="ainp" value="${e(p.desc)}" oninput="DATA.categorias[${ci}].productos[${pi}].desc=this.value"></div>
       <div class="afw"><label class="albl">Badge (opcional)</label><input class="ainp" value="${e(p.badge||'')}" oninput="DATA.categorias[${ci}].productos[${pi}].badge=this.value"></div>
+      <div class="afw" style="justify-content:flex-end;padding-top:14px">
+        <label class="disp-toggle" title="Marcar como disponible/no disponible en la carta">
+          <input type="checkbox" ${p.disponible===false?'':'checked'} onchange="DATA.categorias[${ci}].productos[${pi}].disponible=this.checked;checkUnavailBtn()">
+          <span class="disp-toggle-track"><span class="disp-toggle-thumb"></span></span>
+          <span class="disp-toggle-lbl">Disponible</span>
+        </label>
+      </div>
       <div class="afw pf-full"><div class="img-hint" id="phint-${ci}-${pi}"></div></div>`;
     row.appendChild(pf);
     const del=document.createElement('div'); del.className='adel'; del.textContent='✕';
@@ -1759,7 +1819,7 @@ function moveProd(ci, pi, dir){
 /* apply / github / export / import */
 function admApply(){
   localStorage.setItem('cafeRoble_v3', JSON.stringify(DATA));
-  renderMenu(); renderInfo();
+  renderMenu(); renderInfo(); checkUnavailBtn();
   toast('✔ Cambios guardados localmente','ok');
 }
 
@@ -1767,7 +1827,7 @@ async function admSaveGitHub(){
   const ok=await saveToGitHub();
   if(ok){
     localStorage.setItem('cafeRoble_v3',JSON.stringify(DATA));
-    renderMenu(); renderInfo();
+    renderMenu(); renderInfo(); checkUnavailBtn();
     toast('☁ Carta publicada en GitHub Pages','ok');
   }
 }
@@ -1785,7 +1845,7 @@ function admImport(input){
     try{
       DATA=JSON.parse(ev.target.result);
       localStorage.setItem('cafeRoble_v3',JSON.stringify(DATA));
-      admTab=0; buildAdmin(); renderMenu(); renderInfo();
+      admTab=0; buildAdmin(); renderMenu(); renderInfo(); checkUnavailBtn();
       toast('JSON importado','ok');
     } catch(_){ toast('Error: JSON inválido','warn'); }
   }; r.readAsText(f); input.value='';
@@ -1803,6 +1863,27 @@ function toast(msg,type=''){
   clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2800);
 }
 function e(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+/* ── DISPONIBILIDAD ── */
+let hideUnavail = false;
+try{ hideUnavail = localStorage.getItem('cafeRoble_hideUnavail')==='1'; }catch(_){}
+
+function checkUnavailBtn(){
+  // Mostrar el botón si hay al menos un producto no disponible
+  const tieneNoDisp = DATA.categorias.some(c=>c.productos.some(p=>p.disponible===false));
+  const btn = document.getElementById('hideUnavailBtn');
+  if(btn) btn.style.display = tieneNoDisp ? 'inline-flex' : 'none';
+}
+function toggleHideUnavail(){
+  hideUnavail = !hideUnavail;
+  try{ localStorage.setItem('cafeRoble_hideUnavail', hideUnavail?'1':'0'); }catch(_){}
+  const btn = document.getElementById('hideUnavailBtn');
+  if(btn){
+    btn.classList.toggle('active', hideUnavail);
+    btn.textContent = hideUnavail ? '👁 Mostrar todos' : '👁 No disp.';
+  }
+  renderMenu();
+}
 
 /* ── BOOT ── */
 /* ═══════════════════════
