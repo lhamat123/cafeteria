@@ -919,7 +919,10 @@ async function loadFromGitHub() {
     if (!res.ok) throw new Error('status ' + res.status);
     const json = await res.json();
     fileSHA = json.sha;
-    DATA = JSON.parse(atob(json.content.replace(/\n/g,'')));
+    // Decodificar correctamente UTF-8 con acentos
+    const raw = json.content.replace(/\n/g,'');
+    const decoded = decodeURIComponent(escape(atob(raw)));
+    DATA = JSON.parse(decoded);
     localStorage.setItem('cafeRoble_v3', JSON.stringify(DATA));
     setGhStatus('✅ Datos cargados desde GitHub Pages', 'ok');
     renderMenu(); renderInfo();
@@ -1814,11 +1817,16 @@ function renderAdmTab(ci){
       <div class="afw"><label class="albl">Precio</label><input class="ainp" value="${e(p.precio)}" oninput="DATA.categorias[${ci}].productos[${pi}].precio=this.value"></div>
       <div class="afw pf-full"><label class="albl">Descripción</label><input class="ainp" value="${e(p.desc)}" oninput="DATA.categorias[${ci}].productos[${pi}].desc=this.value"></div>
       <div class="afw"><label class="albl">Badge (opcional)</label><input class="ainp" value="${e(p.badge||'')}" oninput="DATA.categorias[${ci}].productos[${pi}].badge=this.value"></div>
-      <div class="afw" style="justify-content:flex-end;padding-top:14px">
+      <div class="afw" style="justify-content:flex-end;padding-top:14px;gap:.8rem;flex-wrap:wrap">
         <label class="disp-toggle" title="Marcar como disponible/no disponible en la carta">
           <input type="checkbox" ${p.disponible===false?'':'checked'} onchange="DATA.categorias[${ci}].productos[${pi}].disponible=this.checked;checkUnavailBtn()">
           <span class="disp-toggle-track"><span class="disp-toggle-thumb"></span></span>
           <span class="disp-toggle-lbl">Disponible</span>
+        </label>
+        <label class="disp-toggle" title="Este producto NO se puede pedir a domicilio">
+          <input type="checkbox" ${p.noDomicilio?'checked':''} onchange="DATA.categorias[${ci}].productos[${pi}].noDomicilio=this.checked">
+          <span class="disp-toggle-track" style="${p.noDomicilio?'background:#dc2626':''}""><span class="disp-toggle-thumb"></span></span>
+          <span class="disp-toggle-lbl" style="color:${p.noDomicilio?'#dc2626':'var(--muted)'}">Solo local</span>
         </label>
       </div>
       <div class="afw pf-full"><div class="img-hint" id="phint-${ci}-${pi}"></div></div>`;
@@ -2096,19 +2104,24 @@ function buildThemePicker(){
 
 
 document.addEventListener('DOMContentLoaded', async ()=>{
-  loadLocalData();
+  // Arrancar siempre con datos vacíos — no mostrar datos del localStorage
+  // hasta que llegue el JSON de GitHub
+  DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
   loadCart();
   buildThemePicker();
   try{ const saved=localStorage.getItem('cafeRoble_theme'); if(saved) applyTheme(saved); }catch(_){}
-  // Si hay productos en carrito al cargar, activar modo pedido
   if(Object.keys(pedCart).length > 0){
     document.body.classList.add('pedido-activo');
   }
   renderMenu();
   renderInfo();
   updateFloatBadge();
-  // Try to load from GitHub in background
-  try { await loadFromGitHub(); } catch(e) {}
+  // Cargar desde GitHub (fuente de verdad)
+  try { await loadFromGitHub(); } catch(e) {
+    // Solo si falla GitHub, caer en localStorage
+    loadLocalData();
+    renderMenu(); renderInfo();
+  }
 });
 
 /* ═══════════════════════════════════════════
@@ -2263,6 +2276,7 @@ function setPedMode(mode){
   }
   updateSendBtn();
   renderPedCart();
+  renderPedProds();
 }
 
 /* ── Mesas ── */
@@ -2322,7 +2336,13 @@ function renderPedProds(){
     list.innerHTML = '<p style="color:var(--muted);font-size:.8rem;padding:.5rem">Sin productos en esta categoría.</p>';
     return;
   }
+  let hayProductos = false;
   cat.productos.forEach((p,pi)=>{
+    // Ocultar no disponibles siempre
+    if(p.disponible === false) return;
+    // Ocultar "solo local" cuando el modo es domicilio
+    if(pedMode === 'domicilio' && p.noDomicilio) return;
+    hayProductos = true;
     const key = pedActiveCat+'-'+pi;
     const qty = pedCart[key]||0;
     const row = document.createElement('div');
@@ -2340,6 +2360,9 @@ function renderPedProds(){
       </div>`;
     list.appendChild(row);
   });
+  if(!hayProductos){
+    list.innerHTML = '<p style="color:var(--muted);font-size:.8rem;padding:.5rem">No hay productos disponibles para esta modalidad.</p>';
+  }
 }
 
 /* ── qty desde página de pedido ── */
