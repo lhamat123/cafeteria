@@ -1,12 +1,12 @@
 {
   "info": {
     "nombre": "ASDDSA",
-    "slogan": "Nlópez",
+    "slogan": "NlÃ³pez",
     "bannerImg": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=200&q=80",
     "aboutImg": "https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=600&q=80",
     "aboutBadge": "Desde 1998",
-    "aboutTitle": "Un RincÃ³n para el Amor",
-    "aboutText1": "Ãnico, tostados artesanalmente cada semana.",
+    "aboutTitle": "Un RincÃÂ³n para el Amor",
+    "aboutText1": "ÃÂnico, tostados artesanalmente cada semana.",
     "aboutText2": "asdasdadadad a dad ad ad ad ad",
     "direccion": "Av. Principal 123, Col. Centro",
     "telefono": "(555) 000-0000",
@@ -19,10 +19,10 @@
     "horariosDom": "9:00 a 19:00",
     "horariosFest": "9:00  a 18:00",
     "footerLine1": "12 a 21:00",
-    "footerLine2": "Av. Principal 123 Â· Tel. (555) 000-0000",
+    "footerLine2": "Av. Principal 123 ÃÂ· Tel. (555) 000-0000",
     "promoImg": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&q=80",
     "promoTag": "Solo en noviembre",
-    "promoTitle": "Desayuno completo + cafÃ©",
+    "promoTitle": "Desayuno completo + cafÃÂ©",
     "promoDesc": "Elige tu desayuno favorito y  un espresso o americano incluido.",
     "promoPrice": "$10.90",
     "destacados": [
@@ -80,15 +80,17 @@
           "precio": "$2.40",
           "badge": "",
           "img": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=200&q=80",
-          "imgFull": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=90"
+          "imgFull": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=90",
+          "disponible": false
         },
         {
           "nombre": "Rico facesito",
-          "desc": "Shot puro de cafÃÂ© de origen ÃÂÃÂºnico, tostado artesanal. Intenso y cremoso con crema dorada perfecta.",
+          "desc": "Shot puro de cafÃÂÃÂ© de origen ÃÂÃÂÃÂÃÂºnico, tostado artesanal. Intenso y cremoso con crema dorada perfecta.",
           "precio": "$1.80",
           "badge": "",
           "img": "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=200&q=80",
-          "imgFull": "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=900&q=90"
+          "imgFull": "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=900&q=90",
+          "disponible": false
         },
         {
           "nombre": "Cappuccino",
@@ -96,7 +98,8 @@
           "precio": "$3.20",
           "badge": "",
           "img": "https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=200&q=80",
-          "imgFull": "https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=900&q=90"
+          "imgFull": "https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=900&q=90",
+          "disponible": false
         },
         {
           "nombre": "Americano",
@@ -104,7 +107,8 @@
           "precio": "$2.80",
           "badge": "",
           "img": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=200&q=80",
-          "imgFull": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=900&q=90"
+          "imgFull": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=900&q=90",
+          "disponible": false
         },
         {
           "nombre": "Latte",
@@ -232,7 +236,7 @@
         }
       ],
       "galeria": {
-        "titulo": "Empieza el dÃ­a  con buen pie",
+        "titulo": "Empieza el dÃÂ­a  con buen pie",
         "fotos": [
           {
             "img": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=400&q=80",
