@@ -545,6 +545,22 @@
   .ped-domicilio-fields{display:none}
   .ped-domicilio-fields.visible{display:block}
 
+  /* ── DESGLOSE CARRITO DOMICILIO ── */
+  .ped-cart-desglose{border-top:1px solid var(--bdr)}
+  .ped-cart-desglose-row{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:.5rem 1rem;font-size:.82rem;color:var(--muted);
+    border-bottom:1px solid var(--bdr);
+  }
+  .ped-cart-desglose-row.envio{color:var(--text);font-weight:600}
+  .ped-cart-desglose-row.pendiente{opacity:.5;font-style:italic}
+  .ped-cart-desglose-total{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:.7rem 1rem;
+    background:var(--bm);
+    font-family:'Playfair Display',serif;font-weight:700;
+    font-size:1.1rem;color:var(--cream);
+  }
   /* ── REPARTO COSTO ── */
   .ped-reparto-costo{
     background:rgba(201,168,124,.13);border:1.5px solid var(--bdr);
@@ -1976,12 +1992,13 @@ function onRepartoChange(){
   const lbl  = document.getElementById('domCostoLabel');
   if(!sel || !wrap || !lbl) return;
   const val = sel.value;
-  if(!val){ wrap.style.display='none'; updateSendBtn(); return; }
+  if(!val){ wrap.style.display='none'; updateSendBtn(); renderPedCart(); return; }
   const [zona, anillo, precio] = val.split('||');
   wrap.style.display = 'block';
   lbl.innerHTML = `<span class="ped-reparto-costo-label">🛵 ${anillo} · ${zona}</span>
     <span class="ped-reparto-costo-val">Costo de envío: ${precio}</span>`;
   updateSendBtn();
+  renderPedCart();
 }
 
 /* ── DISPONIBILIDAD ── */
@@ -2245,6 +2262,7 @@ function setPedMode(mode){
     else label.textContent = 'Enviar Pedido por WhatsApp';
   }
   updateSendBtn();
+  renderPedCart();
 }
 
 /* ── Mesas ── */
@@ -2367,11 +2385,38 @@ function renderPedCart(){
       <button class="ped-cart-del" onclick="eliminarDelCart('${key}')">✕</button>
     </div>`;
   }).join('');
-  box.innerHTML = items +
-    `<div class="ped-cart-total">
+  // Desglose para domicilio
+  let resumen = '';
+  if(pedMode === 'domicilio'){
+    const rval = (document.getElementById('domReparto')?.value || '');
+    const parts = rval.split('||');
+    const zonaLabel = parts[0] || '';
+    const anilloLabel = parts[1] || '';
+    const precioEnvio = parts[2] ? parsePrecio(parts[2]) : 0;
+    const precioEnvioStr = parts[2] || '';
+    const totalFinal = total + precioEnvio;
+    resumen = `
+      <div class="ped-cart-desglose">
+        <div class="ped-cart-desglose-row">
+          <span>🛒 Subtotal productos</span>
+          <span>${total > 0 ? formatPrecio(total) : '—'}</span>
+        </div>
+        <div class="ped-cart-desglose-row envio ${precioEnvioStr ? '' : 'pendiente'}">
+          <span>🛵 Envío${zonaLabel ? ' · ' + zonaLabel : ' (elige tu reparto)'}</span>
+          <span>${precioEnvioStr || '—'}</span>
+        </div>
+        <div class="ped-cart-desglose-total">
+          <span>💵 Total</span>
+          <span>${totalFinal > 0 ? formatPrecio(totalFinal) : '—'}</span>
+        </div>
+      </div>`;
+  } else {
+    resumen = `<div class="ped-cart-total">
       <span class="ped-cart-total-label">Total estimado</span>
-      <span class="ped-cart-total-val">${total>0?formatPrecio(total):'—'}</span>
+      <span class="ped-cart-total-val">${total > 0 ? formatPrecio(total) : '—'}</span>
     </div>`;
+  }
+  box.innerHTML = items + resumen;
 }
 
 function cartCambiarQty(key, delta){
