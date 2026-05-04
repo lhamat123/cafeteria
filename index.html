@@ -584,12 +584,21 @@
   .reparto-add-inp:focus{outline:none;border-color:var(--gold)}
 
   /* ── SOLO LOCAL badge en carta ── */
+  @keyframes latido{
+    0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(154,52,18,.5)}
+    50%{transform:scale(1.15);box-shadow:0 0 0 5px rgba(154,52,18,0)}
+  }
   .badge-local{
     top:auto !important;
     bottom:-3px !important;
     right:2px !important;
     background:rgba(154,52,18,.88) !important;
     color:#fff !important;
+    display:none !important;
+  }
+  .pedido-activo .badge-local{
+    display:inline !important;
+    animation:latido 1.4s ease-in-out infinite;
   }
   /* Toggle switch admin */
   .disp-toggle{display:flex;align-items:center;gap:5px;cursor:pointer;user-select:none;margin-top:2px}
