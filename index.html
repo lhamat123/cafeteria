@@ -2414,8 +2414,9 @@ let pedActiveCat = 0;
 let pedCart = {};   // { "catIdx-prodIdx": qty }
 const PED_MESAS = 20;
 const CART_KEY = 'cafeRoble_cart';
+const MESA_KEY = 'cafeRoble_mesa';
 
-/* ── Persistencia ── */
+/* ── Persistencia carrito ── */
 function saveCart(){
   try{ localStorage.setItem(CART_KEY, JSON.stringify(pedCart)); }catch(_){}
   updateFloatBadge();
@@ -2425,6 +2426,21 @@ function loadCart(){
     const raw = localStorage.getItem(CART_KEY);
     pedCart = raw ? JSON.parse(raw) : {};
   }catch(_){ pedCart = {}; }
+}
+
+/* ── Persistencia mesa QR ── */
+function saveMesa(num){
+  try{
+    if(num) localStorage.setItem(MESA_KEY, String(num));
+    else localStorage.removeItem(MESA_KEY);
+  }catch(_){}
+}
+function loadMesa(){
+  try{
+    const raw = localStorage.getItem(MESA_KEY);
+    const n = parseInt(raw);
+    return (!isNaN(n) && n > 0) ? n : null;
+  }catch(_){ return null; }
 }
 
 /* ── Badge en botón flotante ── */
@@ -2516,7 +2532,9 @@ function abrirPedido(mesaNum){
   if(vac2) vac2.style.display = '';
   document.getElementById('pedNotas').value = '';
 
-  if(mesaNum){ selectMesa(parseInt(mesaNum), null); }
+  // Recuperar mesa: del parámetro (QR directo) o del localStorage
+  const mesaAUsar = mesaNum || loadMesa();
+  if(mesaAUsar){ selectMesa(parseInt(mesaAUsar), null); }
 
   setPedMode('mesa');
   buildMesaGrid();
@@ -2755,6 +2773,7 @@ function selectMesa(num, customVal){
     if(isNaN(n) || n < 1) n = null;
   }
   pedMesaSeleccionada = n;
+  saveMesa(n); // persistir mesa en localStorage
   // Actualizar UI badge
   const det = document.getElementById('mesaQrDetectada');
   const vac = document.getElementById('mesaQrVacia');
@@ -3108,6 +3127,9 @@ function updateSendBtn(){
 
 document.addEventListener('DOMContentLoaded', ()=>{
   loadCart();
+  // Restaurar mesa persistida del localStorage
+  const mesaGuardada = loadMesa();
+  if(mesaGuardada) pedMesaSeleccionada = mesaGuardada;
   updateFloatBadge();
   ['domNombre','domTelefono','domDireccion','domReferencia','domReparto','recNombre','recTelefono']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('input', updateSendBtn); });
@@ -3193,12 +3215,15 @@ function enviarPedido(){
   const msg = encodeURIComponent(lineas.join('\n'));
   window.open('https://wa.me/' + rawTel + '?text=' + msg, '_blank');
 
-  // Limpiar carrito tras enviar
+  // Limpiar carrito tras enviar — pero conservar la mesa QR
   pedCart = {};
   saveCart();
   renderPedCart();
   renderMenu();
   updateSendBtn();
+  // Restaurar mesa guardada para el próximo pedido
+  const mesaPersistida = loadMesa();
+  if(mesaPersistida) selectMesa(mesaPersistida, null);
   toast('✅ Pedido enviado por WhatsApp','ok');
 }
 
