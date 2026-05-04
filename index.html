@@ -698,6 +698,49 @@
     display:inline !important;
     animation:latido 2.2s ease-in-out 1 forwards;
   }
+  /* ── MODAL BIENVENIDA MESA (QR) ── */
+  #mesaBienvenidaOverlay{
+    position:fixed;inset:0;z-index:950;background:rgba(0,0,0,.82);
+    display:none;align-items:center;justify-content:center;padding:1rem;
+  }
+  #mesaBienvenidaOverlay.open{display:flex}
+  .mesa-bienvenida-modal{
+    background:var(--cs);border-radius:18px;overflow:hidden;
+    width:100%;max-width:360px;box-shadow:0 8px 40px rgba(0,0,0,.4);
+  }
+  .mesa-bv-header{
+    background:var(--bm);padding:1.1rem 1.2rem .9rem;text-align:center;
+    border-bottom:2px solid var(--gold);
+  }
+  .mesa-bv-icon{font-size:2.4rem;display:block;margin-bottom:.3rem}
+  .mesa-bv-title{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--cream)}
+  .mesa-bv-sub{font-size:.75rem;color:var(--gold);letter-spacing:.06em;margin-top:.2rem}
+  .mesa-bv-body{padding:1.1rem 1.2rem}
+  .mesa-bv-info{
+    background:rgba(201,168,124,.12);border:1px solid var(--bdr);
+    border-radius:10px;padding:.75rem 1rem;margin-bottom:.9rem;
+    font-size:.82rem;color:var(--text);line-height:1.55;
+  }
+  .mesa-bv-info strong{color:var(--bl);font-family:'Playfair Display',serif}
+  .mesa-bv-warn{
+    background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);
+    border-radius:8px;padding:.55rem .85rem;margin-bottom:.85rem;
+    font-size:.76rem;color:#92400e;line-height:1.5;
+  }
+  .mesa-bv-btns{display:flex;flex-direction:column;gap:.5rem}
+  .mesa-bv-btn{
+    width:100%;padding:11px 16px;border-radius:10px;border:none;
+    font-family:'Lato',sans-serif;font-size:.86rem;font-weight:700;
+    letter-spacing:.04em;cursor:pointer;transition:all .18s;
+    display:flex;align-items:center;justify-content:center;gap:.45rem;
+  }
+  .mesa-bv-btn-primary{background:var(--gold);color:var(--bd)}
+  .mesa-bv-btn-primary:hover{filter:brightness(1.08)}
+  .mesa-bv-btn-secondary{background:transparent;color:var(--gold);border:1.5px solid var(--gold)}
+  .mesa-bv-btn-secondary:hover{background:rgba(201,168,124,.15)}
+  .mesa-bv-btn-danger{background:transparent;color:#dc2626;border:1.5px solid rgba(220,38,38,.4)}
+  .mesa-bv-btn-danger:hover{background:rgba(220,38,38,.08)}
+
   /* Toggle switch admin */
   .disp-toggle{display:flex;align-items:center;gap:5px;cursor:pointer;user-select:none;margin-top:2px}
   .disp-toggle input{display:none}
@@ -1035,6 +1078,22 @@
   </div>
 </div>
 
+<!-- ══════════ MODAL BIENVENIDA MESA (QR) ══════════ -->
+<div id="mesaBienvenidaOverlay">
+  <div class="mesa-bienvenida-modal">
+    <div class="mesa-bv-header">
+      <span class="mesa-bv-icon">🪑</span>
+      <div class="mesa-bv-title" id="bvTitle">¡Bienvenido!</div>
+      <div class="mesa-bv-sub" id="bvSub">Café Roble</div>
+    </div>
+    <div class="mesa-bv-body">
+      <div class="mesa-bv-info" id="bvInfo"></div>
+      <div class="mesa-bv-warn" id="bvWarn" style="display:none"></div>
+      <div class="mesa-bv-btns" id="bvBtns"></div>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -1122,7 +1181,13 @@ async function loadFromGitHubSilent() {
     if(remoteStr !== localStr){
       DATA = remoteData;
       localStorage.setItem('cafeRoble_v3', JSON.stringify(DATA));
+      // Sincronizar carrito con la nueva carta (eliminar productos que ya no existen)
+      const { eliminados } = validarYSincronizarCarrito();
+      if(eliminados.length > 0){
+        toast('⚠️ ' + eliminados.length + ' producto(s) de tu pedido ya no están en la carta y fueron removidos.', 'warn');
+      }
       renderMenu(); renderInfo(); checkUnavailBtn();
+      updateFloatBadge();
       setGhStatus('✅ Datos actualizados desde GitHub', 'ok');
     } else {
       setGhStatus('✅ Datos en sync con GitHub', 'ok');
@@ -2462,6 +2527,154 @@ function abrirPedido(mesaNum){
   goPage('pedido');
 }
 
+/* ═══════════════════════════════════════════════════
+   VALIDACIÓN Y SINCRONIZACIÓN DEL CARRITO CON LA CARTA
+   Verifica que cada item del carrito exista y actualiza precios
+═══════════════════════════════════════════════════ */
+function validarYSincronizarCarrito(){
+  const keys = Object.keys(pedCart);
+  if(!keys.length) return { eliminados:[], actualizados:[] };
+
+  const eliminados = [];
+  const actualizados = [];
+
+  keys.forEach(key=>{
+    const [ci,pi] = key.split('-').map(Number);
+    const cat = DATA?.categorias?.[ci];
+    const prod = cat?.productos?.[pi];
+
+    if(!prod || prod.disponible === false){
+      // Producto ya no existe o está desactivado
+      const nombre = prod?.nombre || key;
+      eliminados.push(nombre);
+      delete pedCart[key];
+    } else {
+      // Producto existe — verificar si el precio cambió
+      // (solo informativo, el precio se toma en tiempo real de DATA)
+      // Podríamos guardar precio al agregar, pero aquí simplemente marcamos OK
+    }
+  });
+
+  if(eliminados.length > 0){
+    saveCart();
+    updateFloatBadge();
+  }
+
+  return { eliminados, actualizados };
+}
+
+/* ── Modal Bienvenida Mesa (QR) ── */
+let _qrMesaNum = null;
+
+function mostrarBienvenidaMesa(mesaNum){
+  _qrMesaNum = mesaNum;
+
+  // Asegurarse que DATA esté cargado antes de mostrar
+  const d = DATA?.info || {};
+  const nombreCafe = d.nombre || 'Café Roble';
+
+  // Actualizar subtítulo del modal
+  const bvSub = document.getElementById('bvSub');
+  if(bvSub) bvSub.textContent = nombreCafe;
+
+  const bvTitle = document.getElementById('bvTitle');
+  if(bvTitle) bvTitle.textContent = '¡Bienvenido a Mesa ' + mesaNum + '!';
+
+  // Validar y sincronizar carrito ANTES de mostrar
+  const { eliminados } = validarYSincronizarCarrito();
+
+  const tieneCarrito = Object.keys(pedCart).length > 0;
+  const bvInfo  = document.getElementById('bvInfo');
+  const bvWarn  = document.getElementById('bvWarn');
+  const bvBtns  = document.getElementById('bvBtns');
+
+  if(bvInfo) bvInfo.innerHTML = tieneCarrito
+    ? `Tienes un pedido en curso para <strong>Mesa ${mesaNum}</strong>.<br>¿Deseas continuar con él o iniciar uno nuevo?`
+    : `Estás en <strong>Mesa ${mesaNum}</strong>.<br>Explora nuestra carta y cuando estés listo haz tu pedido.`;
+
+  // Mostrar advertencia si se eliminaron productos
+  if(bvWarn){
+    if(eliminados.length > 0){
+      bvWarn.style.display = '';
+      bvWarn.innerHTML = '⚠️ <strong>' + eliminados.length + ' producto(s)</strong> de tu pedido anterior ya no están disponibles y fueron removidos: ' + eliminados.join(', ') + '.';
+    } else {
+      bvWarn.style.display = 'none';
+    }
+  }
+
+  // Construir botones según estado
+  if(bvBtns){
+    bvBtns.innerHTML = '';
+    if(tieneCarrito){
+      // Continuar pedido
+      const btnCont = document.createElement('button');
+      btnCont.className = 'mesa-bv-btn mesa-bv-btn-primary';
+      btnCont.innerHTML = '✅ &nbsp;Continuar mi pedido';
+      btnCont.onclick = ()=>{
+        cerrarBienvenidaMesa();
+        // Ir a carta con mesa ya seleccionada
+        goPage('menu');
+        // Activar modo pedido con esa mesa
+        selectMesa(mesaNum, null);
+        body_activarPedidoSiNoActivo();
+        toast('🪑 Mesa ' + mesaNum + ' — pedido anterior recuperado', 'ok');
+      };
+      bvBtns.appendChild(btnCont);
+
+      // Ver carta sin comprometer
+      const btnCarta = document.createElement('button');
+      btnCarta.className = 'mesa-bv-btn mesa-bv-btn-secondary';
+      btnCarta.innerHTML = '📋 &nbsp;Ver la carta primero';
+      btnCarta.onclick = ()=>{
+        cerrarBienvenidaMesa();
+        selectMesa(mesaNum, null);
+        goPage('menu');
+      };
+      bvBtns.appendChild(btnCarta);
+
+      // Nuevo pedido (limpia carrito)
+      const btnNuevo = document.createElement('button');
+      btnNuevo.className = 'mesa-bv-btn mesa-bv-btn-danger';
+      btnNuevo.innerHTML = '🗑️ &nbsp;Iniciar pedido nuevo';
+      btnNuevo.onclick = ()=>{
+        pedCart = {};
+        saveCart();
+        updateFloatBadge();
+        cerrarBienvenidaMesa();
+        selectMesa(mesaNum, null);
+        goPage('menu');
+        toast('🆕 Pedido anterior limpiado — ¡empieza a elegir!', 'ok');
+      };
+      bvBtns.appendChild(btnNuevo);
+    } else {
+      // Sin carrito: solo ir a la carta
+      const btnCarta = document.createElement('button');
+      btnCarta.className = 'mesa-bv-btn mesa-bv-btn-primary';
+      btnCarta.innerHTML = '📋 &nbsp;Ver la carta';
+      btnCarta.onclick = ()=>{
+        cerrarBienvenidaMesa();
+        selectMesa(mesaNum, null);
+        goPage('menu');
+      };
+      bvBtns.appendChild(btnCarta);
+    }
+  }
+
+  document.getElementById('mesaBienvenidaOverlay').classList.add('open');
+}
+
+function cerrarBienvenidaMesa(){
+  document.getElementById('mesaBienvenidaOverlay').classList.remove('open');
+}
+
+// Activa el modo pedido si hay productos en carrito y aún no está activo
+function body_activarPedidoSiNoActivo(){
+  if(Object.keys(pedCart).length > 0){
+    document.body.classList.add('pedido-activo');
+    updateFloatBadge();
+  }
+}
+
 /* ── Detectar ?mesa=N o ?info=1 en URL (QR) ── */
 (function detectQRMesa(){
   try{
@@ -2470,7 +2683,13 @@ function abrirPedido(mesaNum){
     const info = params.get('info');
     if(m && !isNaN(m)){
       window.addEventListener('DOMContentLoaded', ()=>{
-        setTimeout(()=>abrirPedido(parseInt(m)), 800);
+        // Esperar a que los datos de la carta estén listos, luego mostrar modal
+        setTimeout(()=>{
+          // Ir a carta primero (no a pedido directamente)
+          goPage('menu');
+          // Mostrar modal de bienvenida con verificación de carrito
+          setTimeout(()=> mostrarBienvenidaMesa(parseInt(m)), 400);
+        }, 900);
       }, {once:true});
     } else if(info === '1'){
       window.addEventListener('DOMContentLoaded', ()=>{
@@ -2630,8 +2849,16 @@ function procesarQR(url){
     const m = params.get('mesa');
     const info = params.get('info');
     if(m && !isNaN(m)){
-      selectMesa(parseInt(m), null);
-      toast('✅ Mesa ' + m + ' seleccionada', 'ok');
+      // Si ya estamos en la página de pedido (cambio de mesa), seleccionar directo
+      const pedPage = document.getElementById('page-pedido');
+      if(pedPage && pedPage.classList.contains('active')){
+        selectMesa(parseInt(m), null);
+        toast('✅ Mesa ' + m + ' seleccionada', 'ok');
+      } else {
+        // Desde otro lugar: mostrar modal de bienvenida
+        goPage('menu');
+        setTimeout(()=> mostrarBienvenidaMesa(parseInt(m)), 200);
+      }
     } else if(info === '1'){
       goPage('info');
       toast('📍 Yendo a Nosotros', 'ok');
@@ -2728,8 +2955,9 @@ function renderPedCart(){
   const items = keys.map(key=>{
     const [ci,pi] = key.split('-').map(Number);
     const p = DATA.categorias[ci]?.productos[pi];
-    if(!p) return '';
+    if(!p){ return ''; } // producto eliminado — ignorar
     const qty = pedCart[key];
+    // Siempre usar el precio actual de la carta
     const priceNum = parsePrecio(p.precio);
     const sub = priceNum * qty;
     total += sub;
@@ -2888,6 +3116,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
 /* ── Enviar por WhatsApp ── */
 function enviarPedido(){
   const rawTel = '5358024452';
+
+  // Validar carrito contra carta actual antes de enviar
+  const { eliminados } = validarYSincronizarCarrito();
+  if(eliminados.length > 0){
+    renderPedCart();
+    updateSendBtn();
+    toast('⚠️ Se removieron productos no disponibles: ' + eliminados.join(', '), 'warn');
+    return;
+  }
+
   const keys = Object.keys(pedCart);
   if(!keys.length){ toast('Agrega al menos un producto','warn'); return; }
 
