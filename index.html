@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Café Roble</title>
+  <title>Café Yupy</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
@@ -1015,7 +1015,7 @@
 <!-- ══════════ ADMIN PAGE ══════════ -->
 <div class="page" id="page-admin">
   <div class="adm-bar">
-    <span class="adm-bar-title">⚙️ Administración — Café Roble</span>
+    <span class="adm-bar-title">⚙️ Administración — Café Yupy</span>
     <button class="ab ab-ghost" onclick="goPage('menu')">← Salir</button>
     <button class="ab ab-ghost" onclick="goPage('qr-dirs')">📱 QRs de Mesas</button>
     <button class="ab ab-green" onclick="admApply()">✔ Guardar local</button>
@@ -1084,7 +1084,7 @@
     <div class="mesa-bv-header">
       <span class="mesa-bv-icon">🪑</span>
       <div class="mesa-bv-title" id="bvTitle">¡Bienvenido!</div>
-      <div class="mesa-bv-sub" id="bvSub">Café Roble</div>
+      <div class="mesa-bv-sub" id="bvSub">Café Yupy</div>
     </div>
     <div class="mesa-bv-body">
       <div class="mesa-bv-info" id="bvInfo"></div>
@@ -1132,7 +1132,7 @@ let fileSHA = '';
 
 function loadLocalData() {
   try {
-    const saved = localStorage.getItem('cafeRoble_v3');
+    const saved = localStorage.getItem('cafeYupy_v3');
     DATA = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_DATA));
   } catch(e) {
     DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
@@ -1180,7 +1180,7 @@ async function loadFromGitHubSilent() {
     const localStr  = JSON.stringify(DATA);
     if(remoteStr !== localStr){
       DATA = remoteData;
-      localStorage.setItem('cafeRoble_v3', JSON.stringify(DATA));
+      localStorage.setItem('cafeYupy_v3', JSON.stringify(DATA));
       // Sincronizar carrito con la nueva carta (eliminar productos que ya no existen)
       const { eliminados } = validarYSincronizarCarrito();
       if(eliminados.length > 0){
@@ -1206,7 +1206,7 @@ async function loadFromGitHub() {
     const json = await res.json();
     fileSHA = json.sha;
     DATA = JSON.parse(fromBase64(json.content));
-    localStorage.setItem('cafeRoble_v3', JSON.stringify(DATA));
+    localStorage.setItem('cafeYupy_v3', JSON.stringify(DATA));
     setGhStatus('✅ Datos cargados desde GitHub Pages', 'ok');
     renderMenu(); renderInfo(); checkUnavailBtn();
     toast('✅ Carta cargada desde GitHub Pages','ok');
@@ -1224,9 +1224,9 @@ async function saveToGitHub() {
   setGhStatus('⏳ Publicando en GitHub...', '');
   const content = toBase64(JSON.stringify(DATA, null, 2));
   const body = {
-    message: 'Actualizar carta — Café Roble',
+    message: 'Actualizar carta — Café Yupy',
     content,
-    committer: { name: 'Café Roble', email: 'noreply@caferoble.com' }
+    committer: { name: 'Café Yupy', email: 'noreply@cafeyupy.com' }
   };
   if (fileSHA) body.sha = fileSHA;
   try {
@@ -1272,7 +1272,7 @@ function renderInfo() {
   });
   ['bannerNameMenu','bannerNameInfo'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.textContent = d.nombre || 'Café Roble';
+    if (el) el.textContent = d.nombre || 'Café Yupy';
   });
   ['bannerSubMenu','bannerSubInfo'].forEach(id => {
     const el = document.getElementById(id);
@@ -1472,7 +1472,7 @@ function goPage(name){
   window.scrollTo(0,0);
   const btn=document.getElementById('adminBtn');
   if(btn) btn.style.display = name==='admin' ? 'none' : (_doradoTaps>=0&&btn.style.display==='block'?'block':'none');
-  if(name==='menu'){ renderMenu(); try{ const last=parseInt(localStorage.getItem('cafeRoble_lastCat')||'0'); setTimeout(()=>goTo(last,false),50); }catch(_){} }
+  if(name==='menu'){ renderMenu(); try{ const last=parseInt(localStorage.getItem('cafeYupy_lastCat')||'0'); setTimeout(()=>goTo(last,false),50); }catch(_){} }
   if(name==='info') renderInfo();
   if(name==='qr-dirs') buildQrDirsPage();
 }
@@ -1516,7 +1516,7 @@ function goTo(idx,anim){
   // Update category title label
   const lbl=document.getElementById('secTitleLabel');
   if(lbl && DATA?.categorias?.[idx]) lbl.textContent=DATA.categorias[idx].label;
-  try{ localStorage.setItem('cafeRoble_lastCat', idx); }catch(_){}
+  try{ localStorage.setItem('cafeYupy_lastCat', idx); }catch(_){}
 }
 const vp=document.getElementById('viewport');
 function gX(ev){ return ev.touches?ev.touches[0].clientX:ev.clientX; }
@@ -2204,7 +2204,7 @@ function moveProd(ci, pi, dir){
 
 /* apply / github / export / import */
 function admApply(){
-  localStorage.setItem('cafeRoble_v3', JSON.stringify(DATA));
+  localStorage.setItem('cafeYupy_v3', JSON.stringify(DATA));
   renderMenu(); renderInfo(); checkUnavailBtn(); buildRepartoSelect();
   toast('✔ Cambios guardados localmente','ok');
 }
@@ -2212,7 +2212,7 @@ function admApply(){
 async function admSaveGitHub(){
   const ok=await saveToGitHub();
   if(ok){
-    localStorage.setItem('cafeRoble_v3',JSON.stringify(DATA));
+    localStorage.setItem('cafeYupy_v3',JSON.stringify(DATA));
     renderMenu(); renderInfo(); checkUnavailBtn();
     toast('☁ Carta publicada en GitHub Pages','ok');
   }
@@ -2230,7 +2230,7 @@ function admImport(input){
   const r=new FileReader(); r.onload=ev=>{
     try{
       DATA=JSON.parse(ev.target.result);
-      localStorage.setItem('cafeRoble_v3',JSON.stringify(DATA));
+      localStorage.setItem('cafeYupy_v3',JSON.stringify(DATA));
       admTab=0; buildAdmin(); renderMenu(); renderInfo(); checkUnavailBtn();
       toast('JSON importado','ok');
     } catch(_){ toast('Error: JSON inválido','warn'); }
@@ -2363,7 +2363,7 @@ function applyTheme(id){
   r.setProperty('--bdr',  t.bdr);
   r.setProperty('--card', t.card);
   currentTheme = id;
-  try{ localStorage.setItem('cafeRoble_theme', id); }catch(_){}
+  try{ localStorage.setItem('cafeYupy_theme', id); }catch(_){}
   document.querySelectorAll('.tswatch').forEach(s=>s.classList.toggle('active', s.dataset.tid===id));
 }
 
@@ -2393,7 +2393,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   loadLocalData();
   loadCart();
   buildThemePicker();
-  try{ const saved=localStorage.getItem('cafeRoble_theme'); if(saved) applyTheme(saved); }catch(_){}
+  try{ const saved=localStorage.getItem('cafeYupy_theme'); if(saved) applyTheme(saved); }catch(_){}
   if(Object.keys(pedCart).length > 0){
     document.body.classList.add('pedido-activo');
   }
@@ -2413,8 +2413,8 @@ let pedMesaSeleccionada = null;
 let pedActiveCat = 0;
 let pedCart = {};   // { "catIdx-prodIdx": qty }
 const PED_MESAS = 20;
-const CART_KEY = 'cafeRoble_cart';
-const MESA_KEY = 'cafeRoble_mesa';
+const CART_KEY = 'cafeYupy_cart';
+const MESA_KEY = 'cafeYupy_mesa';
 
 /* ── Persistencia carrito ── */
 function saveCart(){
@@ -2521,7 +2521,7 @@ function abrirPedido(mesaNum){
   const ph = document.getElementById('bannerPhotoPedido');
   const pn = document.getElementById('bannerNamePedido');
   if(ph && d.bannerImg) ph.src = d.bannerImg;
-  if(pn) pn.textContent = d.nombre||'Café Roble';
+  if(pn) pn.textContent = d.nombre||'Café Yupy';
 
   // NO limpiar el carrito — viene de localStorage
   pedMesaSeleccionada = null;
@@ -2589,7 +2589,7 @@ function mostrarBienvenidaMesa(mesaNum){
 
   // Asegurarse que DATA esté cargado antes de mostrar
   const d = DATA?.info || {};
-  const nombreCafe = d.nombre || 'Café Roble';
+  const nombreCafe = d.nombre || 'Café Yupy';
 
   // Actualizar subtítulo del modal
   const bvSub = document.getElementById('bvSub');
