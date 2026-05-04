@@ -583,6 +583,14 @@
     font-family:'Lato',sans-serif;font-size:.77rem;background:#faf9f7;color:var(--text)}
   .reparto-add-inp:focus{outline:none;border-color:var(--gold)}
 
+  /* ── SOLO LOCAL badge en carta ── */
+  .solo-local-tag{
+    display:inline-flex;align-items:center;gap:3px;
+    font-size:.55rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+    background:rgba(180,83,9,.12);color:#b45309;
+    border:1px solid rgba(180,83,9,.25);border-radius:20px;
+    padding:2px 6px;margin-top:3px;white-space:nowrap;
+  }
   /* Toggle switch admin */
   .disp-toggle{display:flex;align-items:center;gap:5px;cursor:pointer;user-select:none;margin-top:2px}
   .disp-toggle input{display:none}
@@ -1147,6 +1155,7 @@ function renderMenu() {
         <div class="item-info">
           <p class="item-name">${e(p.nombre)}</p>
           <p class="item-desc">${e(p.desc)}</p>
+          ${p.noDomicilio ? '<span class="solo-local-tag">🏠 Solo local</span>' : ''}
         </div>
         <div class="item-qty-wrap">
           <span class="price">${e(p.precio)}</span>
@@ -2314,6 +2323,28 @@ function setPedMode(mode){
   updateSendBtn();
   renderPedCart();
   renderPedProds();
+
+  // Si se cambia a domicilio, quitar del carrito los productos "solo local"
+  if(mode === 'domicilio'){
+    let eliminados = false;
+    Object.keys(pedCart).forEach(key=>{
+      const [ci,pi] = key.split('-').map(Number);
+      const p = DATA?.categorias?.[ci]?.productos?.[pi];
+      if(p && p.noDomicilio){
+        delete pedCart[key];
+        const el = document.getElementById('miqv-'+key);
+        if(el) el.textContent = '';
+        eliminados = true;
+      }
+    });
+    if(eliminados){
+      saveCart();
+      updateFloatBadge();
+      renderPedCart();
+      renderPedProds();
+      toast('⚠️ Algunos productos son solo para local y fueron removidos del pedido.','warn');
+    }
+  }
 }
 
 /* ── Mesas ── */
