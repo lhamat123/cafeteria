@@ -27,7 +27,100 @@
     transition:transform .15s,border-color .15s;flex-shrink:0}
   .tswatch:hover{transform:scale(1.3)}
   .tswatch.active{border-color:#fff;transform:scale(1.2)}
-  body{font-family:'Lato',sans-serif;background:var(--cs);color:var(--text);overflow-x:hidden}
+
+  /* ── QR MESA ── */
+  .mesa-qr-hint{font-size:.82rem;color:var(--muted);margin-bottom:.9rem;text-align:center}
+  .mesa-qr-scan-btn{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:.4rem;width:100%;padding:1.1rem;border-radius:12px;border:2px dashed var(--gold);
+    background:rgba(201,168,124,.08);color:var(--gold);font-family:'Lato',sans-serif;
+    font-size:.88rem;font-weight:700;letter-spacing:.06em;cursor:pointer;
+    transition:background .18s,border-color .18s;text-transform:uppercase;
+  }
+  .mesa-qr-scan-btn:hover{background:rgba(201,168,124,.18);border-color:var(--bl)}
+  .mesa-qr-badge{
+    display:flex;align-items:center;gap:.7rem;
+    background:var(--card);border:1.5px solid var(--gold);border-radius:12px;
+    padding:.75rem 1rem;
+  }
+  .mesa-qr-badge-icon{font-size:1.6rem;flex-shrink:0}
+  .mesa-qr-badge-info{flex:1;display:flex;flex-direction:column;gap:1px}
+  .mesa-qr-badge-label{font-size:.62rem;font-weight:700;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--muted)}
+  .mesa-qr-badge-num{font-family:'Playfair Display',serif;font-size:1.25rem;
+    font-weight:700;color:var(--text)}
+  .mesa-qr-change-btn{
+    flex-shrink:0;padding:5px 11px;border-radius:20px;
+    border:1.5px solid var(--gold);background:transparent;color:var(--gold);
+    font-family:'Lato',sans-serif;font-size:.68rem;font-weight:700;
+    letter-spacing:.05em;cursor:pointer;white-space:nowrap;
+    transition:background .15s,color .15s;
+  }
+  .mesa-qr-change-btn:hover{background:var(--gold);color:var(--bd)}
+
+  /* ── QR SCANNER OVERLAY ── */
+  #qrScanOverlay{
+    position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.88);
+    display:flex;align-items:center;justify-content:center;padding:1rem;
+  }
+  .qr-scan-modal{
+    background:var(--cs);border-radius:16px;overflow:hidden;
+    width:100%;max-width:380px;
+  }
+  .qr-scan-header{
+    display:flex;align-items:center;justify-content:space-between;
+    background:var(--bm);padding:.7rem 1rem;
+    font-family:'Playfair Display',serif;font-size:.9rem;color:var(--cream);font-weight:600;
+  }
+  .qr-scan-close{
+    background:none;border:none;color:var(--gold);font-size:1.2rem;
+    cursor:pointer;line-height:1;padding:2px 6px;
+  }
+  .qr-scan-viewport{position:relative;background:#000;overflow:hidden;min-height:240px}
+  .qr-scan-frame{
+    position:absolute;inset:20%;border:3px solid var(--gold);border-radius:8px;
+    pointer-events:none;
+    box-shadow:0 0 0 9999px rgba(0,0,0,.45);
+  }
+  .qr-scan-status{
+    text-align:center;padding:.6rem 1rem;font-size:.78rem;
+    color:var(--muted);font-style:italic;
+  }
+
+  /* ── QR DIRECTIONS PAGE ── */
+  #page-qr-dirs{background:var(--cs);min-height:100vh;padding-bottom:2rem}
+  .qrd-wrap{max-width:860px;margin:0 auto;padding:1rem}
+  .qrd-title{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;
+    color:var(--text);padding:.8rem 0 .5rem;border-bottom:2px solid var(--gold);margin-bottom:1rem}
+  .qrd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.7rem;margin-bottom:1.5rem}
+  .qrd-card{
+    background:var(--card);border:1px solid var(--bdr);border-radius:12px;
+    padding:.8rem;display:flex;flex-direction:column;align-items:center;gap:.35rem;
+    cursor:pointer;transition:box-shadow .15s;
+  }
+  .qrd-card:hover{box-shadow:0 2px 12px rgba(0,0,0,.12)}
+  .qrd-card-num{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--bl)}
+  .qrd-card-label{font-size:.65rem;font-weight:700;letter-spacing:.07em;
+    text-transform:uppercase;color:var(--muted)}
+  .qrd-card-url{font-size:.6rem;color:var(--muted);word-break:break-all;text-align:center;
+    opacity:.7;margin-top:.1rem}
+  .qrd-card-nosotros{background:var(--bm);border-color:var(--gold)}
+  .qrd-card-nosotros .qrd-card-num{font-size:2rem;color:var(--gold)}
+  .qrd-card-nosotros .qrd-card-label{color:var(--cream)}
+  .qrd-card-nosotros .qrd-card-url{color:var(--gold);opacity:.8}
+  .qrd-print-btn{
+    display:inline-flex;align-items:center;gap:.4rem;
+    padding:8px 18px;border-radius:20px;border:none;
+    background:var(--bd);color:var(--cream);font-family:'Lato',sans-serif;
+    font-size:.78rem;font-weight:700;cursor:pointer;letter-spacing:.05em;
+    transition:background .18s;margin-right:.5rem;margin-bottom:.5rem;
+  }
+  .qrd-print-btn:hover{background:var(--bl)}
+  @media print{
+    #page-qr-dirs .banner,#page-qr-dirs .qrd-actions{display:none}
+    .qrd-card{page-break-inside:avoid}
+  }
+
 
   /* ── PAGES ── */
   .page{display:none}.page.active{display:block}
@@ -773,10 +866,40 @@
   </div>
   <div class="ped-wrap">
     <div class="ped-section" id="pedMesaSection">
-      <h3 class="ped-sec-title">🪑 Selecciona tu mesa</h3>
-      <div class="mesa-grid" id="mesaGrid"></div>
-      <div class="mesa-custom-row">
-        <input class="mesa-custom-inp" id="mesaCustom" type="number" min="1" max="99" placeholder="Otra mesa (número)..." oninput="selectMesa(null,this.value)"/>
+      <h3 class="ped-sec-title">🪑 Tu mesa</h3>
+      <!-- Estado: mesa detectada por QR -->
+      <div id="mesaQrDetectada" style="display:none">
+        <div class="mesa-qr-badge" id="mesaQrBadgeBox">
+          <span class="mesa-qr-badge-icon">🪑</span>
+          <div class="mesa-qr-badge-info">
+            <span class="mesa-qr-badge-label">Mesa seleccionada</span>
+            <span class="mesa-qr-badge-num" id="mesaQrBadgeNum">—</span>
+          </div>
+          <button class="mesa-qr-change-btn" onclick="abrirEscaner()">📷 Cambiar mesa</button>
+        </div>
+      </div>
+      <!-- Estado: sin mesa -->
+      <div id="mesaQrVacia">
+        <p class="mesa-qr-hint">Escanea el código QR de tu mesa para continuar.</p>
+        <button class="mesa-qr-scan-btn" onclick="abrirEscaner()">
+          <span style="font-size:1.6rem">📷</span>
+          <span>Escanear QR de la mesa</span>
+        </button>
+      </div>
+      <!-- Escáner QR modal -->
+      <div id="qrScanOverlay" style="display:none">
+        <div class="qr-scan-modal">
+          <div class="qr-scan-header">
+            <span>📷 Apunta al QR de tu mesa</span>
+            <button class="qr-scan-close" onclick="cerrarEscaner()">✕</button>
+          </div>
+          <div class="qr-scan-viewport">
+            <video id="qrVideo" autoplay playsinline muted style="width:100%;border-radius:8px;display:block"></video>
+            <div class="qr-scan-frame"></div>
+          </div>
+          <p class="qr-scan-status" id="qrScanStatus">Iniciando cámara...</p>
+          <canvas id="qrCanvas" style="display:none"></canvas>
+        </div>
       </div>
     </div>
     <div class="ped-section" id="pedDomicilioSection" style="display:none">
@@ -851,6 +974,7 @@
   <div class="adm-bar">
     <span class="adm-bar-title">⚙️ Administración — Café Roble</span>
     <button class="ab ab-ghost" onclick="goPage('menu')">← Salir</button>
+    <button class="ab ab-ghost" onclick="goPage('qr-dirs')">📱 QRs de Mesas</button>
     <button class="ab ab-green" onclick="admApply()">✔ Guardar local</button>
     <button class="ab ab-purple" onclick="admSaveGitHub()">☁ Publicar en GitHub</button>
     <button class="ab ab-gold" onclick="admExport()">⬇ Exportar JSON</button>
@@ -877,6 +1001,37 @@
 
     <div class="adm-tabs" id="admTabs"></div>
     <div id="admContent"></div>
+  </div>
+</div>
+
+<!-- ══════════ QR DIRECTIONS PAGE ══════════ -->
+<div class="page" id="page-qr-dirs">
+  <a class="banner" href="#" onclick="goPage('menu');return false">
+    <img class="banner-photo" id="bannerPhotoQr" src="" alt=""/>
+    <div class="banner-body">
+      <span class="banner-name" id="bannerNameQr"></span>
+      <span class="banner-sub">Direcciones QR</span>
+    </div>
+    <div class="banner-action">
+      <span class="banner-action-icon">📋</span>
+      <span class="banner-action-label">Carta</span>
+    </div>
+  </a>
+  <div class="qrd-wrap">
+    <div class="qrd-actions" style="margin-bottom:.8rem">
+      <button class="qrd-print-btn" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+    </div>
+    <h2 class="qrd-title">📍 QR Sin mesa — Nosotros</h2>
+    <div class="qrd-grid">
+      <div class="qrd-card qrd-card-nosotros" onclick="copiarUrl(getQRUrlInfo())">
+        <div class="qrd-card-num">ℹ️</div>
+        <div class="qrd-card-label">Sin mesa · Nosotros</div>
+        <div class="qrd-card-url" id="qrdInfoUrl"></div>
+      </div>
+    </div>
+    <h2 class="qrd-title">🪑 QRs por mesa (1–20)</h2>
+    <div class="qrd-grid" id="qrdMesasGrid"></div>
+    <p style="font-size:.72rem;color:var(--muted);margin-top:.3rem">Toca cualquier tarjeta para copiar la URL. Usa el botón imprimir para obtener un PDF con todos los códigos.</p>
   </div>
 </div>
 
@@ -1254,6 +1409,7 @@ function goPage(name){
   if(btn) btn.style.display = name==='admin' ? 'none' : (_doradoTaps>=0&&btn.style.display==='block'?'block':'none');
   if(name==='menu'){ renderMenu(); try{ const last=parseInt(localStorage.getItem('cafeRoble_lastCat')||'0'); setTimeout(()=>goTo(last,false),50); }catch(_){} }
   if(name==='info') renderInfo();
+  if(name==='qr-dirs') buildQrDirsPage();
 }
 function goAdmin(){
   const pass=prompt('Acceso limitado:');
@@ -2288,7 +2444,11 @@ function abrirPedido(mesaNum){
 
   // NO limpiar el carrito — viene de localStorage
   pedMesaSeleccionada = null;
-  document.getElementById('mesaCustom').value = '';
+  // reset mesa badge
+  const det2 = document.getElementById('mesaQrDetectada');
+  const vac2 = document.getElementById('mesaQrVacia');
+  if(det2) det2.style.display = 'none';
+  if(vac2) vac2.style.display = '';
   document.getElementById('pedNotas').value = '';
 
   if(mesaNum){ selectMesa(parseInt(mesaNum), null); }
@@ -2302,14 +2462,19 @@ function abrirPedido(mesaNum){
   goPage('pedido');
 }
 
-/* ── Detectar ?mesa=N en URL (QR) ── */
+/* ── Detectar ?mesa=N o ?info=1 en URL (QR) ── */
 (function detectQRMesa(){
   try{
     const params = new URLSearchParams(window.location.search);
     const m = params.get('mesa');
+    const info = params.get('info');
     if(m && !isNaN(m)){
       window.addEventListener('DOMContentLoaded', ()=>{
         setTimeout(()=>abrirPedido(parseInt(m)), 800);
+      }, {once:true});
+    } else if(info === '1'){
+      window.addEventListener('DOMContentLoaded', ()=>{
+        setTimeout(()=>goPage('info'), 600);
       }, {once:true});
     }
   }catch(_){}
@@ -2361,32 +2526,121 @@ function setPedMode(mode){
   }
 }
 
-/* ── Mesas ── */
-function buildMesaGrid(){
-  const grid = document.getElementById('mesaGrid');
-  if(!grid) return;
-  grid.innerHTML = '';
-  for(let i=1; i<=PED_MESAS; i++){
-    const btn = document.createElement('button');
-    btn.className = 'mesa-btn'+(pedMesaSeleccionada===i?' selected':'');
-    btn.textContent = i;
-    btn.onclick = ()=>selectMesa(i,null);
-    grid.appendChild(btn);
+/* ── Mesa vía QR ── */
+function buildMesaGrid(){ /* no-op: mesas se seleccionan por QR */ }
+
+function selectMesa(num, customVal){
+  let n = num;
+  if(customVal !== null && customVal !== undefined){
+    n = parseInt(customVal);
+    if(isNaN(n) || n < 1) n = null;
+  }
+  pedMesaSeleccionada = n;
+  // Actualizar UI badge
+  const det = document.getElementById('mesaQrDetectada');
+  const vac = document.getElementById('mesaQrVacia');
+  const badge = document.getElementById('mesaQrBadgeNum');
+  if(n){
+    if(det) det.style.display = '';
+    if(vac) vac.style.display = 'none';
+    if(badge) badge.textContent = 'Mesa ' + n;
+  } else {
+    if(det) det.style.display = 'none';
+    if(vac) vac.style.display = '';
+  }
+  updateSendBtn();
+}
+
+/* ── Escáner QR (jsQR) ── */
+let qrStream = null;
+let qrAnimFrame = null;
+
+function abrirEscaner(){
+  const ov = document.getElementById('qrScanOverlay');
+  if(ov) ov.style.display = 'flex';
+  iniciarCamara();
+}
+
+function cerrarEscaner(){
+  const ov = document.getElementById('qrScanOverlay');
+  if(ov) ov.style.display = 'none';
+  if(qrAnimFrame){ cancelAnimationFrame(qrAnimFrame); qrAnimFrame = null; }
+  if(qrStream){ qrStream.getTracks().forEach(t=>t.stop()); qrStream = null; }
+  const video = document.getElementById('qrVideo');
+  if(video) video.srcObject = null;
+}
+
+async function iniciarCamara(){
+  const status = document.getElementById('qrScanStatus');
+  const video  = document.getElementById('qrVideo');
+  try{
+    if(status) status.textContent = 'Iniciando cámara...';
+    qrStream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'environment' } });
+    video.srcObject = qrStream;
+    await video.play();
+    if(status) status.textContent = 'Apunta al QR de tu mesa';
+    cargarJsQR(()=>escanearFrame());
+  }catch(err){
+    if(status) status.textContent = '⚠️ No se pudo acceder a la cámara. Intenta de nuevo.';
+    console.warn('Cámara QR:', err);
   }
 }
-function selectMesa(num, customVal){
-  if(customVal!==null && customVal!==undefined){
-    const n = parseInt(customVal);
-    pedMesaSeleccionada = isNaN(n)||n<1 ? null : n;
-  } else {
-    pedMesaSeleccionada = num;
-    const inp = document.getElementById('mesaCustom');
-    if(inp) inp.value = '';
+
+function cargarJsQR(cb){
+  if(window.jsQR){ cb(); return; }
+  const s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js';
+  s.onload = cb;
+  s.onerror = ()=>{
+    const st = document.getElementById('qrScanStatus');
+    if(st) st.textContent = '⚠️ Error cargando librería QR. Verifica tu conexión.';
+  };
+  document.head.appendChild(s);
+}
+
+function escanearFrame(){
+  const video  = document.getElementById('qrVideo');
+  const canvas = document.getElementById('qrCanvas');
+  const status = document.getElementById('qrScanStatus');
+  if(!video || !canvas || !window.jsQR){ qrAnimFrame = requestAnimationFrame(escanearFrame); return; }
+  if(video.readyState !== video.HAVE_ENOUGH_DATA){ qrAnimFrame = requestAnimationFrame(escanearFrame); return; }
+  const ctx = canvas.getContext('2d');
+  canvas.width  = video.videoWidth;
+  canvas.height = video.videoHeight;
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const code = window.jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts:'dontInvert' });
+  if(code){
+    procesarQR(code.data);
+    return;
   }
-  document.querySelectorAll('.mesa-btn').forEach((b,i)=>{
-    b.classList.toggle('selected', (i+1)===pedMesaSeleccionada);
-  });
-  updateSendBtn();
+  qrAnimFrame = requestAnimationFrame(escanearFrame);
+}
+
+function procesarQR(url){
+  cerrarEscaner();
+  try{
+    // Intentar parsear como URL con parámetros
+    let params;
+    if(url.includes('?')){
+      params = new URLSearchParams(url.split('?')[1]);
+    } else {
+      params = new URLSearchParams(url);
+    }
+    const m = params.get('mesa');
+    const info = params.get('info');
+    if(m && !isNaN(m)){
+      selectMesa(parseInt(m), null);
+      toast('✅ Mesa ' + m + ' seleccionada', 'ok');
+    } else if(info === '1'){
+      goPage('info');
+      toast('📍 Yendo a Nosotros', 'ok');
+    } else {
+      toast('⚠️ QR no reconocido', 'warn');
+    }
+  }catch(e){
+    toast('⚠️ QR no reconocido', 'warn');
+  }
 }
 
 /* ── Catálogo en página de pedido ── */
@@ -2712,6 +2966,44 @@ function enviarPedido(){
 
 function getQRUrl(mesaNum){
   return window.location.href.split('?')[0] + '?mesa=' + mesaNum;
+}
+function getQRUrlInfo(){
+  return window.location.href.split('?')[0] + '?info=1';
+}
+function copiarUrl(url){
+  try{
+    navigator.clipboard.writeText(url).then(()=>toast('✅ URL copiada al portapapeles','ok'));
+  }catch(_){ toast('URL: '+url,''); }
+}
+
+function buildQrDirsPage(){
+  // Banner
+  const d = DATA.info||{};
+  const ph = document.getElementById('bannerPhotoQr');
+  const pn = document.getElementById('bannerNameQr');
+  if(ph && d.bannerImg) ph.src = d.bannerImg;
+  if(pn) pn.textContent = d.nombre||'Café';
+
+  // Info URL
+  const infoUrl = getQRUrlInfo();
+  const infoUrlEl = document.getElementById('qrdInfoUrl');
+  if(infoUrlEl) infoUrlEl.textContent = infoUrl;
+
+  // Mesa grid
+  const grid = document.getElementById('qrdMesasGrid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  for(let i=1; i<=PED_MESAS; i++){
+    const url = getQRUrl(i);
+    const card = document.createElement('div');
+    card.className = 'qrd-card';
+    card.title = 'Copiar URL Mesa ' + i;
+    card.onclick = ()=>copiarUrl(url);
+    card.innerHTML = `<div class="qrd-card-num">${i}</div>
+      <div class="qrd-card-label">Mesa ${i}</div>
+      <div class="qrd-card-url">${url}</div>`;
+    grid.appendChild(card);
+  }
 }
 </script>
 </body>
