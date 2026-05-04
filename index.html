@@ -912,10 +912,24 @@ function ghApi() {
   return `https://api.github.com/repos/${user}/${repo}/contents/${GH_FILE}`;
 }
 
+// Encode JSON → base64 UTF-8 seguro
+function toBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = '';
+  bytes.forEach(b => bin += String.fromCharCode(b));
+  return btoa(bin);
+}
+// Decode base64 → string UTF-8 seguro
+function fromBase64(b64) {
+  const bin = atob(b64.replace(/\n/g,''));
+  const bytes = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
 async function loadFromGitHubSilent() {
-  // Timeout de 6 segundos — si GitHub no responde, se abandona sin afectar la UI
   const controller = new AbortController();
-  const timer = setTimeout(()=>controller.abort(), 6000);
+  const timer = setTimeout(()=>controller.abort(), 8000);
   try {
     const res = await fetch(ghApi(), {
       headers: {'Accept':'application/vnd.github+json'},
@@ -925,10 +939,7 @@ async function loadFromGitHubSilent() {
     if (!res.ok) return;
     const json = await res.json();
     fileSHA = json.sha;
-    const raw = json.content.replace(/\n/g,'');
-    const decoded = decodeURIComponent(escape(atob(raw)));
-    const remoteData = JSON.parse(decoded);
-    // Solo actualizar si los datos remotos son más nuevos/distintos
+    const remoteData = JSON.parse(fromBase64(json.content));
     const remoteStr = JSON.stringify(remoteData);
     const localStr  = JSON.stringify(DATA);
     if(remoteStr !== localStr){
@@ -941,7 +952,6 @@ async function loadFromGitHubSilent() {
     }
   } catch(e) {
     clearTimeout(timer);
-    // Fallo silencioso — el usuario ya tiene el localStorage cargado
     setGhStatus('⚠️ Sin conexión a GitHub — mostrando datos locales', '');
   }
 }
@@ -953,13 +963,10 @@ async function loadFromGitHub() {
     if (!res.ok) throw new Error('status ' + res.status);
     const json = await res.json();
     fileSHA = json.sha;
-    // Decodificar correctamente UTF-8 con acentos
-    const raw = json.content.replace(/\n/g,'');
-    const decoded = decodeURIComponent(escape(atob(raw)));
-    DATA = JSON.parse(decoded);
+    DATA = JSON.parse(fromBase64(json.content));
     localStorage.setItem('cafeRoble_v3', JSON.stringify(DATA));
     setGhStatus('✅ Datos cargados desde GitHub Pages', 'ok');
-    renderMenu(); renderInfo();
+    renderMenu(); renderInfo(); checkUnavailBtn();
     toast('✅ Carta cargada desde GitHub Pages','ok');
   } catch(e) {
     setGhStatus('⚠️ Sin datos en GitHub — usando datos locales', '');
@@ -973,7 +980,7 @@ async function saveToGitHub() {
 
   showLoad(true);
   setGhStatus('⏳ Publicando en GitHub...', '');
-  const content = btoa(unescape(encodeURIComponent(JSON.stringify(DATA, null, 2))));
+  const content = toBase64(JSON.stringify(DATA, null, 2));
   const body = {
     message: 'Actualizar carta — Café Roble',
     content,
