@@ -584,12 +584,12 @@
   .reparto-add-inp:focus{outline:none;border-color:var(--gold)}
 
   /* ── SOLO LOCAL badge en carta ── */
-  .solo-local-tag{
-    display:inline-flex;align-items:center;gap:3px;
-    font-size:.55rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
-    background:rgba(180,83,9,.12);color:#b45309;
-    border:1px solid rgba(180,83,9,.25);border-radius:20px;
-    padding:2px 6px;margin-top:3px;white-space:nowrap;
+  .badge-local{
+    top:auto !important;
+    bottom:2px !important;
+    right:2px !important;
+    background:rgba(154,52,18,.88) !important;
+    color:#fff !important;
   }
   /* Toggle switch admin */
   .disp-toggle{display:flex;align-items:center;gap:5px;cursor:pointer;user-select:none;margin-top:2px}
@@ -1151,11 +1151,11 @@ function renderMenu() {
         <div class="item-thumb">
           <img src="${e(p.img)}" alt="${e(p.nombre)}">
           ${p.badge?`<span class="badge">${e(p.badge)}</span>`:''}
+          ${p.noDomicilio?`<span class="badge badge-local">🏠 Solo local</span>`:''}
         </div>
         <div class="item-info">
           <p class="item-name">${e(p.nombre)}</p>
           <p class="item-desc">${e(p.desc)}</p>
-          ${p.noDomicilio ? '<span class="solo-local-tag">🏠 Solo local</span>' : ''}
         </div>
         <div class="item-qty-wrap">
           <span class="price">${e(p.precio)}</span>
