@@ -912,6 +912,40 @@ function ghApi() {
   return `https://api.github.com/repos/${user}/${repo}/contents/${GH_FILE}`;
 }
 
+async function loadFromGitHubSilent() {
+  // Timeout de 6 segundos — si GitHub no responde, se abandona sin afectar la UI
+  const controller = new AbortController();
+  const timer = setTimeout(()=>controller.abort(), 6000);
+  try {
+    const res = await fetch(ghApi(), {
+      headers: {'Accept':'application/vnd.github+json'},
+      signal: controller.signal
+    });
+    clearTimeout(timer);
+    if (!res.ok) return;
+    const json = await res.json();
+    fileSHA = json.sha;
+    const raw = json.content.replace(/\n/g,'');
+    const decoded = decodeURIComponent(escape(atob(raw)));
+    const remoteData = JSON.parse(decoded);
+    // Solo actualizar si los datos remotos son más nuevos/distintos
+    const remoteStr = JSON.stringify(remoteData);
+    const localStr  = JSON.stringify(DATA);
+    if(remoteStr !== localStr){
+      DATA = remoteData;
+      localStorage.setItem('cafeRoble_v3', JSON.stringify(DATA));
+      renderMenu(); renderInfo(); checkUnavailBtn();
+      setGhStatus('✅ Datos actualizados desde GitHub', 'ok');
+    } else {
+      setGhStatus('✅ Datos en sync con GitHub', 'ok');
+    }
+  } catch(e) {
+    clearTimeout(timer);
+    // Fallo silencioso — el usuario ya tiene el localStorage cargado
+    setGhStatus('⚠️ Sin conexión a GitHub — mostrando datos locales', '');
+  }
+}
+
 async function loadFromGitHub() {
   showLoad(true);
   try {
@@ -2104,9 +2138,8 @@ function buildThemePicker(){
 
 
 document.addEventListener('DOMContentLoaded', async ()=>{
-  // Arrancar siempre con datos vacíos — no mostrar datos del localStorage
-  // hasta que llegue el JSON de GitHub
-  DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
+  // 1. Cargar localStorage al instante — el usuario ve contenido de inmediato
+  loadLocalData();
   loadCart();
   buildThemePicker();
   try{ const saved=localStorage.getItem('cafeRoble_theme'); if(saved) applyTheme(saved); }catch(_){}
@@ -2116,12 +2149,9 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   renderMenu();
   renderInfo();
   updateFloatBadge();
-  // Cargar desde GitHub (fuente de verdad)
-  try { await loadFromGitHub(); } catch(e) {
-    // Solo si falla GitHub, caer en localStorage
-    loadLocalData();
-    renderMenu(); renderInfo();
-  }
+  checkUnavailBtn();
+  // 2. GitHub actualiza en segundo plano sin bloquear ni mostrar spinner
+  loadFromGitHubSilent();
 });
 
 /* ═══════════════════════════════════════════
