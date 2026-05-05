@@ -1102,14 +1102,13 @@
     <div class="enc-git-card" id="encPdfCard">
       <div class="enc-git-title">📄 Generar comprobante PDF de un pedido</div>
       <p style="font-size:.75rem;color:var(--text);margin-bottom:.6rem">
-        Cuando llegue un pedido por WhatsApp, escribe aquí el número <strong>#XXXXXX</strong> y genera el PDF oficial para enviarle el link al cliente.
+        Cuando llegue un pedido por WhatsApp, <strong>copia el bloque de datos</strong> que aparece al final del mensaje del cliente (desde la línea <code>─────</code> hasta la línea <code>─────</code>, incluyendo el código largo) y pégalo aquí abajo.<br>
+        <span style="color:var(--muted);font-size:.7rem">El sistema verificará el pedido y generará el PDF oficial desde este dispositivo con tu token de GitHub. El cliente nunca tuvo acceso al token.</span>
       </p>
-      <div class="enc-git-row" style="gap:.5rem">
-        <input class="enc-git-inp" type="text" id="encPedidoNum" placeholder="Número de pedido (ej: A3F9B2)"
-          style="text-transform:uppercase;letter-spacing:.1em" maxlength="8"
-          oninput="this.value=this.value.toUpperCase();encBuscarPedido(this.value)"/>
-        <button class="enc-pdf-buscar" onclick="encBuscarPedido(document.getElementById('encPedidoNum').value)">🔍</button>
-      </div>
+      <textarea class="enc-git-inp" id="encPedidoDatos"
+        placeholder="Pega aquí el bloque de datos del mensaje de WhatsApp del cliente (el código largo que aparece al final del mensaje)..."
+        rows="4" style="resize:vertical;width:100%;font-size:.72rem;letter-spacing:.02em;font-family:monospace"
+        oninput="encDecodificarPedido(this.value)"></textarea>
 
       <!-- Vista previa del pedido encontrado -->
       <div id="encPedidoPreview" style="display:none;margin-top:.8rem">
@@ -1127,7 +1126,7 @@
         </div>
       </div>
       <div id="encPedidoNotFound" style="display:none;font-size:.78rem;color:#dc2626;margin-top:.6rem">
-        ⚠️ Pedido no encontrado. Verifica el número.
+        ⚠️ No se encontraron datos válidos. Asegúrate de copiar el bloque completo del mensaje de WhatsApp.
       </div>
     </div>
 
@@ -3139,6 +3138,20 @@ async function enviarPedido(){
   if(notas){ lineas.push(''); lineas.push('📝 ' + notas); }
   lineas.push(''); lineas.push('🕐 ' + hora + ' — ' + fecha);
 
+  // ── Codificar datos del pedido para que el encargado pueda generar el PDF ──
+  // Los datos viajan dentro del mensaje de WhatsApp (Base64).
+  // El encargado los pega en su panel → decodifica → genera PDF con su token.
+  // El cliente NUNCA ve el token de GitHub.
+  try{
+    const payloadStr = JSON.stringify(pedidoData);
+    const encoded = btoa(unescape(encodeURIComponent(payloadStr)));
+    lineas.push('');
+    lineas.push('─────────────────────');
+    lineas.push('🔐 DATOS VERIFICADOS DEL PEDIDO (no modificar):');
+    lineas.push(encoded);
+    lineas.push('─────────────────────');
+  }catch(_){}
+
   const msg = encodeURIComponent(lineas.join('\n'));
   window.open('https://wa.me/' + rawTel + '?text=' + msg, '_blank');
 
@@ -3182,61 +3195,90 @@ function encTokenCheck(val){
   }
 }
 
-function encBuscarPedido(num){
-  num = (num||'').trim().toUpperCase();
-  const preview = document.getElementById('encPedidoPreview');
-  const notFound = document.getElementById('encPedidoNotFound');
-  const box = document.getElementById('encPreviewBox');
+// Variable global que guarda el pedido decodificado del mensaje de WhatsApp
+let _pedidoDecodificado = null;
+
+function encDecodificarPedido(texto){
+  const preview   = document.getElementById('encPedidoPreview');
+  const notFound  = document.getElementById('encPedidoNotFound');
+  const box       = document.getElementById('encPreviewBox');
   const pdfResult = document.getElementById('encPdfResult');
+  _pedidoDecodificado = null;
   if(pdfResult) pdfResult.style.display = 'none';
-  if(!num || num.length < 4){ if(preview) preview.style.display='none'; if(notFound) notFound.style.display='none'; return; }
+
+  if(!texto || texto.trim().length < 20){
+    if(preview)  preview.style.display  = 'none';
+    if(notFound) notFound.style.display = 'none';
+    return;
+  }
+
   try{
-    const pedidos = JSON.parse(localStorage.getItem('cafeRoble_pedidos')||'{}');
-    const p = pedidos[num];
-    if(!p){
-      if(preview) preview.style.display='none';
-      if(notFound) notFound.style.display='block';
-      return;
+    // Extraer el bloque Base64: puede ser todo el texto pegado o solo el código
+    // Busca una cadena Base64 larga (mínimo 40 chars) dentro del texto
+    const match = texto.match(/([A-Za-z0-9+/=]{40,})/);
+    if(!match){ throw new Error('No se encontró código válido'); }
+    const encoded = match[1].trim();
+    const jsonStr = decodeURIComponent(escape(atob(encoded)));
+    const p = JSON.parse(jsonStr);
+
+    // Validar que tenga los campos mínimos esperados
+    if(!p || !p.numero || !p.items || !p.modotitulo){
+      throw new Error('Datos incompletos');
     }
-    if(notFound) notFound.style.display='none';
-    // Mostrar resumen
+
+    _pedidoDecodificado = p;
+
+    // Mostrar resumen visual
     let html = `<strong>#${p.numero} — ${p.modotitulo}</strong>`;
-    html += p.infolineas.map(l=>`<span>${l}</span>`).join('');
+    if(p.infolineas && p.infolineas.length){
+      html += p.infolineas.map(l=>`<span>${l}</span>`).join('');
+    }
     html += '<br>';
     p.items.forEach(item=>{
       html += `<span>• ${item.nombre} ×${item.qty}${item.sub>0?' — '+formatPrecio(item.sub):''}</span>`;
     });
     html += `<br><span>💵 Total: <strong>${formatPrecio(p.total)}</strong></span>`;
-    html += `<span style="color:var(--muted);font-size:.7rem">🕐 ${p.hora} ${p.fecha}</span>`;
-    if(box) box.innerHTML = html;
-    if(preview) preview.style.display = 'block';
-  }catch(_){
-    if(notFound) notFound.style.display='block';
+    if(p.hora && p.fecha){
+      html += `<span style="color:var(--muted);font-size:.7rem">🕐 ${p.hora} ${p.fecha}</span>`;
+    }
+    if(box)      box.innerHTML = html;
+    if(preview)  preview.style.display  = 'block';
+    if(notFound) notFound.style.display = 'none';
+  }catch(e){
+    _pedidoDecodificado = null;
+    if(preview)  preview.style.display  = 'none';
+    if(notFound) notFound.style.display = 'block';
   }
 }
 
+// Mantener compatibilidad con cualquier llamada anterior a encBuscarPedido
+function encBuscarPedido(num){
+  const datos = document.getElementById('encPedidoDatos');
+  if(datos) encDecodificarPedido(datos.value);
+}
+
 async function encGenerarPDF(){
-  const num = (document.getElementById('encPedidoNum')?.value||'').trim().toUpperCase();
-  const btn = document.getElementById('encPdfBtn');
+  const btn    = document.getElementById('encPdfBtn');
   const result = document.getElementById('encPdfResult');
-  const linkTxt = document.getElementById('encPdfLinkTxt');
+  const linkTxt= document.getElementById('encPdfLinkTxt');
+
+  // Usar el pedido decodificado del mensaje de WhatsApp
+  const p = _pedidoDecodificado;
+
+  if(!p){ toast('Sin datos de pedido. Pega el bloque del mensaje de WhatsApp.','err'); return; }
 
   try{
-    const pedidos = JSON.parse(localStorage.getItem('cafeRoble_pedidos')||'{}');
-    const p = pedidos[num];
-    if(!p){ toast('Pedido no encontrado','err'); return; }
-
     if(btn){ btn.disabled=true; btn.textContent='⏳ Generando PDF…'; }
 
-    const pdfBuffer = generarPDFPedido(p);
-    const nombreArchivo = `pedido-${p.numero}.pdf`;
+    const pdfBuffer    = generarPDFPedido(p);
+    const nombreArchivo= `pedido-${p.numero}.pdf`;
 
     if(btn) btn.textContent = '☁ Subiendo a GitHub…';
     const pdfUrl = await subirPDFGitHub(nombreArchivo, pdfBuffer);
 
     if(pdfUrl){
       if(linkTxt) linkTxt.textContent = pdfUrl;
-      if(result) result.style.display = 'block';
+      if(result)  result.style.display = 'block';
       toast('✅ PDF generado y subido','ok');
     } else {
       // Sin token → descargar localmente
