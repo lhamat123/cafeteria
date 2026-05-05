@@ -1101,21 +1101,75 @@
     <!-- GENERADOR PDF POR NÚMERO DE PEDIDO -->
     <div class="enc-git-card" id="encPdfCard">
       <div class="enc-git-title">📄 Generar comprobante PDF de un pedido</div>
-      <p style="font-size:.75rem;color:var(--text);margin-bottom:.6rem">
-        Cuando llegue un pedido por WhatsApp, <strong>copia el bloque de datos</strong> que aparece al final del mensaje del cliente (desde la línea <code>─────</code> hasta la línea <code>─────</code>, incluyendo el código largo) y pégalo aquí abajo.<br>
-        <span style="color:var(--muted);font-size:.7rem">El sistema verificará el pedido y generará el PDF oficial desde este dispositivo con tu token de GitHub. El cliente nunca tuvo acceso al token.</span>
+      <p style="font-size:.74rem;color:var(--muted);margin-bottom:.8rem;line-height:1.5">
+        Copia el <strong>código verificado</strong> que aparece al final del mensaje de WhatsApp del cliente y pulsa el botón para pegarlo. El sistema lo valida y genera el PDF desde este dispositivo con tu token.
       </p>
-      <textarea class="enc-git-inp" id="encPedidoDatos"
-        placeholder="Pega aquí el bloque de datos del mensaje de WhatsApp del cliente (el código largo que aparece al final del mensaje)..."
-        rows="4" style="resize:vertical;width:100%;font-size:.72rem;letter-spacing:.02em;font-family:monospace"
-        oninput="encDecodificarPedido(this.value)"></textarea>
 
-      <!-- Vista previa del pedido encontrado -->
-      <div id="encPedidoPreview" style="display:none;margin-top:.8rem">
-        <div class="enc-preview-box" id="encPreviewBox"></div>
-        <button class="enc-save-btn" id="encPdfBtn" onclick="encGenerarPDF()" style="margin-top:.7rem">
+      <!-- Botón principal pegar + campo readonly -->
+      <div style="display:flex;flex-direction:column;gap:.5rem">
+        <button id="encPegarBtn" onclick="encPegarCodigo()"
+          style="width:100%;padding:.75rem;border-radius:10px;border:2px dashed #6fcf6f;
+                 background:#f0faf0;color:#166534;font-family:'Lato',sans-serif;
+                 font-size:.9rem;font-weight:700;cursor:pointer;transition:all .18s;
+                 display:flex;align-items:center;justify-content:center;gap:.5rem">
+          📋 Pegar código del pedido
+        </button>
+        <div id="encCodigoWrap" style="display:none;position:relative">
+          <textarea id="encPedidoDatos" readonly
+            style="width:100%;height:64px;resize:none;border-radius:8px;
+                   border:1.5px solid #6fcf6f;background:#f0faf0;
+                   font-family:monospace;font-size:.65rem;color:#166534;
+                   padding:7px 36px 7px 10px;overflow:hidden;word-break:break-all;
+                   cursor:default;outline:none;line-height:1.4"></textarea>
+          <!-- Botón limpiar -->
+          <button onclick="encLimpiarCodigo()" title="Limpiar y pegar otro código"
+            style="position:absolute;top:5px;right:6px;background:none;border:none;
+                   color:#dc2626;font-size:1rem;cursor:pointer;line-height:1;padding:2px">✕</button>
+        </div>
+      </div>
+
+      <!-- Estado del código -->
+      <div id="encCodigoEstado" style="display:none;font-size:.73rem;font-weight:700;
+           margin-top:.4rem;padding:5px 10px;border-radius:6px;text-align:center"></div>
+
+      <!-- Vista previa del pedido decodificado -->
+      <div id="encPedidoPreview" style="display:none;margin-top:.9rem">
+
+        <!-- Tipo de pedido destacado -->
+        <div id="encTipoPedido" style="background:var(--bm);border-radius:8px;
+             padding:.55rem .9rem;margin-bottom:.6rem;
+             font-family:'Playfair Display',serif;font-size:1rem;
+             font-weight:700;color:var(--gold);text-align:center"></div>
+
+        <!-- Datos del cliente / mesa -->
+        <div id="encPreviewBox" style="background:#fff;border-radius:8px;border:1px solid #e0ddd9;
+             padding:.7rem .9rem;font-size:.8rem;color:var(--text);
+             display:flex;flex-direction:column;gap:3px"></div>
+
+        <!-- Productos -->
+        <div style="margin-top:.6rem;background:#fff;border-radius:8px;border:1px solid #e0ddd9;overflow:hidden">
+          <div style="background:var(--bm);padding:.4rem .9rem;font-size:.72rem;
+               font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--gold)">
+            Productos
+          </div>
+          <div id="encPreviewItems" style="padding:.5rem .9rem;display:flex;flex-direction:column;gap:3px;font-size:.8rem"></div>
+        </div>
+
+        <!-- Totales -->
+        <div id="encPreviewTotales" style="margin-top:.6rem;background:#fff;border-radius:8px;
+             border:1px solid #e0ddd9;padding:.6rem .9rem;font-size:.82rem"></div>
+
+        <!-- Notas -->
+        <div id="encPreviewNotas" style="display:none;margin-top:.5rem;background:#fffbf0;
+             border-radius:8px;border:1px solid #e5d48a;padding:.5rem .9rem;
+             font-size:.78rem;color:#92400e;font-style:italic"></div>
+
+        <!-- Botón generar PDF -->
+        <button class="enc-save-btn" id="encPdfBtn" onclick="encGenerarPDF()" style="margin-top:.8rem">
           📄 Generar PDF y subir a GitHub
         </button>
+
+        <!-- Resultado con link -->
         <div id="encPdfResult" style="margin-top:.6rem;display:none">
           <div class="enc-pdf-link-box">
             <span class="enc-pdf-link-label">🔗 Link del comprobante:</span>
@@ -1125,8 +1179,11 @@
           <p class="enc-pdf-hint">Pega este link en WhatsApp como respuesta al cliente</p>
         </div>
       </div>
-      <div id="encPedidoNotFound" style="display:none;font-size:.78rem;color:#dc2626;margin-top:.6rem">
-        ⚠️ No se encontraron datos válidos. Asegúrate de copiar el bloque completo del mensaje de WhatsApp.
+
+      <div id="encPedidoNotFound" style="display:none;font-size:.78rem;color:#dc2626;
+           margin-top:.6rem;padding:8px 12px;background:#fef2f2;border-radius:8px;
+           border:1px solid #fca5a5">
+        ⚠️ Código inválido o incompleto. Asegúrate de copiar todo el bloque del mensaje de WhatsApp.
       </div>
     </div>
 
