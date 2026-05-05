@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Café Roble</title>
+  <title>Carta</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
@@ -619,6 +619,35 @@
     font-family:'Playfair Display',serif;font-weight:700;
     font-size:1.1rem;color:var(--cream);
   }
+  .enc-status{font-size:.72rem;text-align:center;color:var(--muted);margin-top:.4rem;min-height:1rem}
+  /* Guía ayuda */
+  .enc-ayuda{background:#fff;border-radius:12px;border:1.5px solid var(--bdr);margin-bottom:.9rem;overflow:hidden}
+  .enc-ayuda-title{
+    padding:.75rem 1rem;font-size:.8rem;font-weight:700;letter-spacing:.05em;
+    color:var(--bl);cursor:pointer;list-style:none;user-select:none;
+    background:rgba(201,168,124,.08);
+  }
+  .enc-ayuda-title::-webkit-details-marker{display:none}
+  .enc-ayuda-body{padding:.8rem 1rem 1rem;display:flex;flex-direction:column;gap:.8rem}
+  .enc-ayuda-step{display:flex;gap:.75rem;align-items:flex-start}
+  .enc-ayuda-num{
+    flex-shrink:0;width:24px;height:24px;border-radius:50%;
+    background:var(--gold);color:var(--bd);
+    font-size:.75rem;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+    margin-top:1px;
+  }
+  .enc-ayuda-step div{font-size:.78rem;color:var(--text);line-height:1.55}
+  .enc-ayuda-step strong{color:var(--bl)}
+  .enc-ayuda-step code{background:#f0ede8;padding:1px 4px;border-radius:4px;font-size:.72rem}
+  /* Token status */
+  .enc-token-show{
+    background:none;border:1.5px solid #d8d5d0;border-radius:8px;
+    padding:5px 9px;cursor:pointer;font-size:.85rem;flex-shrink:0;
+    color:var(--muted);
+  }
+  .enc-token-status{font-size:.72rem;margin-top:.35rem;display:flex;align-items:center;gap:4px}
+
   /* ── QR MESA PANEL ── */
   .qr-mesa-panel{display:flex;flex-direction:column;align-items:center;gap:.8rem;padding:.5rem 0}
   .qr-mesa-display{
@@ -709,6 +738,7 @@
     text-transform:uppercase;color:var(--muted)}
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -754,7 +784,7 @@
 <!-- ADMIN FLOATING BUTTON -->
 <button id="adminBtn" onclick="goAdmin()">⚙</button>
 <!-- ENCARGADO FLOATING BUTTON -->
-<button id="encargadoBtn" onclick="goEncargado()">👤 Encargado</button>
+<button id="encargadoBtn" onclick="goEncargado()">👤</button>
 
 <!-- ══════════ MENU PAGE ══════════ -->
 <div class="page active" id="page-menu">
@@ -987,21 +1017,71 @@
   <div class="enc-header">
     <div>
       <div class="enc-header-title">👤 Panel Encargado</div>
-      <div class="enc-header-sub">Solo disponibilidad de productos</div>
+      <div class="enc-header-sub">Disponibilidad · Pedidos PDF · Teléfono</div>
     </div>
     <button class="enc-back" onclick="goPage('menu')">← Salir</button>
   </div>
   <div class="enc-wrap">
-    <div class="enc-git-card">
-      <div class="enc-git-title">🔑 Token GitHub (para publicar)</div>
-      <div class="enc-git-row">
-        <input class="enc-git-inp" type="password" id="encToken" placeholder="github_pat_…" autocomplete="off"/>
+
+    <!-- GUÍA -->
+    <details class="enc-ayuda" open>
+      <summary class="enc-ayuda-title">📖 Guía rápida — ¿Cómo funciona?</summary>
+      <div class="enc-ayuda-body">
+        <div class="enc-ayuda-step">
+          <span class="enc-ayuda-num">1</span>
+          <div><strong>Activar comprobantes PDF</strong><br>
+          Pega el token de GitHub en el campo de abajo. Cuando un cliente haga un pedido, el sistema genera un PDF automáticamente y lo sube a GitHub. El cliente recibe el link en WhatsApp — nadie puede falsificar ese PDF.</div>
+        </div>
+        <div class="enc-ayuda-step">
+          <span class="enc-ayuda-num">2</span>
+          <div><strong>Ver los PDFs de pedidos</strong><br>
+          Entra a <strong>github.com/lhamat123/cafeteria</strong> → carpeta <strong>pedidos/</strong>. Ahí aparecen todos los comprobantes ordenados por número. Cada PDF tiene el detalle completo del pedido con precios reales.</div>
+        </div>
+        <div class="enc-ayuda-step">
+          <span class="enc-ayuda-num">3</span>
+          <div><strong>Ocultar productos agotados</strong><br>
+          Desactiva el toggle del producto. Desaparece de la carta inmediatamente. Pulsa <em>Publicar</em> para que los clientes también lo vean en sus dispositivos.</div>
+        </div>
+        <div class="enc-ayuda-step">
+          <span class="enc-ayuda-num">4</span>
+          <div><strong>Cambiar teléfono de pedidos</strong><br>
+          Si los pedidos deben llegar a otro número de WhatsApp, cámbialo aquí y pulsa Publicar.</div>
+        </div>
       </div>
-      <p style="font-size:.68rem;color:var(--muted);margin-top:.4rem">El token se usa solo para publicar cambios. No se guarda en ningún sitio.</p>
+    </details>
+
+    <!-- TOKEN PDF -->
+    <div class="enc-git-card">
+      <div class="enc-git-title">🔑 Token GitHub — Comprobantes PDF</div>
+      <div class="enc-git-row">
+        <input class="enc-git-inp" type="password" id="encToken" placeholder="github_pat_…" autocomplete="off"
+          oninput="encTokenCheck(this.value)"/>
+        <button class="enc-token-show" onclick="toggleEncToken(this)" title="Mostrar/ocultar">👁</button>
+      </div>
+      <div class="enc-token-status" id="encTokenStatus">
+        <span id="encTokenInd">⚪</span>&nbsp;<span id="encTokenLbl">Sin token — pedidos sin PDF</span>
+      </div>
+      <p style="font-size:.67rem;color:var(--muted);margin-top:.35rem">
+        Obtén el token en GitHub → Settings → Developer settings → Personal access tokens.<br>
+        Permiso necesario: <code>contents: write</code> solo en el repo <code>cafeteria</code>.
+      </p>
     </div>
+
+    <!-- TELÉFONO -->
+    <div class="enc-git-card">
+      <div class="enc-git-title">📱 Teléfono para recibir pedidos</div>
+      <div class="enc-git-row">
+        <input class="enc-git-inp" type="tel" id="encTelefono" placeholder="ej: 5358024452"
+          oninput="DATA.info.telefono=this.value.trim();localStorage.setItem('cafeRoble_v3',JSON.stringify(DATA))"/>
+      </div>
+      <p style="font-size:.68rem;color:var(--muted);margin-top:.4rem">Todos los pedidos de WhatsApp llegarán a este número.</p>
+    </div>
+
+    <!-- PRODUCTOS -->
     <div id="encCatList"></div>
+
     <button class="enc-save-btn" id="encSaveBtn" onclick="encGuardar()">
-      ☁ Publicar disponibilidad en GitHub
+      ☁ Publicar cambios en GitHub
     </button>
     <div class="enc-status" id="encStatus"></div>
   </div>
@@ -1011,7 +1091,9 @@
 /* ═══════════════════════════════════════════
    CONFIG GITHUB
 ═══════════════════════════════════════════ */
-const GH_FILE     = 'menu-data.json';
+const GH_FILE         = 'menu-data.json';
+const GH_PEDIDOS_DIR  = 'pedidos';       // carpeta en el repo donde se suben los PDFs
+const GH_PEDIDOS_TOKEN= '';              // ← pega aquí un token con permisos contents:write
 const APP_PASS      = 'Cafe2025';   // ← contraseña administrador
 const ENC_PASS      = 'Enc2025';    // ← contraseña encargado (cámbiala)
 
@@ -1171,6 +1253,8 @@ function setGhStatus(msg, cls) {
 ═══════════════════════ */
 function renderInfo() {
   const d = DATA.info || {};
+  // Título del navegador
+  document.title = d.nombre || 'Carta';
   // Banner
   ['bannerPhotoMenu','bannerPhotoInfo'].forEach(id => {
     const el = document.getElementById(id);
@@ -2806,15 +2890,138 @@ document.addEventListener('DOMContentLoaded', ()=>{
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('input', updateSendBtn); });
 });
 
+/* ── Generar PDF del pedido ── */
+function generarPDFPedido(datos){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'mm', format:'a5', orientation:'portrait' });
+  const negocio = DATA.info?.nombre || 'Café';
+  const W = doc.internal.pageSize.getWidth();
+
+  // Cabecera
+  doc.setFillColor(44, 26, 14);
+  doc.rect(0, 0, W, 28, 'F');
+  doc.setTextColor(201, 168, 124);
+  doc.setFontSize(16); doc.setFont('helvetica','bold');
+  doc.text(negocio, W/2, 12, {align:'center'});
+  doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.text('PEDIDO OFICIAL — No editable', W/2, 19, {align:'center'});
+  doc.setTextColor(180,160,130);
+  doc.text('# ' + datos.numero, W/2, 25, {align:'center'});
+
+  // Info pedido
+  let y = 35;
+  doc.setTextColor(30,15,5);
+  doc.setFontSize(9); doc.setFont('helvetica','bold');
+  doc.text(datos.modotitulo, 8, y); y += 6;
+
+  doc.setFont('helvetica','normal'); doc.setFontSize(8);
+  datos.infolineas.forEach(l=>{ doc.text(l, 8, y); y += 5; });
+
+  // Separador
+  y += 2;
+  doc.setDrawColor(201,168,124); doc.setLineWidth(0.3);
+  doc.line(8, y, W-8, y); y += 5;
+
+  // Productos
+  doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
+  doc.text('PRODUCTOS', 8, y); y += 5;
+  doc.setFont('helvetica','normal'); doc.setFontSize(8);
+
+  datos.items.forEach(item=>{
+    const lbl = item.nombre + '  ×' + item.qty;
+    const precio = item.sub > 0 ? formatPrecio(item.sub) : '';
+    doc.text(lbl, 8, y);
+    if(precio) doc.text(precio, W-8, y, {align:'right'});
+    y += 5;
+    if(y > 185){ doc.addPage(); y = 15; }
+  });
+
+  // Totales
+  y += 2;
+  doc.setDrawColor(201,168,124); doc.line(8, y, W-8, y); y += 5;
+  doc.setFontSize(8);
+  if(datos.subtotal > 0){
+    doc.text('Subtotal productos:', 8, y);
+    doc.text(formatPrecio(datos.subtotal), W-8, y, {align:'right'}); y += 5;
+  }
+  if(datos.costoEnvio > 0){
+    doc.text('Costo de envío:', 8, y);
+    doc.text(formatPrecio(datos.costoEnvio), W-8, y, {align:'right'}); y += 5;
+  }
+  doc.setFont('helvetica','bold'); doc.setFontSize(10);
+  doc.text('TOTAL:', 8, y);
+  doc.text(formatPrecio(datos.total), W-8, y, {align:'right'}); y += 6;
+
+  if(datos.notas){
+    doc.setFont('helvetica','italic'); doc.setFontSize(7.5);
+    doc.text('Notas: ' + datos.notas, 8, y); y += 5;
+  }
+
+  // Pie
+  doc.setFont('helvetica','normal'); doc.setFontSize(7);
+  doc.setTextColor(150,130,110);
+  doc.text(datos.hora + ' · Generado por el sistema · No modificable', W/2, y+4, {align:'center'});
+
+  return doc.output('arraybuffer');
+}
+
+/* ── Subir PDF a GitHub ── */
+async function subirPDFGitHub(nombreArchivo, pdfBuffer){
+  const user  = document.getElementById('ghUser')?.value.trim() || 'lhamat123';
+  const repo  = document.getElementById('ghRepo')?.value.trim() || 'cafeteria';
+  // Prioridad: token encargado (sessionStorage) → token admin → hardcodeado
+  let token = '';
+  try{ token = sessionStorage.getItem('cafeRoble_encToken') || ''; }catch(_){}
+  if(!token) token = document.getElementById('ghToken')?.value.trim() || GH_PEDIDOS_TOKEN;
+  if(!token) return null;
+
+  const bytes = new Uint8Array(pdfBuffer);
+  let bin = ''; bytes.forEach(b => bin += String.fromCharCode(b));
+  const b64 = btoa(bin);
+
+  const path = `${GH_PEDIDOS_DIR}/${nombreArchivo}`;
+  const apiUrl = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
+
+  try {
+    const res = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({
+        message: 'Pedido ' + nombreArchivo,
+        content: b64,
+        committer: { name: 'Sistema Pedidos', email: 'pedidos@caferoble.com' }
+      })
+    });
+    if(!res.ok) return null;
+    // URL raw para acceso inmediato sin esperar GitHub Pages build
+    return `https://raw.githubusercontent.com/${user}/${repo}/main/${path}`;
+  } catch(_){ return null; }
+}
+
 /* ── Enviar por WhatsApp ── */
-function enviarPedido(){
-  const rawTel = '5358024452';
+async function enviarPedido(){
+  const rawTel = (DATA.info?.telefono||'5358024452').replace(/\D/g,'');
   const keys = Object.keys(pedCart);
   if(!keys.length){ toast('Agrega al menos un producto','warn'); return; }
 
-  let lineas = [];
+  const btn = document.getElementById('pedSendBtn');
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ Preparando pedido…'; }
+
+  // Número de pedido único
+  const numero = Date.now().toString(36).toUpperCase().slice(-6);
+  const hora   = new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  const fecha  = new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'});
+
+  // ── Construir datos del pedido ──
+  let modotitulo = '';
+  let infolineas = [];
+
   if(pedMode==='mesa'){
-    lineas.push('🍽️ *PEDIDO MESA ' + pedMesaSeleccionada + '*');
+    modotitulo = '🍽️ PEDIDO MESA ' + pedMesaSeleccionada;
   } else if(pedMode==='domicilio'){
     const nombre  = (document.getElementById('domNombre')?.value||'').trim();
     const tel     = (document.getElementById('domTelefono')?.value||'').trim();
@@ -2822,23 +3029,23 @@ function enviarPedido(){
     const ref     = (document.getElementById('domReferencia')?.value||'').trim();
     const rval    = (document.getElementById('domReparto')?.value||'');
     const [zona, anillo, precio] = rval.split('||');
-    lineas.push('🛵 *PEDIDO A DOMICILIO*');
-    if(nombre) lineas.push('👤 Nombre: ' + nombre);
-    if(tel)    lineas.push('📱 Tel: ' + tel);
-    if(zona)   lineas.push('📍 Reparto: ' + zona + ' (' + anillo + ')');
-    if(dir)    lineas.push('🏠 Dirección: ' + dir);
-    if(ref)    lineas.push('📌 Ref: ' + ref);
-    if(precio) lineas.push('🛵 Costo de envío: ' + precio);
+    modotitulo = '🛵 PEDIDO A DOMICILIO';
+    if(nombre) infolineas.push('👤 ' + nombre);
+    if(tel)    infolineas.push('📱 ' + tel);
+    if(zona)   infolineas.push('📍 ' + zona + ' (' + anillo + ')');
+    if(dir)    infolineas.push('🏠 ' + dir);
+    if(ref)    infolineas.push('📌 ' + ref);
   } else {
     const nombre = (document.getElementById('recNombre')?.value||'').trim();
     const tel    = (document.getElementById('recTelefono')?.value||'').trim();
-    lineas.push('🥡 *PEDIDO PARA RECOGER*');
-    if(nombre) lineas.push('👤 Nombre: ' + nombre);
-    if(tel)    lineas.push('📱 Tel: ' + tel);
+    modotitulo = '🥡 PEDIDO PARA RECOGER';
+    if(nombre) infolineas.push('👤 ' + nombre);
+    if(tel)    infolineas.push('📱 ' + tel);
   }
 
-  lineas.push(''); lineas.push('*Productos:*');
-  let total = 0;
+  // Productos
+  let total = 0, subtotal = 0, costoEnvio = 0;
+  const items = [];
   keys.forEach(key=>{
     const [ci,pi] = key.split('-').map(Number);
     const p = DATA.categorias[ci]?.productos[pi];
@@ -2846,43 +3053,61 @@ function enviarPedido(){
     const qty = pedCart[key];
     const priceNum = parsePrecio(p.precio);
     const sub = priceNum * qty;
-    total += sub;
-    lineas.push('• ' + p.nombre + ' ×' + qty + (priceNum>0?' ('+formatPrecio(sub)+')':''));
+    subtotal += sub;
+    items.push({ nombre: p.nombre, qty, precio: priceNum, sub });
   });
-  if(total>0){
-    lineas.push('');
-    lineas.push('💰 *Subtotal productos: ' + formatPrecio(total) + '*');
-    if(pedMode==='domicilio'){
-      const rval = (document.getElementById('domReparto')?.value||'');
-      const parts = rval.split('||');
-      if(parts[2]){
-        const costoEnvio = parsePrecio(parts[2]);
-        lineas.push('🛵 *Envío: ' + parts[2] + '*');
-        lineas.push('💵 *Total: ' + formatPrecio(total + costoEnvio) + '*');
-      } else {
-        lineas.push('💵 *Total: ' + formatPrecio(total) + '*');
-      }
-    } else {
-      lineas.push('💵 *Total estimado: ' + formatPrecio(total) + '*');
-    }
+
+  if(pedMode==='domicilio'){
+    const rval  = (document.getElementById('domReparto')?.value||'');
+    const parts = rval.split('||');
+    if(parts[2]) costoEnvio = parsePrecio(parts[2]);
   }
+  total = subtotal + costoEnvio;
 
   const notas = (document.getElementById('pedNotas')?.value||'').trim();
-  if(notas){ lineas.push(''); lineas.push('📝 Notas: ' + notas); }
 
-  const hora = new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
-  lineas.push(''); lineas.push('🕐 Hora del pedido: ' + hora);
+  // ── Generar PDF ──
+  const pdfBuffer = generarPDFPedido({ numero, hora, fecha, modotitulo, infolineas, items, subtotal, costoEnvio, total, notas });
+
+  // ── Subir a GitHub ──
+  const nombreArchivo = `pedido-${numero}.pdf`;
+  toast('☁ Subiendo comprobante…','');
+  const pdfUrl = await subirPDFGitHub(nombreArchivo, pdfBuffer);
+
+  // ── Construir mensaje WhatsApp ──
+  let lineas = [];
+  lineas.push('*' + modotitulo + '*');
+  lineas.push('🔖 Pedido: *#' + numero + '*');
+  infolineas.forEach(l => lineas.push(l));
+  lineas.push('');
+  lineas.push('*Productos:*');
+  items.forEach(item=>{
+    lineas.push('• ' + item.nombre + ' ×' + item.qty + (item.sub > 0 ? '  (' + formatPrecio(item.sub) + ')' : ''));
+  });
+  lineas.push('');
+  if(subtotal > 0) lineas.push('💰 *Subtotal: ' + formatPrecio(subtotal) + '*');
+  if(costoEnvio > 0) lineas.push('🛵 *Envío: ' + formatPrecio(costoEnvio) + '*');
+  if(total > 0) lineas.push('💵 *Total: ' + formatPrecio(total) + '*');
+  if(notas){ lineas.push(''); lineas.push('📝 ' + notas); }
+  lineas.push('');
+  lineas.push('🕐 ' + hora + ' — ' + fecha);
+  if(pdfUrl){
+    lineas.push('');
+    lineas.push('📄 *Comprobante oficial:*');
+    lineas.push(pdfUrl);
+  }
 
   const msg = encodeURIComponent(lineas.join('\n'));
   window.open('https://wa.me/' + rawTel + '?text=' + msg, '_blank');
 
-  // Limpiar carrito tras enviar
+  // Limpiar carrito
   pedCart = {};
   saveCart();
   renderPedCart();
   renderMenu();
+  if(btn){ btn.disabled = false; btn.textContent = ''; }
   updateSendBtn();
-  toast('✅ Pedido enviado por WhatsApp','ok');
+  toast('✅ Pedido enviado' + (pdfUrl ? ' con comprobante PDF' : ''), 'ok');
 }
 
 /* ══════════════════════════════
@@ -2895,10 +3120,48 @@ function goEncargado(){
   goPage('encargado');
 }
 
+function toggleEncToken(btn){
+  const inp = document.getElementById('encToken');
+  if(!inp) return;
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+}
+
+function encTokenCheck(val){
+  const ind = document.getElementById('encTokenInd');
+  const lbl = document.getElementById('encTokenLbl');
+  // Guardar en sessionStorage (solo dura la sesión, no en localStorage por seguridad)
+  try{ sessionStorage.setItem('cafeRoble_encToken', val); }catch(_){}
+  if(val && val.startsWith('github_')){
+    if(ind) ind.textContent = '🟢';
+    if(lbl) lbl.textContent = 'Token válido — los pedidos generarán PDF automáticamente';
+  } else if(val){
+    if(ind) ind.textContent = '🔴';
+    if(lbl) lbl.textContent = 'Formato inválido — debe comenzar con github_pat_…';
+  } else {
+    if(ind) ind.textContent = '⚪';
+    if(lbl) lbl.textContent = 'Sin token — pedidos sin PDF';
+  }
+}
+
 function buildEncargado(){
   const wrap = document.getElementById('encCatList');
   if(!wrap) return;
   wrap.innerHTML = '';
+
+  // Cargar teléfono actual
+  const telInp = document.getElementById('encTelefono');
+  if(telInp) telInp.value = DATA.info?.telefono || '';
+
+  // Restaurar token de sessionStorage
+  const encInp = document.getElementById('encToken');
+  if(encInp){
+    try{
+      const saved = sessionStorage.getItem('cafeRoble_encToken') || '';
+      encInp.value = saved;
+      encTokenCheck(saved);
+    }catch(_){}
+  }
   DATA.categorias.forEach((cat, ci)=>{
     const card = document.createElement('div');
     card.className = 'enc-cat-card';
