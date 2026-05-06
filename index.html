@@ -3007,70 +3007,119 @@ function generarPDFPedido(datos){
   const negocio = DATA.info?.nombre || 'Café';
   const W = doc.internal.pageSize.getWidth();
 
-  // Cabecera
+  // ── Cabecera ──────────────────────────────────────────────────────────────
   doc.setFillColor(44, 26, 14);
-  doc.rect(0, 0, W, 28, 'F');
+  doc.rect(0, 0, W, 30, 'F');
   doc.setTextColor(201, 168, 124);
-  doc.setFontSize(16); doc.setFont('helvetica','bold');
-  doc.text(negocio, W/2, 12, {align:'center'});
-  doc.setFontSize(8); doc.setFont('helvetica','normal');
-  doc.text('PEDIDO OFICIAL — No editable', W/2, 19, {align:'center'});
+  doc.setFontSize(15); doc.setFont('helvetica','bold');
+  doc.text(negocio, W/2, 11, {align:'center'});
+  doc.setFontSize(7.5); doc.setFont('helvetica','normal');
+  doc.text('COMPROBANTE OFICIAL DE PEDIDO', W/2, 18, {align:'center'});
   doc.setTextColor(180,160,130);
-  doc.text('# ' + datos.numero, W/2, 25, {align:'center'});
+  doc.text('# ' + datos.numero + '   ·   ' + (datos.hora||'') + '  ' + (datos.fecha||''), W/2, 24.5, {align:'center'});
 
-  // Info pedido
   let y = 35;
-  doc.setTextColor(30,15,5);
-  doc.setFontSize(9); doc.setFont('helvetica','bold');
-  doc.text(datos.modotitulo, 8, y); y += 6;
 
-  doc.setFont('helvetica','normal'); doc.setFontSize(8);
-  datos.infolineas.forEach(l=>{ doc.text(l, 8, y); y += 5; });
+  // ── Tipo de pedido (destacado) ────────────────────────────────────────────
+  const modo = datos.modotitulo || '';
+  let tipoLabel = '', tipoColor = [44,26,14], tipoBg = [201,168,124];
+  if(modo.includes('MESA')){
+    const mNum = modo.replace(/[^0-9]/g,'');
+    tipoLabel = '  PEDIDO EN MESA' + (mNum ? '  N° ' + mNum : '');
+  } else if(modo.includes('DOMICILIO') || modo.includes('ENVÍO') || modo.includes('ENVIO')){
+    tipoLabel = '  PEDIDO A DOMICILIO / ENVÍO';
+  } else if(modo.includes('RECOGER')){
+    tipoLabel = '  PEDIDO PARA RECOGER EN EL LOCAL';
+  } else {
+    tipoLabel = '  ' + modo;
+  }
+  doc.setFillColor(...tipoBg);
+  doc.roundedRect(6, y-4.5, W-12, 9, 2, 2, 'F');
+  doc.setTextColor(...tipoColor);
+  doc.setFontSize(9.5); doc.setFont('helvetica','bold');
+  doc.text(tipoLabel, 8, y+0.5);
+  y += 10;
 
-  // Separador
-  y += 2;
+  // ── Info del cliente / mesa ───────────────────────────────────────────────
+  if(datos.infolineas && datos.infolineas.length){
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(30,15,5);
+    datos.infolineas.forEach(l=>{ doc.text(l, 9, y); y += 5; });
+    y += 1;
+  }
+
+  // ── Separador ─────────────────────────────────────────────────────────────
+  doc.setDrawColor(201,168,124); doc.setLineWidth(0.25);
+  doc.line(8, y, W-8, y); y += 5;
+
+  // ── Encabezado productos ──────────────────────────────────────────────────
+  doc.setFillColor(245,240,232);
+  doc.rect(6, y-3.5, W-12, 7, 'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(44,26,14);
+  doc.text('CANT.', 9,  y+0.5);
+  doc.text('PRODUCTO', 25, y+0.5);
+  doc.text('PRECIO', W-9, y+0.5, {align:'right'});
+  y += 7;
+
+  // ── Filas de productos ────────────────────────────────────────────────────
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(30,15,5);
+  datos.items.forEach((item,i)=>{
+    if(y > 188){ doc.addPage(); y = 15; }
+    if(i%2===0){ doc.setFillColor(252,250,247); doc.rect(6,y-3.5,W-12,6.5,'F'); }
+    doc.text('×' + item.qty,          10, y+0.5, {align:'center'});
+    doc.text(item.nombre,             24, y+0.5);
+    if(item.sub > 0) doc.text(formatPrecio(item.sub), W-9, y+0.5, {align:'right'});
+    y += 6.5;
+  });
+
+  // ── Bloque de totales ─────────────────────────────────────────────────────
+  y += 3;
   doc.setDrawColor(201,168,124); doc.setLineWidth(0.3);
   doc.line(8, y, W-8, y); y += 5;
 
-  // Productos
-  doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
-  doc.text('PRODUCTOS', 8, y); y += 5;
-  doc.setFont('helvetica','normal'); doc.setFontSize(8);
+  const esDomicilio = modo.includes('DOMICILIO') || modo.includes('ENVÍO') || modo.includes('ENVIO');
 
-  datos.items.forEach(item=>{
-    const lbl = item.nombre + '  ×' + item.qty;
-    const precio = item.sub > 0 ? formatPrecio(item.sub) : '';
-    doc.text(lbl, 8, y);
-    if(precio) doc.text(precio, W-8, y, {align:'right'});
-    y += 5;
-    if(y > 185){ doc.addPage(); y = 15; }
-  });
+  if(esDomicilio && datos.subtotal > 0){
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(60,40,20);
+    doc.text('Subtotal productos:', 9, y);
+    doc.text(formatPrecio(datos.subtotal), W-9, y, {align:'right'});
+    y += 6;
 
-  // Totales
-  y += 2;
-  doc.setDrawColor(201,168,124); doc.line(8, y, W-8, y); y += 5;
-  doc.setFontSize(8);
-  if(datos.subtotal > 0){
-    doc.text('Subtotal productos:', 8, y);
-    doc.text(formatPrecio(datos.subtotal), W-8, y, {align:'right'}); y += 5;
+    doc.setTextColor(150,80,0);
+    doc.text('Costo de envío:', 9, y);
+    doc.text(datos.costoEnvio > 0 ? formatPrecio(datos.costoEnvio) : 'Por confirmar', W-9, y, {align:'right'});
+    y += 6;
+
+    // Línea separadora antes del total final
+    doc.setDrawColor(201,168,124); doc.setLineWidth(0.4);
+    doc.line(8, y, W-8, y); y += 5;
   }
-  if(datos.costoEnvio > 0){
-    doc.text('Costo de envío:', 8, y);
-    doc.text(formatPrecio(datos.costoEnvio), W-8, y, {align:'right'}); y += 5;
-  }
-  doc.setFont('helvetica','bold'); doc.setFontSize(10);
-  doc.text('TOTAL:', 8, y);
-  doc.text(formatPrecio(datos.total), W-8, y, {align:'right'}); y += 6;
 
+  // Total principal
+  doc.setFillColor(44,26,14);
+  doc.roundedRect(6, y-4.5, W-12, 10, 2, 2, 'F');
+  doc.setTextColor(201,168,124);
+  doc.setFont('helvetica','bold'); doc.setFontSize(11);
+  const totalLabel = esDomicilio && datos.subtotal > 0 ? 'TOTAL CON ENVÍO:' : 'TOTAL:';
+  doc.text(totalLabel, 10, y+2);
+  doc.text(formatPrecio(datos.total), W-9, y+2, {align:'right'});
+  y += 14;
+
+  // ── Notas ─────────────────────────────────────────────────────────────────
   if(datos.notas){
+    doc.setFillColor(255,251,230);
+    doc.roundedRect(6, y-3, W-12, 10, 2, 2, 'F');
+    doc.setTextColor(120,80,20);
     doc.setFont('helvetica','italic'); doc.setFontSize(7.5);
-    doc.text('Notas: ' + datos.notas, 8, y); y += 5;
+    doc.text('📝 ' + datos.notas, 9, y+2.5);
+    y += 13;
   }
 
-  // Pie
-  doc.setFont('helvetica','normal'); doc.setFontSize(7);
-  doc.setTextColor(150,130,110);
-  doc.text(datos.hora + ' · Generado por el sistema · No modificable', W/2, y+4, {align:'center'});
+  // ── Pie de página ─────────────────────────────────────────────────────────
+  const pageH = doc.internal.pageSize.getHeight();
+  doc.setFont('helvetica','normal'); doc.setFontSize(6.5);
+  doc.setTextColor(160,140,120);
+  doc.text('Comprobante generado por el sistema — No modificable', W/2, pageH-6, {align:'center'});
+  doc.text(negocio + ' · ' + (datos.hora||'') + ' · ' + (datos.fecha||''), W/2, pageH-2.5, {align:'center'});
 
   return doc.output('arraybuffer');
 }
@@ -3252,83 +3301,200 @@ function encTokenCheck(val){
   }
 }
 
-// Variable global que guarda el pedido decodificado del mensaje de WhatsApp
+// ── Variable global del pedido decodificado ──────────────────────────────────
 let _pedidoDecodificado = null;
 
+/* Botón "Pegar código" — lee el portapapeles y decodifica */
+async function encPegarCodigo(){
+  let texto = '';
+  try{
+    texto = await navigator.clipboard.readText();
+  }catch(_){
+    // Fallback: prompt manual si el navegador bloquea clipboard
+    texto = prompt('Pega aquí el código del pedido:') || '';
+  }
+  if(!texto.trim()){ toast('El portapapeles está vacío','warn'); return; }
+  const campo = document.getElementById('encPedidoDatos');
+  const wrap  = document.getElementById('encCodigoWrap');
+  if(campo){ campo.value = texto; }
+  if(wrap)  wrap.style.display = 'block';
+  encDecodificarPedido(texto);
+}
+
+/* Botón ✕ — limpia todo para empezar de nuevo */
+function encLimpiarCodigo(){
+  const campo    = document.getElementById('encPedidoDatos');
+  const wrap     = document.getElementById('encCodigoWrap');
+  const estado   = document.getElementById('encCodigoEstado');
+  const preview  = document.getElementById('encPedidoPreview');
+  const notFound = document.getElementById('encPedidoNotFound');
+  const pdfResult= document.getElementById('encPdfResult');
+  _pedidoDecodificado = null;
+  if(campo)    campo.value = '';
+  if(wrap)     wrap.style.display     = 'none';
+  if(estado)   estado.style.display   = 'none';
+  if(preview)  preview.style.display  = 'none';
+  if(notFound) notFound.style.display = 'none';
+  if(pdfResult)pdfResult.style.display= 'none';
+}
+
+/* Decodifica el Base64 y renderiza la vista previa completa */
 function encDecodificarPedido(texto){
-  const preview   = document.getElementById('encPedidoPreview');
-  const notFound  = document.getElementById('encPedidoNotFound');
-  const box       = document.getElementById('encPreviewBox');
-  const pdfResult = document.getElementById('encPdfResult');
+  const preview    = document.getElementById('encPedidoPreview');
+  const notFound   = document.getElementById('encPedidoNotFound');
+  const estado     = document.getElementById('encCodigoEstado');
+  const tipoPed    = document.getElementById('encTipoPedido');
+  const boxInfo    = document.getElementById('encPreviewBox');
+  const boxItems   = document.getElementById('encPreviewItems');
+  const boxTotales = document.getElementById('encPreviewTotales');
+  const boxNotas   = document.getElementById('encPreviewNotas');
+  const pdfResult  = document.getElementById('encPdfResult');
   _pedidoDecodificado = null;
   if(pdfResult) pdfResult.style.display = 'none';
 
   if(!texto || texto.trim().length < 20){
     if(preview)  preview.style.display  = 'none';
     if(notFound) notFound.style.display = 'none';
+    if(estado)   estado.style.display   = 'none';
     return;
   }
 
   try{
-    // Extraer el bloque Base64: puede ser todo el texto pegado o solo el código
-    // Busca una cadena Base64 larga (mínimo 40 chars) dentro del texto
+    // Extraer cadena Base64 larga del bloque pegado
     const match = texto.match(/([A-Za-z0-9+/=]{40,})/);
-    if(!match){ throw new Error('No se encontró código válido'); }
-    const encoded = match[1].trim();
-    const jsonStr = decodeURIComponent(escape(atob(encoded)));
+    if(!match) throw new Error('no base64');
+    const jsonStr = decodeURIComponent(escape(atob(match[1].trim())));
     const p = JSON.parse(jsonStr);
-
-    // Validar que tenga los campos mínimos esperados
-    if(!p || !p.numero || !p.items || !p.modotitulo){
-      throw new Error('Datos incompletos');
-    }
+    if(!p || !p.numero || !p.items || !p.modotitulo) throw new Error('incompleto');
 
     _pedidoDecodificado = p;
 
-    // Mostrar resumen visual
-    let html = `<strong>#${p.numero} — ${p.modotitulo}</strong>`;
-    if(p.infolineas && p.infolineas.length){
-      html += p.infolineas.map(l=>`<span>${l}</span>`).join('');
+    // Estado visual del código
+    if(estado){
+      estado.style.display = 'block';
+      estado.style.background = '#f0faf0';
+      estado.style.color = '#166534';
+      estado.style.border = '1px solid #6fcf6f';
+      estado.textContent = '✅ Código válido — pedido verificado #' + p.numero;
     }
-    html += '<br>';
-    p.items.forEach(item=>{
-      html += `<span>• ${item.nombre} ×${item.qty}${item.sub>0?' — '+formatPrecio(item.sub):''}</span>`;
-    });
-    html += `<br><span>💵 Total: <strong>${formatPrecio(p.total)}</strong></span>`;
-    if(p.hora && p.fecha){
-      html += `<span style="color:var(--muted);font-size:.7rem">🕐 ${p.hora} ${p.fecha}</span>`;
+
+    // ── Tipo de pedido ────────────────────────────────────────────────────────
+    const modo = p.modotitulo || '';
+    let tipoLabel = '';
+    if(modo.includes('MESA')){
+      // Extraer número de mesa del título
+      const mNum = modo.replace(/[^0-9]/g,'');
+      tipoLabel = '🍽️ PEDIDO EN MESA' + (mNum ? ' N° ' + mNum : '');
+    } else if(modo.includes('DOMICILIO') || modo.includes('ENVÍO') || modo.includes('ENVIO')){
+      tipoLabel = '🛵 PEDIDO A DOMICILIO / ENVÍO';
+    } else if(modo.includes('RECOGER')){
+      tipoLabel = '🥡 PEDIDO PARA RECOGER EN EL LOCAL';
+    } else {
+      tipoLabel = modo;
     }
-    if(box)      box.innerHTML = html;
+    if(tipoPed) tipoPed.textContent = tipoLabel;
+
+    // ── Info del cliente / mesa ───────────────────────────────────────────────
+    if(boxInfo){
+      let infoHtml = '';
+      if(p.infolineas && p.infolineas.length){
+        infoHtml = p.infolineas.map(l =>
+          `<div style="padding:1px 0">${l}</div>`
+        ).join('');
+      } else {
+        infoHtml = `<div style="color:var(--muted)">Sin datos adicionales</div>`;
+      }
+      infoHtml += `<div style="color:var(--muted);font-size:.72rem;margin-top:4px">🕐 ${p.hora||''} — ${p.fecha||''} &nbsp;·&nbsp; <strong>#${p.numero}</strong></div>`;
+      boxInfo.innerHTML = infoHtml;
+    }
+
+    // ── Productos ─────────────────────────────────────────────────────────────
+    if(boxItems){
+      boxItems.innerHTML = p.items.map(item =>{
+        const precio = item.sub > 0
+          ? `<span style="font-weight:700;color:var(--gold)">${formatPrecio(item.sub)}</span>`
+          : '';
+        return `<div style="display:flex;justify-content:space-between;align-items:baseline;padding:2px 0;border-bottom:1px dashed #f0ede8">
+          <span>• ${item.nombre} <span style="color:var(--muted)">×${item.qty}</span></span>
+          ${precio}
+        </div>`;
+      }).join('');
+    }
+
+    // ── Totales (con desglose envío si aplica) ────────────────────────────────
+    if(boxTotales){
+      const esDomicilio = modo.includes('DOMICILIO') || modo.includes('ENVÍO') || modo.includes('ENVIO');
+      let totHtml = '';
+
+      if(esDomicilio && p.subtotal > 0){
+        totHtml += `<div style="display:flex;justify-content:space-between;padding:2px 0">
+          <span>Subtotal productos</span>
+          <span>${formatPrecio(p.subtotal)}</span>
+        </div>`;
+        totHtml += `<div style="display:flex;justify-content:space-between;padding:2px 0;color:#b45309">
+          <span>🛵 Costo de envío</span>
+          <span>${p.costoEnvio > 0 ? formatPrecio(p.costoEnvio) : 'Por confirmar'}</span>
+        </div>`;
+        totHtml += `<div style="display:flex;justify-content:space-between;padding:6px 0 2px;
+            border-top:2px solid var(--gold);margin-top:4px;font-size:.95rem;font-weight:700;color:var(--gold)">
+          <span>TOTAL CON ENVÍO</span>
+          <span>${formatPrecio(p.total)}</span>
+        </div>`;
+      } else {
+        totHtml += `<div style="display:flex;justify-content:space-between;padding:6px 0;
+            font-size:.95rem;font-weight:700;color:var(--gold)">
+          <span>TOTAL</span>
+          <span>${formatPrecio(p.total)}</span>
+        </div>`;
+      }
+      boxTotales.innerHTML = totHtml;
+    }
+
+    // ── Notas ─────────────────────────────────────────────────────────────────
+    if(boxNotas){
+      if(p.notas){
+        boxNotas.style.display = 'block';
+        boxNotas.textContent   = '📝 Notas: ' + p.notas;
+      } else {
+        boxNotas.style.display = 'none';
+      }
+    }
+
     if(preview)  preview.style.display  = 'block';
     if(notFound) notFound.style.display = 'none';
+
   }catch(e){
     _pedidoDecodificado = null;
     if(preview)  preview.style.display  = 'none';
     if(notFound) notFound.style.display = 'block';
+    if(estado){
+      estado.style.display    = 'block';
+      estado.style.background = '#fef2f2';
+      estado.style.color      = '#dc2626';
+      estado.style.border     = '1px solid #fca5a5';
+      estado.textContent      = '❌ Código inválido o incompleto';
+    }
   }
 }
 
-// Mantener compatibilidad con cualquier llamada anterior a encBuscarPedido
-function encBuscarPedido(num){
+// Compatibilidad con llamadas antiguas
+function encBuscarPedido(){
   const datos = document.getElementById('encPedidoDatos');
   if(datos) encDecodificarPedido(datos.value);
 }
 
 async function encGenerarPDF(){
-  const btn    = document.getElementById('encPdfBtn');
-  const result = document.getElementById('encPdfResult');
-  const linkTxt= document.getElementById('encPdfLinkTxt');
-
-  // Usar el pedido decodificado del mensaje de WhatsApp
+  const btn     = document.getElementById('encPdfBtn');
+  const result  = document.getElementById('encPdfResult');
+  const linkTxt = document.getElementById('encPdfLinkTxt');
   const p = _pedidoDecodificado;
 
-  if(!p){ toast('Sin datos de pedido. Pega el bloque del mensaje de WhatsApp.','err'); return; }
+  if(!p){ toast('Primero pega el código del pedido','err'); return; }
 
   try{
     if(btn){ btn.disabled=true; btn.textContent='⏳ Generando PDF…'; }
-
-    const pdfBuffer    = generarPDFPedido(p);
-    const nombreArchivo= `pedido-${p.numero}.pdf`;
+    const pdfBuffer     = generarPDFPedido(p);
+    const nombreArchivo = `pedido-${p.numero}.pdf`;
 
     if(btn) btn.textContent = '☁ Subiendo a GitHub…';
     const pdfUrl = await subirPDFGitHub(nombreArchivo, pdfBuffer);
@@ -3338,16 +3504,15 @@ async function encGenerarPDF(){
       if(result)  result.style.display = 'block';
       toast('✅ PDF generado y subido','ok');
     } else {
-      // Sin token → descargar localmente
-      const blob = new Blob([pdfBuffer], {type:'application/pdf'});
+      const blob = new Blob([pdfBuffer],{type:'application/pdf'});
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = nombreArchivo;
       a.click();
-      toast('📥 PDF descargado (configura el token para subir a GitHub)','warn');
+      toast('📥 PDF descargado — configura tu token para subir a GitHub','warn');
     }
   }catch(err){
-    toast('Error: ' + err.message,'err');
+    toast('Error al generar PDF: ' + err.message,'err');
   }
   if(btn){ btn.disabled=false; btn.textContent='📄 Generar PDF y subir a GitHub'; }
 }
