@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Carta</title>
+  <title>Panel Administrador</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
@@ -761,21 +761,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
-
-
-<!-- LOADING BAR -->
+<body>
 <div id="loading-bar"></div>
-
-<!-- LIGHTBOX -->
-<div id="lb" onclick="lbBg(event)">
-  <button id="lb-close" onclick="lbClose()">✕</button>
-  <button id="lb-prev" onclick="lbNav(-1);event.stopPropagation()">&#8249;</button>
-  <img id="lb-img" src="" alt=""/>
-  <div id="lb-cap"></div>
-  <button id="lb-next" onclick="lbNav(1);event.stopPropagation()">&#8250;</button>
-  <span id="lb-ctr"></span>
-</div>
-
 <!-- IMAGE CROPPER -->
 <div class="cropper-overlay" id="cropper-overlay">
   <div class="cropper-title">✂️ Recortar imagen</div>
@@ -801,203 +788,57 @@
     <button class="crop-btn apply" onclick="applyCrop()">✅ Usar esta imagen</button>
   </div>
 </div>
-
-
-
-<!-- ══════════ MENU PAGE ══════════ -->
-<div class="page active" id="page-menu">
-  <a class="banner" href="#" onclick="goPage('info');return false">
-    <img class="banner-photo" id="bannerPhotoMenu" src="" alt=""/>
-    <div class="banner-body">
-      <span class="banner-name" id="bannerNameMenu"></span>
-      <span class="banner-sub" id="bannerSubMenu"></span>
-    </div>
-    <div id="themePicker"></div>
-    <div class="banner-action">
-      <span class="banner-action-icon">ℹ️</span>
-      <span class="banner-action-label">Nosotros</span>
-    </div>
-  </a>
-  <nav class="cat-nav-wrap"><div class="cat-nav" id="catNav"></div></nav>
-  <p class="swipe-hint" id="swipeHint">← arrastra para cambiar categoría →</p>
-  <!-- Título de categoría + botón de pedido -->
-  <div class="sec-title-row" id="secTitleRow">
-    <h2 class="sec-title" id="secTitleLabel"></h2>
-    <div id="pedidoBarWrap">
-      <button id="pedClearBtn" onclick="cancelarPedido()" title="Cancelar pedido">✕</button>
-      <button id="pedFloatBtn" onclick="activarPedido()">
-        <div id="pedFloatLeft">📲 &nbsp;HACER PEDIDO</div>
-        <div id="pedFloatRight">
-          <span id="pedFloatQty">0 PROD.</span>
-          <span id="pedFloatTotal"></span>
-        </div>
-      </button>
-    </div>
-  </div>
-  <div class="slider-vp" id="viewport"><div class="slider-track" id="track"></div></div>
-  <footer id="footerMenu"></footer>
-</div>
-
-
-<!-- ══════════ INFO PAGE ══════════ -->
-<div class="page" id="page-info">
-  <a class="banner" href="#" onclick="goPage('menu');return false">
-    <img class="banner-photo" id="bannerPhotoInfo" src="" alt=""/>
-    <div class="banner-body">
-      <span class="banner-name" id="bannerNameInfo"></span>
-      <span class="banner-sub" id="bannerSubInfo"></span>
-    </div>
-    <div id="themePickerInfo"></div>
-    <div class="banner-action">
-      <span class="banner-action-icon">📋</span>
-      <span class="banner-action-label">Carta</span>
-    </div>
-  </a>
-  <div class="info-wrap">
-    <h2 class="info-sec">⭐ Oferta del mes</h2>
-    <div class="promo" id="promoBox"></div>
-    <h2 class="info-sec">🫘 Nuestra historia</h2>
-    <div class="about-grid">
-      <img class="about-img" id="aboutImg" src="" alt="Interior"/>
-      <div class="about-text">
-        <span class="about-badge" id="aboutBadge"></span>
-        <h3 id="aboutTitle"></h3>
-        <p id="aboutText1"></p>
-        <p id="aboutText2"></p>
-      </div>
-    </div>
-    <h2 class="info-sec">📞 Contacto</h2>
-    <div class="cg" id="contactGrid">
-      <div class="cc"><span class="ci">📍</span><div><p class="cl">Dirección</p><p class="cv" id="contactAddr"></p></div></div>
-      <div class="cc"><span class="ci">📱</span><div><p class="cl">Teléfono</p><p class="cv" id="contactTel"></p></div></div>
-      <div class="cc"><span class="ci">✉️</span><div><p class="cl">Email</p><p class="cv" id="contactEmail"></p></div></div>
-      <div class="cc"><span class="ci">📸</span><div><p class="cl">Instagram</p><p class="cv" id="contactIg"></p></div></div>
-    </div>
-    <h2 class="info-sec">🕐 Horarios</h2>
-    <div class="hg" id="horariosGrid"></div>
-    <h2 class="info-sec">✨ Destacados</h2>
-    <div class="feat-grid" id="infoFeat"></div>
-    <h2 class="info-sec">📸 Galería</h2>
-    <div class="info-gal" id="infoGal"></div>
-    <h2 class="info-sec">📍 Ubicación</h2>
-    <div class="map-card">
-      <iframe class="map-frame" id="mapFrame" src="" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-      <div class="map-info">
-        <div class="map-addr"><strong id="mapName"></strong><span id="mapAddr"></span><br>Tel: <span id="mapTel"></span></div>
-        <a class="map-lnk" id="mapLink" href="#" target="_blank">Abrir en Maps →</a>
-      </div>
-    </div>
-  </div>
-  <footer id="footerInfo"></footer>
-</div>
-
-
-<!-- ══════════ PEDIDO PAGE ══════════ -->
-<div class="page" id="page-pedido">
-  <a class="banner" href="#" onclick="goPage('menu');return false">
-    <img class="banner-photo" id="bannerPhotoPedido" src="" alt=""/>
-    <div class="banner-body">
-      <span class="banner-name" id="bannerNamePedido"></span>
-      <span class="banner-sub">Realizar Pedido</span>
-    </div>
-    <div class="banner-action">
-      <span class="banner-action-icon">📋</span>
-      <span class="banner-action-label">Carta</span>
-    </div>
-  </a>
-  <div class="ped-mode-bar">
-    <button class="ped-mode-btn active" id="modeMesaBtn" onclick="setPedMode('mesa')">🍽️ Mesa</button>
-    <button class="ped-mode-btn" id="modeDomicilioBtn" onclick="setPedMode('domicilio')">🛵 A Domicilio</button>
-    <button class="ped-mode-btn" id="modeRecogerBtn" onclick="setPedMode('recoger')">🥡 Recoger</button>
-  </div>
-  <div class="ped-wrap">
-    <div class="ped-section" id="pedMesaSection">
-      <h3 class="ped-sec-title">🪑 Tu mesa</h3>
-      <div class="qr-mesa-panel">
-        <div class="qr-mesa-display" id="qrMesaDisplay">
-          <span class="qr-mesa-num" id="qrMesaNum">—</span>
-          <span class="qr-mesa-lbl">Mesa asignada</span>
-        </div>
-        <button class="qr-scan-btn" id="qrScanBtn" onclick="iniciarScanQR()">
-          <span class="qr-scan-icon">📷</span>
-          <span id="qrScanLabel">Escanear QR de mi mesa</span>
-        </button>
-        <p class="qr-hint" id="qrHint">Escanea el código QR de tu mesa para asignarla automáticamente</p>
-        <div id="qrReaderWrap" style="display:none">
-          <div id="qrReader" style="width:100%;max-width:320px;margin:0 auto;border-radius:10px;overflow:hidden"></div>
-          <button class="qr-cancel-btn" onclick="cancelarScanQR()">✕ Cancelar</button>
-        </div>
-      </div>
-    </div>
-    <div class="ped-section" id="pedDomicilioSection" style="display:none">
-      <h3 class="ped-sec-title">📦 Datos de entrega</h3>
-      <div class="ped-field-group">
-        <div class="ped-field">
-          <label class="ped-label">Nombre</label>
-          <input class="ped-inp" id="domNombre" type="text" placeholder="Tu nombre"/>
-        </div>
-        <div class="ped-field">
-          <label class="ped-label">Teléfono</label>
-          <input class="ped-inp" id="domTelefono" type="tel" placeholder="Ej: 555-1234"/>
-        </div>
-        <div class="ped-field full">
-          <label class="ped-label">Reparto</label>
-          <select class="ped-inp" id="domReparto" onchange="onRepartoChange()">
-            <option value="">— Selecciona tu reparto —</option>
-          </select>
-        </div>
-        <div class="ped-field full" id="domCostoWrap" style="display:none">
-          <div class="ped-reparto-costo" id="domCostoLabel"></div>
-        </div>
-        <div class="ped-field full">
-          <label class="ped-label">Dirección completa</label>
-          <input class="ped-inp" id="domDireccion" type="text" placeholder="Calle, número..."/>
-        </div>
-        <div class="ped-field full">
-          <label class="ped-label">Referencia</label>
-          <input class="ped-inp" id="domReferencia" type="text" placeholder="Entre calles, color de fachada..."/>
-        </div>
-      </div>
-    </div>
-    <div class="ped-section" id="pedRecogerSection" style="display:none">
-      <h3 class="ped-sec-title">🥡 Datos para recoger</h3>
-      <div class="ped-field-group">
-        <div class="ped-field">
-          <label class="ped-label">Tu nombre</label>
-          <input class="ped-inp" id="recNombre" type="text" placeholder="Nombre para el pedido"/>
-        </div>
-        <div class="ped-field">
-          <label class="ped-label">Teléfono</label>
-          <input class="ped-inp" id="recTelefono" type="tel" placeholder="Para avisarte"/>
-        </div>
-      </div>
-    </div>
-    <div class="ped-section">
-      <h3 class="ped-sec-title">🛒 Tu pedido</h3>
-      <div class="ped-cart" id="pedCart">
-        <div class="ped-cart-empty">Aún no has agregado productos.</div>
-      </div>
-    </div>
-    <div class="ped-section">
-      <h3 class="ped-sec-title">📝 Notas adicionales</h3>
-      <textarea class="ped-notes" id="pedNotas" placeholder="Alergias, preferencias, instrucciones especiales..."></textarea>
-    </div>
-    <div class="ped-section">
-      <h3 class="ped-sec-title">☕ Elige tus productos</h3>
-      <div class="ped-cat-nav" id="pedCatNav"></div>
-      <div class="ped-prod-list" id="pedProdList"></div>
-    </div>
-  </div>
-  <div class="ped-send-bar">
-    <button class="ped-back-btn" onclick="goPage('menu')">← Carta</button>
-    <button class="ped-send-btn" id="pedSendBtn" onclick="enviarPedido()" disabled>
-      <span>📲</span> <span id="pedSendLabel">Enviar por WhatsApp</span>
-    </button>
-  </div>
-</div>
-
-
 <div id="toast"></div>
+
+<div id="login-screen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--cs);flex-direction:column;gap:1rem;padding:2rem">
+  <div style="background:#1a1a2e;border-radius:16px;padding:2rem;max-width:360px;width:100%;text-align:center;border:1.5px solid rgba(201,168,124,.3)">
+    <div style="font-size:2rem;margin-bottom:.5rem">⚙️</div>
+    <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold);margin-bottom:1.2rem">Administración</div>
+    <input type="password" id="loginPass" placeholder="Contraseña de administrador"
+      style="padding:10px 14px;border-radius:10px;border:1.5px solid rgba(201,168,124,.3);background:rgba(255,255,255,.07);color:#fff;font-family:'Lato',sans-serif;font-size:.95rem;width:100%;margin-bottom:.8rem"/>
+    <button onclick="loginAdmin()"
+      style="width:100%;padding:11px;border-radius:10px;border:none;background:var(--gold);color:var(--bd);font-family:'Lato',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;letter-spacing:.05em">
+      ▶ Entrar
+    </button>
+    <div id="loginErr" style="color:#f87171;font-size:.78rem;margin-top:.6rem;display:none">⚠️ Contraseña incorrecta</div>
+  </div>
+</div>
+
+<!-- ══════════ ADMIN PAGE ══════════ -->
+<div class="page" id="page-admin" style="display:none">
+  <div class="adm-bar">
+    <span class="adm-bar-title">⚙️ Administración — Café Roble</span>
+    <button class="ab ab-ghost" onclick="goPage('menu')">← Salir</button>
+    <button class="ab ab-green" onclick="admApply()">✔ Guardar local</button>
+    <button class="ab ab-purple" onclick="admSaveGitHub()">☁ Publicar en GitHub</button>
+    <button class="ab ab-gold" onclick="admExport()">⬇ Exportar JSON</button>
+    <label class="ab ab-blue" style="cursor:pointer">
+      📂 Importar JSON
+      <input type="file" accept=".json" style="display:none" onchange="admImport(this)"/>
+    </label>
+  </div>
+  <div class="adm-body">
+    <!-- GitHub Config Panel -->
+    <div class="gh-panel">
+      <div class="gh-panel-title">☁️ Publicar en GitHub Pages</div>
+      <input type="hidden" id="ghUser" value="lhamat123"/>
+      <input type="hidden" id="ghRepo" value="cafeteria"/>
+      <div class="gh-field">
+        <label class="gh-label">Token de acceso</label>
+        <input class="gh-inp" type="password" id="ghToken" placeholder="github_pat_..." autocomplete="off"/>
+      </div>
+      <input type="hidden" id="ghPass" value=""/>
+      <div style="width:100%">
+        <div class="gh-status" id="ghStatus">Ingresa tu token para publicar</div>
+      </div>
+    </div>
+
+    <div class="adm-tabs" id="admTabs"></div>
+    <div id="admContent"></div>
+  </div>
+</div>
+
+
 
 <script>
 /* ═══════════════════════════════════════════
@@ -2291,19 +2132,8 @@ function buildThemePicker(){
 
 
 document.addEventListener('DOMContentLoaded', async ()=>{
-  // 1. Cargar localStorage al instante — el usuario ve contenido de inmediato
+  // Panel admin standalone
   loadLocalData();
-  loadCart();
-  buildThemePicker();
-  try{ const saved=localStorage.getItem('cafeRoble_theme'); if(saved) applyTheme(saved); }catch(_){}
-  if(Object.keys(pedCart).length > 0){
-    document.body.classList.add('pedido-activo');
-  }
-  renderMenu();
-  renderInfo();
-  updateFloatBadge();
-  checkUnavailBtn();
-  // 2. GitHub actualiza en segundo plano sin bloquear ni mostrar spinner
   loadFromGitHubSilent();
 });
 
@@ -2795,12 +2625,7 @@ function updateSendBtn(){
   btn.disabled = !valido;
 }
 
-document.addEventListener('DOMContentLoaded', ()=>{
-  loadCart();
-  updateFloatBadge();
-  ['domNombre','domTelefono','domDireccion','domReferencia','domReparto','recNombre','recTelefono']
-    .forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('input', updateSendBtn); });
-});
+/* pedido form listener - not needed in encargado/admin */
 
 /* ── Generar PDF del pedido ── */
 function generarPDFPedido(datos){
@@ -3432,6 +3257,26 @@ async function encGuardar(){
 function getQRUrl(mesaNum){
   return window.location.href.split('?')[0] + '?mesa=' + mesaNum;
 }
+
+// ── ADMIN STANDALONE ──
+function loginAdmin(){
+  const pass = document.getElementById('loginPass').value;
+  if(pass === APP_PASS){
+    document.getElementById('login-screen').style.display = 'none';
+    const pg = document.getElementById('page-admin');
+    if(pg) pg.style.display = 'block';
+    buildAdmin();
+  } else {
+    const err = document.getElementById('loginErr');
+    if(err) err.style.display = 'block';
+  }
+}
+document.addEventListener('keydown', ev=>{
+  if(ev.key==='Enter'){
+    const ls=document.getElementById('login-screen');
+    if(ls && ls.style.display!=='none') loginAdmin();
+  }
+});
 </script>
 </body>
 </html>

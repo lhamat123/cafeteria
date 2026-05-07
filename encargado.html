@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Carta</title>
+  <title>Panel Encargado</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
@@ -761,243 +761,187 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
-
-
-<!-- LOADING BAR -->
+<body>
 <div id="loading-bar"></div>
-
-<!-- LIGHTBOX -->
-<div id="lb" onclick="lbBg(event)">
-  <button id="lb-close" onclick="lbClose()">✕</button>
-  <button id="lb-prev" onclick="lbNav(-1);event.stopPropagation()">&#8249;</button>
-  <img id="lb-img" src="" alt=""/>
-  <div id="lb-cap"></div>
-  <button id="lb-next" onclick="lbNav(1);event.stopPropagation()">&#8250;</button>
-  <span id="lb-ctr"></span>
-</div>
-
-<!-- IMAGE CROPPER -->
-<div class="cropper-overlay" id="cropper-overlay">
-  <div class="cropper-title">✂️ Recortar imagen</div>
-  <div class="cropper-wrap" id="cropper-wrap">
-    <canvas id="cropper-canvas"></canvas>
-    <div class="crop-box" id="crop-box">
-      <div class="crop-handle tl" data-h="tl"></div>
-      <div class="crop-handle tr" data-h="tr"></div>
-      <div class="crop-handle bl" data-h="bl"></div>
-      <div class="crop-handle br" data-h="br"></div>
-    </div>
-  </div>
-  <div id="crop-target-label"></div>
-  <div class="cropper-info">Arrastra para mover · esquinas para redimensionar</div>
-  <div class="quality-row">
-    <span>Calidad:</span>
-    <input type="range" id="crop-quality" min="30" max="95" value="72" oninput="updateQualityLabel()">
-    <span id="crop-qlabel">72%</span>
-    <span id="crop-size-est" style="margin-left:6px;color:var(--gold)"></span>
-  </div>
-  <div class="cropper-btns">
-    <button class="crop-btn cancel" onclick="closeCropper()">Cancelar</button>
-    <button class="crop-btn apply" onclick="applyCrop()">✅ Usar esta imagen</button>
-  </div>
-</div>
-
-
-
-<!-- ══════════ MENU PAGE ══════════ -->
-<div class="page active" id="page-menu">
-  <a class="banner" href="#" onclick="goPage('info');return false">
-    <img class="banner-photo" id="bannerPhotoMenu" src="" alt=""/>
-    <div class="banner-body">
-      <span class="banner-name" id="bannerNameMenu"></span>
-      <span class="banner-sub" id="bannerSubMenu"></span>
-    </div>
-    <div id="themePicker"></div>
-    <div class="banner-action">
-      <span class="banner-action-icon">ℹ️</span>
-      <span class="banner-action-label">Nosotros</span>
-    </div>
-  </a>
-  <nav class="cat-nav-wrap"><div class="cat-nav" id="catNav"></div></nav>
-  <p class="swipe-hint" id="swipeHint">← arrastra para cambiar categoría →</p>
-  <!-- Título de categoría + botón de pedido -->
-  <div class="sec-title-row" id="secTitleRow">
-    <h2 class="sec-title" id="secTitleLabel"></h2>
-    <div id="pedidoBarWrap">
-      <button id="pedClearBtn" onclick="cancelarPedido()" title="Cancelar pedido">✕</button>
-      <button id="pedFloatBtn" onclick="activarPedido()">
-        <div id="pedFloatLeft">📲 &nbsp;HACER PEDIDO</div>
-        <div id="pedFloatRight">
-          <span id="pedFloatQty">0 PROD.</span>
-          <span id="pedFloatTotal"></span>
-        </div>
-      </button>
-    </div>
-  </div>
-  <div class="slider-vp" id="viewport"><div class="slider-track" id="track"></div></div>
-  <footer id="footerMenu"></footer>
-</div>
-
-
-<!-- ══════════ INFO PAGE ══════════ -->
-<div class="page" id="page-info">
-  <a class="banner" href="#" onclick="goPage('menu');return false">
-    <img class="banner-photo" id="bannerPhotoInfo" src="" alt=""/>
-    <div class="banner-body">
-      <span class="banner-name" id="bannerNameInfo"></span>
-      <span class="banner-sub" id="bannerSubInfo"></span>
-    </div>
-    <div id="themePickerInfo"></div>
-    <div class="banner-action">
-      <span class="banner-action-icon">📋</span>
-      <span class="banner-action-label">Carta</span>
-    </div>
-  </a>
-  <div class="info-wrap">
-    <h2 class="info-sec">⭐ Oferta del mes</h2>
-    <div class="promo" id="promoBox"></div>
-    <h2 class="info-sec">🫘 Nuestra historia</h2>
-    <div class="about-grid">
-      <img class="about-img" id="aboutImg" src="" alt="Interior"/>
-      <div class="about-text">
-        <span class="about-badge" id="aboutBadge"></span>
-        <h3 id="aboutTitle"></h3>
-        <p id="aboutText1"></p>
-        <p id="aboutText2"></p>
-      </div>
-    </div>
-    <h2 class="info-sec">📞 Contacto</h2>
-    <div class="cg" id="contactGrid">
-      <div class="cc"><span class="ci">📍</span><div><p class="cl">Dirección</p><p class="cv" id="contactAddr"></p></div></div>
-      <div class="cc"><span class="ci">📱</span><div><p class="cl">Teléfono</p><p class="cv" id="contactTel"></p></div></div>
-      <div class="cc"><span class="ci">✉️</span><div><p class="cl">Email</p><p class="cv" id="contactEmail"></p></div></div>
-      <div class="cc"><span class="ci">📸</span><div><p class="cl">Instagram</p><p class="cv" id="contactIg"></p></div></div>
-    </div>
-    <h2 class="info-sec">🕐 Horarios</h2>
-    <div class="hg" id="horariosGrid"></div>
-    <h2 class="info-sec">✨ Destacados</h2>
-    <div class="feat-grid" id="infoFeat"></div>
-    <h2 class="info-sec">📸 Galería</h2>
-    <div class="info-gal" id="infoGal"></div>
-    <h2 class="info-sec">📍 Ubicación</h2>
-    <div class="map-card">
-      <iframe class="map-frame" id="mapFrame" src="" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-      <div class="map-info">
-        <div class="map-addr"><strong id="mapName"></strong><span id="mapAddr"></span><br>Tel: <span id="mapTel"></span></div>
-        <a class="map-lnk" id="mapLink" href="#" target="_blank">Abrir en Maps →</a>
-      </div>
-    </div>
-  </div>
-  <footer id="footerInfo"></footer>
-</div>
-
-
-<!-- ══════════ PEDIDO PAGE ══════════ -->
-<div class="page" id="page-pedido">
-  <a class="banner" href="#" onclick="goPage('menu');return false">
-    <img class="banner-photo" id="bannerPhotoPedido" src="" alt=""/>
-    <div class="banner-body">
-      <span class="banner-name" id="bannerNamePedido"></span>
-      <span class="banner-sub">Realizar Pedido</span>
-    </div>
-    <div class="banner-action">
-      <span class="banner-action-icon">📋</span>
-      <span class="banner-action-label">Carta</span>
-    </div>
-  </a>
-  <div class="ped-mode-bar">
-    <button class="ped-mode-btn active" id="modeMesaBtn" onclick="setPedMode('mesa')">🍽️ Mesa</button>
-    <button class="ped-mode-btn" id="modeDomicilioBtn" onclick="setPedMode('domicilio')">🛵 A Domicilio</button>
-    <button class="ped-mode-btn" id="modeRecogerBtn" onclick="setPedMode('recoger')">🥡 Recoger</button>
-  </div>
-  <div class="ped-wrap">
-    <div class="ped-section" id="pedMesaSection">
-      <h3 class="ped-sec-title">🪑 Tu mesa</h3>
-      <div class="qr-mesa-panel">
-        <div class="qr-mesa-display" id="qrMesaDisplay">
-          <span class="qr-mesa-num" id="qrMesaNum">—</span>
-          <span class="qr-mesa-lbl">Mesa asignada</span>
-        </div>
-        <button class="qr-scan-btn" id="qrScanBtn" onclick="iniciarScanQR()">
-          <span class="qr-scan-icon">📷</span>
-          <span id="qrScanLabel">Escanear QR de mi mesa</span>
-        </button>
-        <p class="qr-hint" id="qrHint">Escanea el código QR de tu mesa para asignarla automáticamente</p>
-        <div id="qrReaderWrap" style="display:none">
-          <div id="qrReader" style="width:100%;max-width:320px;margin:0 auto;border-radius:10px;overflow:hidden"></div>
-          <button class="qr-cancel-btn" onclick="cancelarScanQR()">✕ Cancelar</button>
-        </div>
-      </div>
-    </div>
-    <div class="ped-section" id="pedDomicilioSection" style="display:none">
-      <h3 class="ped-sec-title">📦 Datos de entrega</h3>
-      <div class="ped-field-group">
-        <div class="ped-field">
-          <label class="ped-label">Nombre</label>
-          <input class="ped-inp" id="domNombre" type="text" placeholder="Tu nombre"/>
-        </div>
-        <div class="ped-field">
-          <label class="ped-label">Teléfono</label>
-          <input class="ped-inp" id="domTelefono" type="tel" placeholder="Ej: 555-1234"/>
-        </div>
-        <div class="ped-field full">
-          <label class="ped-label">Reparto</label>
-          <select class="ped-inp" id="domReparto" onchange="onRepartoChange()">
-            <option value="">— Selecciona tu reparto —</option>
-          </select>
-        </div>
-        <div class="ped-field full" id="domCostoWrap" style="display:none">
-          <div class="ped-reparto-costo" id="domCostoLabel"></div>
-        </div>
-        <div class="ped-field full">
-          <label class="ped-label">Dirección completa</label>
-          <input class="ped-inp" id="domDireccion" type="text" placeholder="Calle, número..."/>
-        </div>
-        <div class="ped-field full">
-          <label class="ped-label">Referencia</label>
-          <input class="ped-inp" id="domReferencia" type="text" placeholder="Entre calles, color de fachada..."/>
-        </div>
-      </div>
-    </div>
-    <div class="ped-section" id="pedRecogerSection" style="display:none">
-      <h3 class="ped-sec-title">🥡 Datos para recoger</h3>
-      <div class="ped-field-group">
-        <div class="ped-field">
-          <label class="ped-label">Tu nombre</label>
-          <input class="ped-inp" id="recNombre" type="text" placeholder="Nombre para el pedido"/>
-        </div>
-        <div class="ped-field">
-          <label class="ped-label">Teléfono</label>
-          <input class="ped-inp" id="recTelefono" type="tel" placeholder="Para avisarte"/>
-        </div>
-      </div>
-    </div>
-    <div class="ped-section">
-      <h3 class="ped-sec-title">🛒 Tu pedido</h3>
-      <div class="ped-cart" id="pedCart">
-        <div class="ped-cart-empty">Aún no has agregado productos.</div>
-      </div>
-    </div>
-    <div class="ped-section">
-      <h3 class="ped-sec-title">📝 Notas adicionales</h3>
-      <textarea class="ped-notes" id="pedNotas" placeholder="Alergias, preferencias, instrucciones especiales..."></textarea>
-    </div>
-    <div class="ped-section">
-      <h3 class="ped-sec-title">☕ Elige tus productos</h3>
-      <div class="ped-cat-nav" id="pedCatNav"></div>
-      <div class="ped-prod-list" id="pedProdList"></div>
-    </div>
-  </div>
-  <div class="ped-send-bar">
-    <button class="ped-back-btn" onclick="goPage('menu')">← Carta</button>
-    <button class="ped-send-btn" id="pedSendBtn" onclick="enviarPedido()" disabled>
-      <span>📲</span> <span id="pedSendLabel">Enviar por WhatsApp</span>
-    </button>
-  </div>
-</div>
-
-
 <div id="toast"></div>
+
+<div id="login-screen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--cs);flex-direction:column;gap:1rem;padding:2rem">
+  <div style="background:var(--bm);border-radius:16px;padding:2rem;max-width:360px;width:100%;text-align:center;border:1.5px solid var(--bdr)">
+    <div style="font-size:2rem;margin-bottom:.5rem">👤</div>
+    <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold);margin-bottom:1.2rem">Panel Encargado</div>
+    <input type="password" id="loginPass" placeholder="Clave de encargado"
+      style="padding:10px 14px;border-radius:10px;border:1.5px solid var(--bdr);background:var(--cs);color:var(--text);font-family:'Lato',sans-serif;font-size:.95rem;width:100%;margin-bottom:.8rem"/>
+    <button onclick="loginEncargado()"
+      style="width:100%;padding:11px;border-radius:10px;border:none;background:var(--gold);color:var(--bd);font-family:'Lato',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;letter-spacing:.05em">
+      ▶ Entrar
+    </button>
+    <div id="loginErr" style="color:#f87171;font-size:.78rem;margin-top:.6rem;display:none">⚠️ Clave incorrecta</div>
+  </div>
+</div>
+
+<!-- ══════════ ENCARGADO PAGE ══════════ -->
+<div class="page" id="page-encargado" style="display:none">
+  <div class="enc-header">
+    <div>
+      <div class="enc-header-title">👤 Panel Encargado</div>
+      <div class="enc-header-sub">Disponibilidad · Pedidos PDF · Teléfono</div>
+    </div>
+    <button class="enc-back" onclick="goPage('menu')">← Salir</button>
+  </div>
+  <div class="enc-wrap">
+
+    <!-- GUÍA -->
+    <details class="enc-ayuda" open>
+      <summary class="enc-ayuda-title">📖 Guía rápida — ¿Cómo funciona?</summary>
+      <div class="enc-ayuda-body">
+        <div class="enc-ayuda-step">
+          <span class="enc-ayuda-num">1</span>
+          <div><strong>Activar comprobantes PDF</strong><br>
+          Pega el token de GitHub en el campo de abajo. Cuando un cliente haga un pedido, el sistema genera un PDF automáticamente y lo sube a GitHub. El cliente recibe el link en WhatsApp — nadie puede falsificar ese PDF.</div>
+        </div>
+        <div class="enc-ayuda-step">
+          <span class="enc-ayuda-num">2</span>
+          <div><strong>Ver los PDFs de pedidos</strong><br>
+          Entra a <strong>github.com/lhamat123/cafeteria</strong> → carpeta <strong>pedidos/</strong>. Ahí aparecen todos los comprobantes ordenados por número. Cada PDF tiene el detalle completo del pedido con precios reales.</div>
+        </div>
+        <div class="enc-ayuda-step">
+          <span class="enc-ayuda-num">3</span>
+          <div><strong>Ocultar productos agotados</strong><br>
+          Desactiva el toggle del producto. Desaparece de la carta inmediatamente. Pulsa <em>Publicar</em> para que los clientes también lo vean en sus dispositivos.</div>
+        </div>
+        <div class="enc-ayuda-step">
+          <span class="enc-ayuda-num">4</span>
+          <div><strong>Cambiar teléfono de pedidos</strong><br>
+          Si los pedidos deben llegar a otro número de WhatsApp, cámbialo aquí y pulsa Publicar.</div>
+        </div>
+      </div>
+    </details>
+
+    <!-- TOKEN PDF -->
+    <div class="enc-git-card">
+      <div class="enc-git-title">🔑 Token GitHub — Comprobantes PDF</div>
+      <div class="enc-git-row">
+        <input class="enc-git-inp" type="password" id="encToken" placeholder="github_pat_…" autocomplete="off"
+          oninput="encTokenCheck(this.value)"/>
+        <button class="enc-token-show" onclick="toggleEncToken(this)" title="Mostrar/ocultar">👁</button>
+      </div>
+      <div class="enc-token-status" id="encTokenStatus">
+        <span id="encTokenInd">⚪</span>&nbsp;<span id="encTokenLbl">Sin token — pedidos sin PDF</span>
+      </div>
+      <p style="font-size:.67rem;color:var(--muted);margin-top:.35rem">
+        Obtén el token en GitHub → Settings → Developer settings → Personal access tokens.<br>
+        Permiso necesario: <code>contents: write</code> solo en el repo <code>cafeteria</code>.
+      </p>
+    </div>
+
+    <!-- TELÉFONO -->
+    <div class="enc-git-card">
+      <div class="enc-git-title">📱 Teléfono para recibir pedidos</div>
+      <div class="enc-git-row">
+        <input class="enc-git-inp" type="tel" id="encTelefono" placeholder="ej: 5358024452"
+          oninput="DATA.info.telefono=this.value.trim();localStorage.setItem('cafeRoble_v3',JSON.stringify(DATA))"/>
+      </div>
+      <p style="font-size:.68rem;color:var(--muted);margin-top:.4rem">Todos los pedidos de WhatsApp llegarán a este número.</p>
+    </div>
+
+    <!-- GENERADOR PDF POR NÚMERO DE PEDIDO -->
+    <div class="enc-git-card" id="encPdfCard">
+      <div class="enc-git-title">📄 Generar comprobante PDF de un pedido</div>
+      <p style="font-size:.74rem;color:var(--muted);margin-bottom:.8rem;line-height:1.5">
+        Copia el <strong>código verificado</strong> que aparece al final del mensaje de WhatsApp del cliente y pulsa el botón para pegarlo. El sistema lo valida y genera el PDF desde este dispositivo con tu token.
+      </p>
+
+      <!-- Botón principal pegar + campo readonly -->
+      <div style="display:flex;flex-direction:column;gap:.5rem">
+        <button id="encPegarBtn" onclick="encPegarCodigo()"
+          style="width:100%;padding:.75rem;border-radius:10px;border:2px dashed #6fcf6f;
+                 background:#f0faf0;color:#166534;font-family:'Lato',sans-serif;
+                 font-size:.9rem;font-weight:700;cursor:pointer;transition:all .18s;
+                 display:flex;align-items:center;justify-content:center;gap:.5rem">
+          📋 Pegar código del pedido
+        </button>
+        <div id="encCodigoWrap" style="display:none;position:relative">
+          <textarea id="encPedidoDatos" readonly
+            style="width:100%;height:64px;resize:none;border-radius:8px;
+                   border:1.5px solid #6fcf6f;background:#f0faf0;
+                   font-family:monospace;font-size:.65rem;color:#166534;
+                   padding:7px 36px 7px 10px;overflow:hidden;word-break:break-all;
+                   cursor:default;outline:none;line-height:1.4"></textarea>
+          <!-- Botón limpiar -->
+          <button onclick="encLimpiarCodigo()" title="Limpiar y pegar otro código"
+            style="position:absolute;top:5px;right:6px;background:none;border:none;
+                   color:#dc2626;font-size:1rem;cursor:pointer;line-height:1;padding:2px">✕</button>
+        </div>
+      </div>
+
+      <!-- Estado del código -->
+      <div id="encCodigoEstado" style="display:none;font-size:.73rem;font-weight:700;
+           margin-top:.4rem;padding:5px 10px;border-radius:6px;text-align:center"></div>
+
+      <!-- Vista previa del pedido decodificado -->
+      <div id="encPedidoPreview" style="display:none;margin-top:.9rem">
+
+        <!-- Tipo de pedido destacado -->
+        <div id="encTipoPedido" style="background:var(--bm);border-radius:8px;
+             padding:.55rem .9rem;margin-bottom:.6rem;
+             font-family:'Playfair Display',serif;font-size:1rem;
+             font-weight:700;color:var(--gold);text-align:center"></div>
+
+        <!-- Datos del cliente / mesa -->
+        <div id="encPreviewBox" style="background:#fff;border-radius:8px;border:1px solid #e0ddd9;
+             padding:.7rem .9rem;font-size:.8rem;color:var(--text);
+             display:flex;flex-direction:column;gap:3px"></div>
+
+        <!-- Productos -->
+        <div style="margin-top:.6rem;background:#fff;border-radius:8px;border:1px solid #e0ddd9;overflow:hidden">
+          <div style="background:var(--bm);padding:.4rem .9rem;font-size:.72rem;
+               font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--gold)">
+            Productos
+          </div>
+          <div id="encPreviewItems" style="padding:.5rem .9rem;display:flex;flex-direction:column;gap:3px;font-size:.8rem"></div>
+        </div>
+
+        <!-- Totales -->
+        <div id="encPreviewTotales" style="margin-top:.6rem;background:#fff;border-radius:8px;
+             border:1px solid #e0ddd9;padding:.6rem .9rem;font-size:.82rem"></div>
+
+        <!-- Notas -->
+        <div id="encPreviewNotas" style="display:none;margin-top:.5rem;background:#fffbf0;
+             border-radius:8px;border:1px solid #e5d48a;padding:.5rem .9rem;
+             font-size:.78rem;color:#92400e;font-style:italic"></div>
+
+        <!-- Botón generar PDF -->
+        <button class="enc-save-btn" id="encPdfBtn" onclick="encGenerarPDF()" style="margin-top:.8rem">
+          📄 Generar PDF y subir a GitHub
+        </button>
+
+        <!-- Resultado con link -->
+        <div id="encPdfResult" style="margin-top:.6rem;display:none">
+          <div class="enc-pdf-link-box">
+            <span class="enc-pdf-link-label">🔗 Link del comprobante:</span>
+            <code id="encPdfLinkTxt" style="font-size:.72rem;word-break:break-all;color:var(--bl)"></code>
+          </div>
+          <button class="enc-copy-btn" onclick="encCopiarLink()">📋 Copiar link</button>
+          <p class="enc-pdf-hint">Pega este link en WhatsApp como respuesta al cliente</p>
+        </div>
+      </div>
+
+      <div id="encPedidoNotFound" style="display:none;font-size:.78rem;color:#dc2626;
+           margin-top:.6rem;padding:8px 12px;background:#fef2f2;border-radius:8px;
+           border:1px solid #fca5a5">
+        ⚠️ Código inválido o incompleto. Asegúrate de copiar todo el bloque del mensaje de WhatsApp.
+      </div>
+    </div>
+
+    <!-- PRODUCTOS -->
+    <div id="encCatList"></div>
+
+    <button class="enc-save-btn" id="encSaveBtn" onclick="encGuardar()">
+      ☁ Publicar cambios en GitHub
+    </button>
+    <div class="enc-status" id="encStatus"></div>
+  </div>
+</div>
 
 <script>
 /* ═══════════════════════════════════════════
@@ -2291,19 +2235,8 @@ function buildThemePicker(){
 
 
 document.addEventListener('DOMContentLoaded', async ()=>{
-  // 1. Cargar localStorage al instante — el usuario ve contenido de inmediato
+  // Panel encargado standalone
   loadLocalData();
-  loadCart();
-  buildThemePicker();
-  try{ const saved=localStorage.getItem('cafeRoble_theme'); if(saved) applyTheme(saved); }catch(_){}
-  if(Object.keys(pedCart).length > 0){
-    document.body.classList.add('pedido-activo');
-  }
-  renderMenu();
-  renderInfo();
-  updateFloatBadge();
-  checkUnavailBtn();
-  // 2. GitHub actualiza en segundo plano sin bloquear ni mostrar spinner
   loadFromGitHubSilent();
 });
 
@@ -2795,12 +2728,7 @@ function updateSendBtn(){
   btn.disabled = !valido;
 }
 
-document.addEventListener('DOMContentLoaded', ()=>{
-  loadCart();
-  updateFloatBadge();
-  ['domNombre','domTelefono','domDireccion','domReferencia','domReparto','recNombre','recTelefono']
-    .forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('input', updateSendBtn); });
-});
+/* pedido form listener - not needed in encargado/admin */
 
 /* ── Generar PDF del pedido ── */
 function generarPDFPedido(datos){
@@ -3432,6 +3360,26 @@ async function encGuardar(){
 function getQRUrl(mesaNum){
   return window.location.href.split('?')[0] + '?mesa=' + mesaNum;
 }
+
+// ── ENCARGADO STANDALONE ──
+function loginEncargado(){
+  const pass = document.getElementById('loginPass').value;
+  if(pass === ENC_PASS){
+    document.getElementById('login-screen').style.display = 'none';
+    const pg = document.getElementById('page-encargado');
+    if(pg) pg.style.display = 'block';
+    buildEncargado();
+  } else {
+    const err = document.getElementById('loginErr');
+    if(err) err.style.display = 'block';
+  }
+}
+document.addEventListener('keydown', ev=>{
+  if(ev.key==='Enter'){
+    const ls=document.getElementById('login-screen');
+    if(ls && ls.style.display!=='none') loginEncargado();
+  }
+});
 </script>
 </body>
 </html>
