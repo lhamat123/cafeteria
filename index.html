@@ -761,7 +761,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
-
+<body>
 
 <!-- LOADING BAR -->
 <div id="loading-bar"></div>
@@ -802,7 +802,10 @@
   </div>
 </div>
 
-
+<!-- ADMIN FLOATING BUTTON -->
+<button id="adminBtn" onclick="goAdmin()">⚙</button>
+<!-- ENCARGADO FLOATING BUTTON -->
+<button id="encargadoBtn" onclick="goEncargado()">👤</button>
 
 <!-- ══════════ MENU PAGE ══════════ -->
 <div class="page active" id="page-menu">
@@ -837,7 +840,6 @@
   <div class="slider-vp" id="viewport"><div class="slider-track" id="track"></div></div>
   <footer id="footerMenu"></footer>
 </div>
-
 
 <!-- ══════════ INFO PAGE ══════════ -->
 <div class="page" id="page-info">
@@ -890,7 +892,6 @@
   </div>
   <footer id="footerInfo"></footer>
 </div>
-
 
 <!-- ══════════ PEDIDO PAGE ══════════ -->
 <div class="page" id="page-pedido">
@@ -996,8 +997,205 @@
   </div>
 </div>
 
+<!-- ══════════ ADMIN PAGE ══════════ -->
+<div class="page" id="page-admin">
+  <div class="adm-bar">
+    <span class="adm-bar-title">⚙️ Administración — Café Roble</span>
+    <button class="ab ab-ghost" onclick="goPage('menu')">← Salir</button>
+    <button class="ab ab-green" onclick="admApply()">✔ Guardar local</button>
+    <button class="ab ab-purple" onclick="admSaveGitHub()">☁ Publicar en GitHub</button>
+    <button class="ab ab-gold" onclick="admExport()">⬇ Exportar JSON</button>
+    <label class="ab ab-blue" style="cursor:pointer">
+      📂 Importar JSON
+      <input type="file" accept=".json" style="display:none" onchange="admImport(this)"/>
+    </label>
+  </div>
+  <div class="adm-body">
+    <!-- GitHub Config Panel -->
+    <div class="gh-panel">
+      <div class="gh-panel-title">☁️ Publicar en GitHub Pages</div>
+      <input type="hidden" id="ghUser" value="lhamat123"/>
+      <input type="hidden" id="ghRepo" value="cafeteria"/>
+      <div class="gh-field">
+        <label class="gh-label">Token de acceso</label>
+        <input class="gh-inp" type="password" id="ghToken" placeholder="github_pat_..." autocomplete="off"/>
+      </div>
+      <input type="hidden" id="ghPass" value=""/>
+      <div style="width:100%">
+        <div class="gh-status" id="ghStatus">Ingresa tu token para publicar</div>
+      </div>
+    </div>
+
+    <div class="adm-tabs" id="admTabs"></div>
+    <div id="admContent"></div>
+  </div>
+</div>
 
 <div id="toast"></div>
+
+<!-- ══════════ ENCARGADO PAGE ══════════ -->
+<div class="page" id="page-encargado">
+  <div class="enc-header">
+    <div>
+      <div class="enc-header-title">👤 Panel Encargado</div>
+      <div class="enc-header-sub">Disponibilidad · Pedidos PDF · Teléfono</div>
+    </div>
+    <button class="enc-back" onclick="goPage('menu')">← Salir</button>
+  </div>
+  <div class="enc-wrap">
+
+    <!-- GUÍA -->
+    <details class="enc-ayuda" open>
+      <summary class="enc-ayuda-title">📖 Guía rápida — ¿Cómo funciona?</summary>
+      <div class="enc-ayuda-body">
+        <div class="enc-ayuda-step">
+          <span class="enc-ayuda-num">1</span>
+          <div><strong>Activar comprobantes PDF</strong><br>
+          Pega el token de GitHub en el campo de abajo. Cuando un cliente haga un pedido, el sistema genera un PDF automáticamente y lo sube a GitHub. El cliente recibe el link en WhatsApp — nadie puede falsificar ese PDF.</div>
+        </div>
+        <div class="enc-ayuda-step">
+          <span class="enc-ayuda-num">2</span>
+          <div><strong>Ver los PDFs de pedidos</strong><br>
+          Entra a <strong>github.com/lhamat123/cafeteria</strong> → carpeta <strong>pedidos/</strong>. Ahí aparecen todos los comprobantes ordenados por número. Cada PDF tiene el detalle completo del pedido con precios reales.</div>
+        </div>
+        <div class="enc-ayuda-step">
+          <span class="enc-ayuda-num">3</span>
+          <div><strong>Ocultar productos agotados</strong><br>
+          Desactiva el toggle del producto. Desaparece de la carta inmediatamente. Pulsa <em>Publicar</em> para que los clientes también lo vean en sus dispositivos.</div>
+        </div>
+        <div class="enc-ayuda-step">
+          <span class="enc-ayuda-num">4</span>
+          <div><strong>Cambiar teléfono de pedidos</strong><br>
+          Si los pedidos deben llegar a otro número de WhatsApp, cámbialo aquí y pulsa Publicar.</div>
+        </div>
+      </div>
+    </details>
+
+    <!-- TOKEN PDF -->
+    <div class="enc-git-card">
+      <div class="enc-git-title">🔑 Token GitHub — Comprobantes PDF</div>
+      <div class="enc-git-row">
+        <input class="enc-git-inp" type="password" id="encToken" placeholder="github_pat_…" autocomplete="off"
+          oninput="encTokenCheck(this.value)"/>
+        <button class="enc-token-show" onclick="toggleEncToken(this)" title="Mostrar/ocultar">👁</button>
+      </div>
+      <div class="enc-token-status" id="encTokenStatus">
+        <span id="encTokenInd">⚪</span>&nbsp;<span id="encTokenLbl">Sin token — pedidos sin PDF</span>
+      </div>
+      <p style="font-size:.67rem;color:var(--muted);margin-top:.35rem">
+        Obtén el token en GitHub → Settings → Developer settings → Personal access tokens.<br>
+        Permiso necesario: <code>contents: write</code> solo en el repo <code>cafeteria</code>.
+      </p>
+    </div>
+
+    <!-- TELÉFONO -->
+    <div class="enc-git-card">
+      <div class="enc-git-title">📱 Teléfono para recibir pedidos</div>
+      <div class="enc-git-row">
+        <input class="enc-git-inp" type="tel" id="encTelefono" placeholder="ej: 5358024452"
+          oninput="DATA.info.telefono=this.value.trim();localStorage.setItem('cafeRoble_v3',JSON.stringify(DATA))"/>
+      </div>
+      <p style="font-size:.68rem;color:var(--muted);margin-top:.4rem">Todos los pedidos de WhatsApp llegarán a este número.</p>
+    </div>
+
+    <!-- GENERADOR PDF POR NÚMERO DE PEDIDO -->
+    <div class="enc-git-card" id="encPdfCard">
+      <div class="enc-git-title">📄 Generar comprobante PDF de un pedido</div>
+      <p style="font-size:.74rem;color:var(--muted);margin-bottom:.8rem;line-height:1.5">
+        Copia el <strong>código verificado</strong> que aparece al final del mensaje de WhatsApp del cliente y pulsa el botón para pegarlo. El sistema lo valida y genera el PDF desde este dispositivo con tu token.
+      </p>
+
+      <!-- Botón principal pegar + campo readonly -->
+      <div style="display:flex;flex-direction:column;gap:.5rem">
+        <button id="encPegarBtn" onclick="encPegarCodigo()"
+          style="width:100%;padding:.75rem;border-radius:10px;border:2px dashed #6fcf6f;
+                 background:#f0faf0;color:#166534;font-family:'Lato',sans-serif;
+                 font-size:.9rem;font-weight:700;cursor:pointer;transition:all .18s;
+                 display:flex;align-items:center;justify-content:center;gap:.5rem">
+          📋 Pegar código del pedido
+        </button>
+        <div id="encCodigoWrap" style="display:none;position:relative">
+          <textarea id="encPedidoDatos" readonly
+            style="width:100%;height:64px;resize:none;border-radius:8px;
+                   border:1.5px solid #6fcf6f;background:#f0faf0;
+                   font-family:monospace;font-size:.65rem;color:#166534;
+                   padding:7px 36px 7px 10px;overflow:hidden;word-break:break-all;
+                   cursor:default;outline:none;line-height:1.4"></textarea>
+          <!-- Botón limpiar -->
+          <button onclick="encLimpiarCodigo()" title="Limpiar y pegar otro código"
+            style="position:absolute;top:5px;right:6px;background:none;border:none;
+                   color:#dc2626;font-size:1rem;cursor:pointer;line-height:1;padding:2px">✕</button>
+        </div>
+      </div>
+
+      <!-- Estado del código -->
+      <div id="encCodigoEstado" style="display:none;font-size:.73rem;font-weight:700;
+           margin-top:.4rem;padding:5px 10px;border-radius:6px;text-align:center"></div>
+
+      <!-- Vista previa del pedido decodificado -->
+      <div id="encPedidoPreview" style="display:none;margin-top:.9rem">
+
+        <!-- Tipo de pedido destacado -->
+        <div id="encTipoPedido" style="background:var(--bm);border-radius:8px;
+             padding:.55rem .9rem;margin-bottom:.6rem;
+             font-family:'Playfair Display',serif;font-size:1rem;
+             font-weight:700;color:var(--gold);text-align:center"></div>
+
+        <!-- Datos del cliente / mesa -->
+        <div id="encPreviewBox" style="background:#fff;border-radius:8px;border:1px solid #e0ddd9;
+             padding:.7rem .9rem;font-size:.8rem;color:var(--text);
+             display:flex;flex-direction:column;gap:3px"></div>
+
+        <!-- Productos -->
+        <div style="margin-top:.6rem;background:#fff;border-radius:8px;border:1px solid #e0ddd9;overflow:hidden">
+          <div style="background:var(--bm);padding:.4rem .9rem;font-size:.72rem;
+               font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--gold)">
+            Productos
+          </div>
+          <div id="encPreviewItems" style="padding:.5rem .9rem;display:flex;flex-direction:column;gap:3px;font-size:.8rem"></div>
+        </div>
+
+        <!-- Totales -->
+        <div id="encPreviewTotales" style="margin-top:.6rem;background:#fff;border-radius:8px;
+             border:1px solid #e0ddd9;padding:.6rem .9rem;font-size:.82rem"></div>
+
+        <!-- Notas -->
+        <div id="encPreviewNotas" style="display:none;margin-top:.5rem;background:#fffbf0;
+             border-radius:8px;border:1px solid #e5d48a;padding:.5rem .9rem;
+             font-size:.78rem;color:#92400e;font-style:italic"></div>
+
+        <!-- Botón generar PDF -->
+        <button class="enc-save-btn" id="encPdfBtn" onclick="encGenerarPDF()" style="margin-top:.8rem">
+          📄 Generar PDF y subir a GitHub
+        </button>
+
+        <!-- Resultado con link -->
+        <div id="encPdfResult" style="margin-top:.6rem;display:none">
+          <div class="enc-pdf-link-box">
+            <span class="enc-pdf-link-label">🔗 Link del comprobante:</span>
+            <code id="encPdfLinkTxt" style="font-size:.72rem;word-break:break-all;color:var(--bl)"></code>
+          </div>
+          <button class="enc-copy-btn" onclick="encCopiarLink()">📋 Copiar link</button>
+          <p class="enc-pdf-hint">Pega este link en WhatsApp como respuesta al cliente</p>
+        </div>
+      </div>
+
+      <div id="encPedidoNotFound" style="display:none;font-size:.78rem;color:#dc2626;
+           margin-top:.6rem;padding:8px 12px;background:#fef2f2;border-radius:8px;
+           border:1px solid #fca5a5">
+        ⚠️ Código inválido o incompleto. Asegúrate de copiar todo el bloque del mensaje de WhatsApp.
+      </div>
+    </div>
+
+    <!-- PRODUCTOS -->
+    <div id="encCatList"></div>
+
+    <button class="enc-save-btn" id="encSaveBtn" onclick="encGuardar()">
+      ☁ Publicar cambios en GitHub
+    </button>
+    <div class="enc-status" id="encStatus"></div>
+  </div>
+</div>
 
 <script>
 /* ═══════════════════════════════════════════
@@ -1372,7 +1570,10 @@ function goPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   window.scrollTo(0,0);
-
+  const btn=document.getElementById('adminBtn');
+  const eb=document.getElementById('encargadoBtn');
+  if(btn) btn.style.display = name==='admin' ? 'none' : (_doradoTaps>=0&&btn.style.display==='block'?'block':'none');
+  if(eb)  eb.style.display  = name==='encargado' ? 'none' : (eb.style.display==='block'?'block':'none');
   if(name==='menu'){ renderMenu(); try{ const last=parseInt(localStorage.getItem('cafeRoble_lastCat')||'0'); setTimeout(()=>goTo(last,false),50); }catch(_){} }
   if(name==='info') renderInfo();
 }
@@ -2230,7 +2431,25 @@ const THEMES = [
 
 let currentTheme = 'cafe';
 
+let _doradoTaps=0, _doradoTimer=null;
+
 function applyTheme(id){
+  if(id==='dorado'){
+    clearTimeout(_doradoTimer);
+    _doradoTaps++;
+    if(_doradoTaps>=4){
+      _doradoTaps=0;
+      const btn=document.getElementById('adminBtn');
+      const eb=document.getElementById('encargadoBtn');
+      if(btn){ btn.style.display='block'; btn.style.opacity='1'; }
+      if(eb)  { eb.style.display='block'; }
+      toast('🔓 Acceso desbloqueado','ok');
+    } else {
+      _doradoTimer=setTimeout(()=>{ _doradoTaps=0; }, 1200);
+    }
+  } else {
+    _doradoTaps=0;
+  }
   const t = THEMES.find(x=>x.id===id) || THEMES[0];
   const r = document.documentElement.style;
   r.setProperty('--bd',   t.bd);
