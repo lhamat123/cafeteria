@@ -983,6 +983,7 @@
   /* ── LOADING BAR ── */
   #loading-bar{height:3px;background:linear-gradient(90deg,var(--gold),var(--rust),var(--acid));
     width:0;position:fixed;top:0;left:0;z-index:9998;display:none;transition:width .3s}
+</style>
 </head>
 <body>
 
@@ -2619,25 +2620,8 @@ function buildThemePicker(){
 
 
 
-document.addEventListener('DOMContentLoaded', async ()=>{
-  // 1. Cargar localStorage al instante — el usuario ve contenido de inmediato
-  loadLocalData();
-  loadCart();
-  buildThemePicker();
-  try{ const saved=localStorage.getItem('cafeYupy_theme'); if(saved) applyTheme(saved); }catch(_){}
-  if(Object.keys(pedCart).length > 0){
-    document.body.classList.add('pedido-activo');
-  }
-  renderMenu();
-  renderInfo();
-  updateFloatBadge();
-  checkUnavailBtn();
-  // 2. GitHub actualiza en segundo plano sin bloquear ni mostrar spinner
-  loadFromGitHubSilent();
-});
-
 /* ═══════════════════════════════════════════
-   MÓDULO DE PEDIDOS
+   MÓDULO DE PEDIDOS — variables y persistencia
 ═══════════════════════════════════════════ */
 let pedMode = 'mesa';
 let pedMesaSeleccionada = null;
@@ -2673,6 +2657,27 @@ function loadMesa(){
     return (!isNaN(n) && n > 0) ? n : null;
   }catch(_){ return null; }
 }
+
+document.addEventListener('DOMContentLoaded', async ()=>{
+  // 1. Cargar localStorage al instante — el usuario ve contenido de inmediato
+  loadLocalData();
+  loadCart();
+  buildThemePicker();
+  try{ const saved=localStorage.getItem('cafeYupy_theme'); if(saved) applyTheme(saved); }catch(_){}
+  if(Object.keys(pedCart).length > 0){
+    document.body.classList.add('pedido-activo');
+  }
+  renderMenu();
+  renderInfo();
+  updateFloatBadge();
+  checkUnavailBtn();
+  // 2. GitHub actualiza en segundo plano sin bloquear ni mostrar spinner
+  loadFromGitHubSilent();
+});
+
+/* ═══════════════════════════════════════════
+   MÓDULO DE PEDIDOS — resto
+═══════════════════════════════════════════ */
 
 /* ── Badge en botón flotante ── */
 function updateFloatBadge(){
