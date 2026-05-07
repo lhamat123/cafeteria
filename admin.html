@@ -808,7 +808,7 @@
 <div class="page" id="page-admin" style="display:none">
   <div class="adm-bar">
     <span class="adm-bar-title">⚙️ Administración — Café Roble</span>
-    <button class="ab ab-ghost" onclick="goPage('menu')">← Salir</button>
+    <button class="ab ab-ghost" onclick="if(confirm('¿Salir del panel de administración?')){location.reload()}">← Salir</button>
     <button class="ab ab-green" onclick="admApply()">✔ Guardar local</button>
     <button class="ab ab-purple" onclick="admSaveGitHub()">☁ Publicar en GitHub</button>
     <button class="ab ab-gold" onclick="admExport()">⬇ Exportar JSON</button>
@@ -849,6 +849,18 @@ const GH_PEDIDOS_DIR  = 'pedidos';       // carpeta en el repo donde se suben lo
 const GH_PEDIDOS_TOKEN= '';              // ← pega aquí un token con permisos contents:write
 const APP_PASS      = 'Cafe2025';   // ← contraseña administrador
 const ENC_PASS      = 'Enc2025';    // ← contraseña encargado (cámbiala)
+
+/* ── ADMIN STANDALONE: stubs para funciones del cliente ── */
+function buildRepartoSelect(){ /* no aplica en admin standalone */ }
+function checkUnavailBtn(){ /* no aplica en admin standalone */ }
+function updateFloatBadge(){ /* no aplica en admin standalone */ }
+function loadCart(){ /* no aplica en admin standalone */ }
+function saveCart(){ /* no aplica en admin standalone */ }
+function renderPedCart(){ /* no aplica en admin standalone */ }
+function activarPedido(){ /* no aplica en admin standalone */ }
+function cancelarPedido(){ /* no aplica en admin standalone */ }
+function abrirPedido(){ /* no aplica en admin standalone */ }
+
 
 /* ═══════════════════════
    DATOS POR DEFECTO
@@ -928,7 +940,7 @@ async function loadFromGitHubSilent() {
     if(remoteStr !== localStr){
       DATA = remoteData;
       localStorage.setItem('cafeRoble_v3', JSON.stringify(DATA));
-      renderMenu(); renderInfo(); checkUnavailBtn();
+      if(document.getElementById('page-admin').style.display!=='none'){ buildAdmin(); }
       setGhStatus('✅ Datos actualizados desde GitHub', 'ok');
     } else {
       setGhStatus('✅ Datos en sync con GitHub', 'ok');
@@ -949,8 +961,8 @@ async function loadFromGitHub() {
     DATA = JSON.parse(fromBase64(json.content));
     localStorage.setItem('cafeRoble_v3', JSON.stringify(DATA));
     setGhStatus('✅ Datos cargados desde GitHub Pages', 'ok');
-    renderMenu(); renderInfo(); checkUnavailBtn();
-    toast('✅ Carta cargada desde GitHub Pages','ok');
+    buildAdmin();
+    toast('✅ Datos cargados desde GitHub Pages','ok');
   } catch(e) {
     setGhStatus('⚠️ Sin datos en GitHub — usando datos locales', '');
   }
@@ -1004,179 +1016,12 @@ function setGhStatus(msg, cls) {
 /* ═══════════════════════
    RENDER INFO PAGE
 ═══════════════════════ */
-function renderInfo() {
-  const d = DATA.info || {};
-  // Título del navegador
-  document.title = d.nombre || 'Carta';
-  // Banner
-  ['bannerPhotoMenu','bannerPhotoInfo'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el && d.bannerImg) el.src = d.bannerImg;
-  });
-  ['bannerNameMenu','bannerNameInfo'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = d.nombre || 'Café Roble';
-  });
-  ['bannerSubMenu','bannerSubInfo'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = d.slogan || '';
-  });
-  // About
-  const aboutImg = document.getElementById('aboutImg');
-  if (aboutImg && d.aboutImg) aboutImg.src = d.aboutImg;
-  const ab = document.getElementById('aboutBadge');     if(ab) ab.textContent = d.aboutBadge||'';
-  const at = document.getElementById('aboutTitle');     if(at) at.textContent = d.aboutTitle||'';
-  const at1= document.getElementById('aboutText1');     if(at1) at1.textContent = d.aboutText1||'';
-  const at2= document.getElementById('aboutText2');     if(at2) at2.textContent = d.aboutText2||'';
-  // Contact
-  const ca = document.getElementById('contactAddr');    if(ca) ca.textContent = d.direccion||'';
-  const ct = document.getElementById('contactTel');     if(ct) ct.textContent = d.telefono||'';
-  const ce = document.getElementById('contactEmail');   if(ce) ce.textContent = d.email||'';
-  const ci = document.getElementById('contactIg');      if(ci) ci.textContent = d.instagram||'';
-  // Map
-  const mf = document.getElementById('mapFrame');
-  if(mf && d.mapEmbed) mf.src = d.mapEmbed;
-  const mn = document.getElementById('mapName');        if(mn) mn.textContent = d.nombre||'';
-  const ma = document.getElementById('mapAddr');        if(ma) ma.textContent = d.direccion||'';
-  const mt = document.getElementById('mapTel');         if(mt) mt.textContent = d.telefono||'';
-  const ml = document.getElementById('mapLink');        if(ml && d.mapLink) ml.href = d.mapLink;
-  // Promo
-  const pb = document.getElementById('promoBox');
-  if(pb) pb.innerHTML = `
-    <img class="promo-photo" src="${e(d.promoImg||'')}" alt="Promo"/>
-    <div class="promo-body">
-      <span class="promo-tag">${e(d.promoTag||'')}</span>
-      <p class="promo-title">${e(d.promoTitle||'')}</p>
-      <p class="promo-desc">${e(d.promoDesc||'')}</p>
-      <span class="promo-price">${e(d.promoPrice||'')}</span>
-    </div>`;
-  // Horarios
-  const hg = document.getElementById('horariosGrid');
-  if(hg) hg.innerHTML = `
-    <div class="hc"><p class="hd">Lun – Vie</p><p class="ht">${e(d.horariosLV||'')}</p></div>
-    <div class="hc"><p class="hd">Sábado</p><p class="ht">${e(d.horariosSab||'')}</p></div>
-    <div class="hc"><p class="hd">Domingo</p><p class="ht">${e(d.horariosDom||'')}</p></div>
-    <div class="hc"><p class="hd">Festivos</p><p class="ht">${e(d.horariosFest||'')}</p></div>`;
-  // Footer
-  const fm = document.getElementById('footerMenu');
-  const fi = document.getElementById('footerInfo');
-  const fl = `<p>${e(d.footerLine1||'')}</p><p>${e(d.footerLine2||'')}</p>`;
-  if(fm) fm.innerHTML = fl;
-  if(fi) fi.innerHTML = fl;
-
-  // Featured & Gallery
-  const feat = document.getElementById('infoFeat');
-  const gal  = document.getElementById('infoGal');
-  feat.innerHTML = ''; gal.innerHTML = '';
-
-  // DESTACADOS: usa info.destacados[] (referencias a productos) si existe, si no fallback
-  const destacados = (d.destacados && d.destacados.length)
-    ? d.destacados.map(ref=>{
-        const cat=DATA.categorias[ref.ci];
-        const prod=cat?.productos[ref.pi];
-        return prod ? {img:prod.img,imgFull:prod.imgFull||prod.img,nombre:prod.nombre,precio:prod.precio} : null;
-      }).filter(Boolean)
-    : DATA.categorias.filter(c=>c.productos[0]).map(c=>({img:c.productos[0].img,imgFull:c.productos[0].imgFull||c.productos[0].img,nombre:c.productos[0].nombre,precio:c.productos[0].precio}));
-  destacados.forEach((item,i)=>{
-    const card = document.createElement('div'); card.className='feat-card';
-    card.innerHTML = `<div style="overflow:hidden"><img class="feat-img" src="${e(item.img||'')}" alt="${e(item.nombre||'')}"></div>
-      <div class="feat-body"><p class="feat-name">${e(item.nombre||'')}</p><p class="feat-price">${e(item.precio||'')}</p></div>`;
-    card.addEventListener('click', ()=>lbSingle(item.imgFull||item.img, item.nombre||''));
-    feat.appendChild(card);
-  });
-
-  // GALERÍA NOSOTROS: usa info.galeria[] si existe, si no fallback a primera foto de cada categoría
-  const galItems = (d.galeria && d.galeria.length)
-    ? d.galeria
-    : DATA.categorias.filter(c=>c.galeria?.fotos?.[0]).map(c=>c.galeria.fotos[0]);
-  galItems.forEach((f,i)=>{
-    const img=document.createElement('img'); img.className='info-gal-img';
-    img.src=f.imgFull||f.img; img.alt=f.caption||'';
-    img.addEventListener('click',()=>lbGallery(galItems.map(g=>({src:g.imgFull||g.img,cap:g.caption||''})),i));
-    gal.appendChild(img);
-  });
-}
+function renderInfo() { /* no-op in admin */ }
 
 /* ═══════════════════════
    RENDER MENU
 ═══════════════════════ */
-function renderMenu() {
-  const nav = document.getElementById('catNav');
-  nav.innerHTML = '';
-  DATA.categorias.forEach((cat,i)=>{
-    const b = document.createElement('button');
-    b.className = 'cat-btn'+(i===0?' active':'');
-    b.dataset.index = i;
-    b.textContent = cat.label;
-    b.addEventListener('click', ()=>goTo(i,true));
-    nav.appendChild(b);
-  });
-  const track = document.getElementById('track');
-  track.innerHTML = '';
-  sliderReady = false;
-  DATA.categorias.forEach((cat,ci)=>{
-    const panel = document.createElement('div');
-    panel.className = 'slide-panel';
-    const rows = cat.productos.map((p,pi)=>{
-      const key = ci+'-'+pi;
-      const qty = pedCart[key]||0;
-      // Ocultar productos no disponibles de la carta
-      if(p.disponible === false) return null;
-      const row = document.createElement('div');
-      row.className = 'item-row';
-      row.innerHTML = `
-        <div class="item-thumb">
-          <img src="${e(p.img)}" alt="${e(p.nombre)}">
-          ${p.badge?`<span class="badge">${e(p.badge)}</span>`:''}
-          ${p.noDomicilio?`<span class="badge badge-local">🏠 Solo local</span>`:''}
-        </div>
-        <div class="item-info">
-          <p class="item-name">${e(p.nombre)}</p>
-          <p class="item-desc">${e(p.desc)}</p>
-        </div>
-        <div class="item-qty-wrap">
-          <span class="price">${e(p.precio)}</span>
-          <div class="item-qty-row" data-key="${key}">
-            <button class="iqbtn" data-key="${key}" data-d="-1">−</button>
-            <span class="iqval" id="miqv-${key}">${qty||''}</span>
-            <button class="iqbtn" data-key="${key}" data-d="1">+</button>
-          </div>
-        </div>`;
-      row.querySelector('.item-thumb').addEventListener('click',()=>lbProduct(ci,pi));
-      row.querySelectorAll('.iqbtn').forEach(btn=>{
-        btn.addEventListener('click', ev=>{
-          ev.stopPropagation();
-          menuCambiarQty(btn.dataset.key, parseInt(btn.dataset.d));
-        });
-      });
-      return row;
-    }).filter(Boolean);
-    const list=document.createElement('div'); list.className='items-list';
-    rows.forEach(r=>list.appendChild(r));
-    panel.appendChild(list);
-    if(cat.galeria?.fotos?.length){
-      const gal=document.createElement('div'); gal.className='panel-gal';
-      gal.innerHTML=`<p class="panel-gal-title">${e(cat.galeria.titulo||'')}</p>
-        <div class="panel-gal-grid">${cat.galeria.fotos.map((f,fi)=>`
-          <div class="pgc" data-ci="${ci}" data-fi="${fi}">
-            <div class="pgc-img"><img src="${e(f.img)}" alt=""></div>
-            <span class="pgc-cap">${e(f.caption||'')}</span>
-          </div>`).join('')}
-        </div>`;
-      gal.querySelectorAll('.pgc').forEach(c=>{
-        c.addEventListener('click',()=>lbGal(+c.dataset.ci,+c.dataset.fi));
-      });
-      panel.appendChild(gal);
-    }
-    track.appendChild(panel);
-  });
-  currentCat=0; initSlider();
-  // Set initial category label
-  const lbl=document.getElementById('secTitleLabel');
-  if(lbl && DATA?.categorias?.[0]) lbl.textContent=DATA.categorias[0].label;
-  updateFloatBadge();
-  checkUnavailBtn();
-}
+function renderMenu() { /* no-op in admin */ }
 
 /* ═══════════════════════
    LIGHTBOX
@@ -1210,12 +1055,10 @@ document.addEventListener('keydown',ev=>{
    PAGE NAV
 ═══════════════════════ */
 function goPage(name){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
+  // En admin standalone solo existe page-admin
+  const pg = document.getElementById('page-'+name);
+  if(pg){ document.querySelectorAll('.page').forEach(p=>p.style.display='none'); pg.style.display='block'; }
   window.scrollTo(0,0);
-
-  if(name==='menu'){ renderMenu(); try{ const last=parseInt(localStorage.getItem('cafeRoble_lastCat')||'0'); setTimeout(()=>goTo(last,false),50); }catch(_){} }
-  if(name==='info') renderInfo();
 }
 function goAdmin(){
   const pass=prompt('Acceso limitado:');
@@ -1276,13 +1119,15 @@ function onE(){
   else if(dragDelta>thr&&currentCat>0)   goTo(currentCat-1,true);
   else                                    goTo(currentCat,true);
 }
-vp.addEventListener('mousedown',onS);
+if(vp){
+  vp.addEventListener('mousedown',onS);
+  vp.addEventListener('touchstart',onS,{passive:true});
+  vp.addEventListener('touchmove',onM,{passive:true});
+  vp.addEventListener('touchend',onE);
+}
 window.addEventListener('mousemove',onM);
 window.addEventListener('mouseup',onE);
-vp.addEventListener('touchstart',onS,{passive:true});
-vp.addEventListener('touchmove',onM,{passive:true});
-vp.addEventListener('touchend',onE);
-window.addEventListener('resize',()=>{ if(sliderReady){layout(0);syncH(false);} });
+window.addEventListener('resize',()=>{ if(vp&&sliderReady){layout(0);syncH(false);} });
 
 /* ═══════════════════════
    IMAGE CROPPER
@@ -1946,7 +1791,6 @@ function moveProd(ci, pi, dir){
 /* apply / github / export / import */
 function admApply(){
   localStorage.setItem('cafeRoble_v3', JSON.stringify(DATA));
-  renderMenu(); renderInfo(); checkUnavailBtn(); buildRepartoSelect();
   toast('✔ Cambios guardados localmente','ok');
 }
 
@@ -1954,7 +1798,6 @@ async function admSaveGitHub(){
   const ok=await saveToGitHub();
   if(ok){
     localStorage.setItem('cafeRoble_v3',JSON.stringify(DATA));
-    renderMenu(); renderInfo(); checkUnavailBtn();
     toast('☁ Carta publicada en GitHub Pages','ok');
   }
 }
@@ -1972,7 +1815,7 @@ function admImport(input){
     try{
       DATA=JSON.parse(ev.target.result);
       localStorage.setItem('cafeRoble_v3',JSON.stringify(DATA));
-      admTab=0; buildAdmin(); renderMenu(); renderInfo(); checkUnavailBtn();
+      admTab=0; buildAdmin();
       toast('JSON importado','ok');
     } catch(_){ toast('Error: JSON inválido','warn'); }
   }; r.readAsText(f); input.value='';
@@ -3244,10 +3087,10 @@ function loginAdmin(){
     document.getElementById('login-screen').style.display = 'none';
     const pg = document.getElementById('page-admin');
     if(pg) pg.style.display = 'block';
-    buildAdmin();
+    setTimeout(()=>{ buildAdmin(); }, 50);
   } else {
     const err = document.getElementById('loginErr');
-    if(err) err.style.display = 'block';
+    if(err){ err.style.display = 'block'; err.textContent = '⚠️ Contraseña incorrecta'; }
   }
 }
 document.addEventListener('keydown', ev=>{
