@@ -1014,7 +1014,7 @@ function fromBase64(b64) {
   return new TextDecoder().decode(bytes);
 }
 
-async async function loadFromGitHubSilent() {
+async function loadFromGitHubSilent() {
   const controller = new AbortController();
   const timer = setTimeout(()=>controller.abort(), 8000);
   try {
