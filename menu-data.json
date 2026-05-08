@@ -29,12 +29,22 @@
       "anillo1": {
         "nombre": "1er Anillo",
         "precio": "$20.00",
-        "zonas": ["Centro Sur", "Centro Norte", "Peralta", "Pueblo Nuevo"]
+        "zonas": [
+          "Centro Sur",
+          "Centro Norte",
+          "Peralta",
+          "Pueblo Nuevo"
+        ]
       },
       "anillo2": {
         "nombre": "2do Anillo",
         "precio": "$40.00",
-        "zonas": ["Sanfield", "La Quinta", "Vista Alegre", "Libertad"]
+        "zonas": [
+          "Sanfield",
+          "La Quinta",
+          "Vista Alegre",
+          "Libertad"
+        ]
       }
     }
   },
