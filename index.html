@@ -29,54 +29,66 @@
   .tswatch.active{border-color:#fff;transform:scale(1.2)}
 
   /* ── MODAL ADVERTENCIA MESA ── */
+  /* modal = bottom-sheet que sube desde abajo, nunca se corta */
   #mesaWarningModal{
     position:fixed;inset:0;z-index:9000;
-    background:rgba(0,0,0,.72);
-    display:none;align-items:center;justify-content:center;padding:1.2rem;
+    background:rgba(0,0,0,.6);
+    display:none;align-items:flex-end;justify-content:center;
   }
   #mesaWarningModal.open{ display:flex; }
   .mesa-warn-box{
-    background:var(--cs);border-radius:16px;max-width:360px;width:100%;
-    overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.45);
-    animation:warnPop .25s ease;
+    background:var(--cs);
+    border-radius:20px 20px 0 0;
+    width:100%;max-width:480px;
+    max-height:92vh;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    box-shadow:0 -4px 32px rgba(0,0,0,.35);
+    animation:slideUp .28s ease;
+    padding-bottom:env(safe-area-inset-bottom, 12px);
   }
-  @keyframes warnPop{from{transform:scale(.88);opacity:0}to{transform:scale(1);opacity:1}}
+  @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .mesa-warn-handle{
+    width:40px;height:4px;border-radius:2px;
+    background:rgba(0,0,0,.15);margin:10px auto 0;
+  }
   .mesa-warn-head{
-    background:var(--bd);padding:1rem 1.2rem .8rem;
-    display:flex;align-items:center;gap:.6rem;
+    background:var(--bd);padding:.75rem 1rem .65rem;
+    display:flex;align-items:center;gap:.5rem;
   }
-  .mesa-warn-icon{font-size:1.6rem;line-height:1}
+  .mesa-warn-icon{font-size:1.3rem;line-height:1;flex-shrink:0}
   .mesa-warn-title{
-    font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;
+    font-family:'Playfair Display',serif;font-size:.95rem;font-weight:700;
     color:var(--cream);line-height:1.2;
   }
-  .mesa-warn-body{padding:1rem 1.2rem .9rem}
+  .mesa-warn-body{padding:.85rem 1rem 1rem}
   .mesa-warn-msg{
-    font-size:.85rem;color:var(--text);line-height:1.65;margin-bottom:.9rem;
+    font-size:.83rem;color:var(--text);line-height:1.6;margin-bottom:.8rem;
   }
   .mesa-warn-num{
     display:inline-block;background:var(--gold);color:var(--bd);
-    font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;
-    padding:.15rem .7rem;border-radius:8px;margin:0 .15rem;
+    font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;
+    padding:.1rem .55rem;border-radius:8px;margin:0 .1rem;
   }
   .mesa-warn-actions{display:flex;flex-direction:column;gap:.5rem}
   .mesa-warn-btn{
-    width:100%;padding:.7rem 1rem;border-radius:10px;border:none;
-    font-family:'Lato',sans-serif;font-size:.82rem;font-weight:700;
-    cursor:pointer;transition:opacity .15s;display:flex;align-items:center;
-    justify-content:center;gap:.4rem;
+    width:100%;padding:.75rem 1rem;border-radius:12px;border:none;
+    font-family:'Lato',sans-serif;font-size:.85rem;font-weight:700;
+    cursor:pointer;display:flex;align-items:center;
+    justify-content:center;gap:.4rem;line-height:1.3;text-align:center;
+    -webkit-tap-highlight-color:transparent;
   }
-  .mesa-warn-btn:hover{opacity:.85}
+  .mesa-warn-btn:active{filter:brightness(.92)}
   .mesa-warn-btn.primary{background:var(--gold);color:var(--bd)}
   .mesa-warn-btn.secondary{background:rgba(201,168,124,.15);color:var(--bl);border:1.5px solid var(--bdr)}
   .mesa-warn-btn.danger{background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca}
   .mesa-warn-qr-tip{
-    background:#fffbf0;border:1.5px solid var(--gold);border-radius:10px;
-    padding:.8rem 1rem;text-align:center;
+    background:#fffbf0;border:1.5px solid var(--gold);border-radius:12px;
+    padding:.75rem 1rem;text-align:center;
   }
-  .mesa-warn-qr-icon{font-size:2rem;margin-bottom:.4rem}
-  .mesa-warn-qr-tip p{font-size:.82rem;color:var(--text);line-height:1.6;margin-bottom:.25rem}
-  .mesa-warn-qr-sub{font-size:.74rem !important;color:var(--muted) !important}
+  .mesa-warn-qr-icon{font-size:1.6rem;margin-bottom:.3rem}
+  .mesa-warn-qr-tip p{font-size:.81rem;color:var(--text);line-height:1.55;margin-bottom:.2rem}
+  .mesa-warn-qr-sub{font-size:.72rem !important;color:var(--muted) !important}
   body{font-family:'Lato',sans-serif;background:var(--cs);color:var(--text);overflow-x:hidden}
 
   /* ── PAGES ── */
@@ -1087,6 +1099,7 @@
 <!-- ══════════ MODAL ADVERTENCIA MESA ══════════ -->
 <div id="mesaWarningModal">
   <div class="mesa-warn-box">
+    <div class="mesa-warn-handle"></div>
     <div class="mesa-warn-head">
       <span class="mesa-warn-icon">⚠️</span>
       <div class="mesa-warn-title">Verificá tu mesa antes de pedir</div>
@@ -2650,7 +2663,11 @@ function cancelarPedido(){
   pedCart = {};
   saveCart();
   pedMesaSeleccionada = null;
-  try{ localStorage.removeItem('mesaAsignada'); }catch(_){}
+  try{
+    localStorage.removeItem('mesaAsignada');
+    localStorage.removeItem('mesaAsignadaTs');
+    localStorage.removeItem('mesaAsignadaOk');
+  }catch(_){}
   document.body.classList.remove('pedido-activo');
   document.querySelectorAll('.iqval').forEach(el=>{ el.textContent=''; });
   actualizarDisplayMesa();
@@ -2738,13 +2755,34 @@ function abrirPedido(mesaNum){
         setTimeout(()=>{
           let savedMesa = null;
           try{ savedMesa = localStorage.getItem('mesaAsignada'); }catch(_){}
-          const mesaURL = parseInt(m);
-          if(savedMesa && !isNaN(savedMesa)){
-            // Hay historial: mostrar advertencia para que el cliente confirme
+          const mesaURL     = parseInt(m);
+          const mesaGuardada = parseInt(savedMesa);
+          let   tsGuardado   = 0;
+          let   confirmado   = false;
+          try{
+            tsGuardado = parseInt(localStorage.getItem('mesaAsignadaTs') || '0');
+            confirmado = localStorage.getItem('mesaAsignadaOk') === '1';
+          }catch(_){}
+
+          const ahora        = Date.now();
+          const tresHoras    = 3 * 60 * 60 * 1000;
+          const mismaMesa    = savedMesa && !isNaN(mesaGuardada) && mesaGuardada === mesaURL;
+          const reciente     = (ahora - tsGuardado) < tresHoras;
+
+          if(mismaMesa && (confirmado || reciente)){
+            // Misma mesa y dentro del período de sesión → entrar directo
+            try{ localStorage.setItem('mesaAsignadaTs', ahora); }catch(_){}
+            abrirPedido(mesaURL);
+          } else if(mismaMesa && !reciente){
+            // Misma mesa pero pasaron más de 3 horas → puede ser otro cliente
             mostrarAdvertenciaMesa(mesaURL);
           } else {
-            // Primera vez con este QR: asignar directo
-            try{ localStorage.setItem('mesaAsignada', m); }catch(_){}
+            // Mesa distinta o primera vez → asignar directo sin preguntar
+            try{
+              localStorage.setItem('mesaAsignada', m);
+              localStorage.setItem('mesaAsignadaTs', ahora);
+              localStorage.setItem('mesaAsignadaOk', '0');
+            }catch(_){}
             abrirPedido(mesaURL);
           }
         }, 800);
@@ -2881,7 +2919,11 @@ function confirmarMesaWarning(){
   const mesa  = modal?._mesaPendiente;
   modal?.classList.remove('open');
   if(mesa){
-    try{ localStorage.setItem('mesaAsignada', mesa); }catch(_){}
+    try{
+      localStorage.setItem('mesaAsignada', mesa);
+      localStorage.setItem('mesaAsignadaTs', Date.now());
+      localStorage.setItem('mesaAsignadaOk', '1');
+    }catch(_){}
     abrirPedido(mesa);
   }
 }
@@ -2889,15 +2931,23 @@ function confirmarMesaWarning(){
 function cerrarMesaWarning(){
   const modal = document.getElementById('mesaWarningModal');
   modal?.classList.remove('open');
-  // Limpiar mesa guardada — el cliente dice que no es suya
-  try{ localStorage.removeItem('mesaAsignada'); }catch(_){}
+  try{
+    localStorage.removeItem('mesaAsignada');
+    localStorage.removeItem('mesaAsignadaTs');
+    localStorage.removeItem('mesaAsignadaOk');
+  }catch(_){}
   pedMesaSeleccionada = null;
   abrirPedido(null);
 }
 
 function escanearDesdeWarning(){
-  // Mantenido por compatibilidad — ya no se usa directamente
   mostrarTipQR();
+  // Limpiar mesa guardada para que al volver con el QR correcto se asigne fresco
+  try{
+    localStorage.removeItem('mesaAsignada');
+    localStorage.removeItem('mesaAsignadaTs');
+    localStorage.removeItem('mesaAsignadaOk');
+  }catch(_){}
 }
 
 function mostrarTipQR(){
