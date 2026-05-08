@@ -1365,10 +1365,18 @@ function loadLocalData() {
 /* ═══════════════════════
    GITHUB API
 ═══════════════════════ */
+// Usuario y repo hardcodeados para la carga inicial (no depende del DOM)
+const GH_USER_DEFAULT = 'lhamat123';
+const GH_REPO_DEFAULT = 'cafeteria';
+
 function ghApi() {
-  const user = document.getElementById('ghUser')?.value.trim() || 'lhamat123';
-  const repo = document.getElementById('ghRepo')?.value.trim() || 'cafeteria';
+  const user = document.getElementById('ghUser')?.value.trim() || GH_USER_DEFAULT;
+  const repo = document.getElementById('ghRepo')?.value.trim() || GH_REPO_DEFAULT;
   return `https://api.github.com/repos/${user}/${repo}/contents/${GH_FILE}`;
+}
+
+function ghApiBase() {
+  return `https://api.github.com/repos/${GH_USER_DEFAULT}/${GH_REPO_DEFAULT}/contents/${GH_FILE}`;
 }
 
 // Encode JSON → base64 UTF-8 seguro
@@ -1390,12 +1398,20 @@ async function loadFromGitHubSilent() {
   const controller = new AbortController();
   const timer = setTimeout(()=>controller.abort(), 8000);
   try {
-    const res = await fetch(ghApi(), {
+    const res = await fetch(ghApiBase(), {
       headers: {'Accept':'application/vnd.github+json'},
       signal: controller.signal
     });
     clearTimeout(timer);
-    if (!res.ok) return;
+    if (!res.ok) {
+      // 404 = repo o archivo no existe; 403 = rate limit; no mostrar error al usuario
+      if (res.status === 404) {
+        setGhStatus('', ''); // silencioso — archivo aún no publicado
+      } else if (res.status === 403 || res.status === 429) {
+        setGhStatus('⚠️ GitHub: límite de peticiones alcanzado — usando datos locales', '');
+      }
+      return;
+    }
     const json = await res.json();
     fileSHA = json.sha;
     const remoteData = JSON.parse(fromBase64(json.content));
@@ -1405,13 +1421,18 @@ async function loadFromGitHubSilent() {
       DATA = remoteData;
       localStorage.setItem('cafeRoble_v3', JSON.stringify(DATA));
       renderMenu(); renderInfo(); checkUnavailBtn();
-      setGhStatus('✅ Datos actualizados desde GitHub', 'ok');
+      setGhStatus('✅ Carta actualizada desde GitHub', 'ok');
     } else {
-      setGhStatus('✅ Datos en sync con GitHub', 'ok');
+      setGhStatus('✅ Carta en sync con GitHub', 'ok');
     }
   } catch(e) {
     clearTimeout(timer);
-    setGhStatus('⚠️ Sin conexión a GitHub — mostrando datos locales', '');
+    // Solo mostrar aviso si hay datos locales válidos (no confundir al usuario)
+    const tieneLocal = DATA && DATA.categorias && DATA.categorias.length > 0;
+    if (!tieneLocal) {
+      setGhStatus('⚠️ Sin conexión a GitHub — configura el repositorio en Admin', '');
+    }
+    // Si hay datos locales, cargamos sin molestar al usuario con el aviso
   }
 }
 
