@@ -765,22 +765,10 @@
 </head>
 <body>
 <div id="toast"></div>
-<div id="login-screen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--cs);padding:2rem">
-  <div style="background:var(--bm);border-radius:16px;padding:2.5rem 2rem;max-width:340px;width:100%;text-align:center;border:1.5px solid var(--bdr)">
-    <div style="font-size:2.5rem;margin-bottom:.6rem">👤</div>
-    <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold);margin-bottom:1.5rem">Panel Encargado</div>
-    <input type="password" id="loginPass" placeholder="Clave de encargado"
-      style="padding:11px 14px;border-radius:10px;border:1.5px solid var(--bdr);background:var(--cs);color:var(--text);font-family:'Lato',sans-serif;font-size:1rem;width:100%;margin-bottom:1rem;display:block;box-sizing:border-box"/>
-    <button id="loginBtn"
-      style="width:100%;padding:12px;border-radius:10px;border:none;background:var(--gold);color:var(--bd);font-family:'Lato',sans-serif;font-size:1rem;font-weight:700;cursor:pointer">
-      ▶ Entrar
-    </button>
-    <div id="loginErr" style="color:#f87171;font-size:.85rem;margin-top:.8rem;display:none">⚠️ Clave incorrecta</div>
-  </div>
-</div>
+
 
 <!-- ══════════ ENCARGADO PAGE ══════════ -->
-<div class="page" id="page-encargado" style="display:none">
+<div class="page" id="page-encargado">
   <div class="enc-header">
     <div>
       <div class="enc-header-title">👤 Panel Encargado</div>
@@ -3379,8 +3367,6 @@ function getQRUrl(mesaNum){
 }
 
 /* ===== ENCARGADO STANDALONE ===== */
-
-// Stubs for functions not needed here
 function renderMenu(){}
 function renderInfo(){}
 function updateFloatBadge(){}
@@ -3391,38 +3377,16 @@ function buildAdmin(){}
 function checkUnavailBtn(){}
 function buildRepartoSelect(){}
 
-// Override goPage to only handle page-encargado
-var _origGoPage = typeof goPage === 'function' ? goPage : null;
 function goPage(name){
-  var pg = document.getElementById('page-'+name);
-  if(pg){
-    document.querySelectorAll('.page').forEach(function(p){ p.style.display='none'; });
-    pg.style.display = 'block';
-  }
+  var pg=document.getElementById('page-'+name);
+  if(pg){ document.querySelectorAll('.page').forEach(function(p){p.style.display='none';}); pg.style.display='block'; }
   window.scrollTo(0,0);
 }
 
-// Login
-function doLogin(){
-  var pass = document.getElementById('loginPass').value;
-  if(pass === ENC_PASS){
-    document.getElementById('login-screen').style.display = 'none';
-    var pg = document.getElementById('page-encargado');
-    pg.style.display = 'block';
-    loadLocalData();
-    buildEncargado();
-    loadFromGitHubSilent().then(function(){ buildEncargado(); }).catch(function(){});
-  } else {
-    var err = document.getElementById('loginErr');
-    err.style.display = 'block';
-  }
-}
-
 document.addEventListener('DOMContentLoaded', function(){
-  document.getElementById('loginBtn').addEventListener('click', doLogin);
-  document.getElementById('loginPass').addEventListener('keydown', function(e){
-    if(e.key==='Enter') doLogin();
-  });
+  loadLocalData();
+  buildEncargado();
+  loadFromGitHubSilent().then(function(){ buildEncargado(); }).catch(function(){});
 });
 
 </script>
