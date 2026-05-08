@@ -667,6 +667,44 @@
   .ped-domicilio-fields{display:none}
   .ped-domicilio-fields.visible{display:block}
 
+  /* ── SEPARADORES EN ELIGE PRODUCTOS ── */
+  .ped-separator{
+    display:flex;flex-direction:column;align-items:center;
+    padding:.55rem .4rem .35rem;
+    margin-top:.5rem;
+    position:relative;
+  }
+  .ped-separator::before{
+    content:'';position:absolute;top:50%;left:0;right:0;
+    height:1.5px;background:var(--gold);opacity:.35;
+  }
+  .ped-separator-label{
+    font-family:'Playfair Display',serif;font-size:.78rem;font-weight:700;
+    color:var(--gold);letter-spacing:.07em;text-transform:uppercase;
+    background:var(--cs);padding:0 .6rem;position:relative;z-index:1;
+    text-align:center;
+  }
+  .ped-separator-desc{
+    font-size:.65rem;color:var(--muted);margin-top:2px;text-align:center;
+    position:relative;z-index:1;background:var(--cs);padding:0 .4rem;
+  }
+
+  /* ── SEPARADORES EN CARRITO ── */
+  .ped-cart-separator{
+    display:flex;flex-direction:column;align-items:center;
+    padding:.5rem .8rem .3rem;
+    position:relative;
+    background:var(--bm);
+  }
+  .ped-cart-separator-label{
+    font-family:'Playfair Display',serif;font-size:.75rem;font-weight:700;
+    color:var(--gold);letter-spacing:.07em;text-transform:uppercase;
+    text-align:center;
+  }
+  .ped-cart-separator-desc{
+    font-size:.65rem;color:rgba(201,168,124,.6);margin-top:1px;text-align:center;
+  }
+
   /* ── DESGLOSE CARRITO DOMICILIO ── */
   .ped-cart-desglose{border-top:1px solid var(--bdr)}
   .ped-cart-desglose-row{
@@ -782,6 +820,24 @@
   .reparto-add-inp{flex:1;padding:5px 9px;border-radius:7px;border:1.5px solid #d8d5d0;
     font-family:'Lato',sans-serif;font-size:.77rem;background:#faf9f7;color:var(--text)}
   .reparto-add-inp:focus{outline:none;border-color:var(--gold)}
+
+  /* ── ARTÍCULO DIVISOR (sin precio) ── */
+  .item-row.item-divider{
+    justify-content:center;align-items:center;
+    border-bottom:none;border-top:none;
+    background:var(--bm);min-height:36px;padding:.45rem 1.2rem;
+    pointer-events:none;border-radius:0;
+    margin:0 -.3rem;
+  }
+  .item-divider-label{
+    font-family:'Playfair Display',serif;font-size:.78rem;font-weight:700;
+    color:var(--gold);letter-spacing:.12em;text-transform:uppercase;
+    text-align:center;
+    display:flex;align-items:center;gap:.6rem;width:100%;
+  }
+  .item-divider-label::before,.item-divider-label::after{
+    content:'';flex:1;height:1px;background:rgba(201,168,124,.3);
+  }
 
   /* ── SOLO LOCAL badge en carta ── */
   @keyframes latido{
@@ -1347,10 +1403,18 @@ function loadLocalData() {
 /* ═══════════════════════
    GITHUB API
 ═══════════════════════ */
+// Usuario y repo hardcodeados para la carga inicial (no depende del DOM)
+const GH_USER_DEFAULT = 'lhamat123';
+const GH_REPO_DEFAULT = 'cafeteria';
+
 function ghApi() {
-  const user = document.getElementById('ghUser')?.value.trim() || 'lhamat123';
-  const repo = document.getElementById('ghRepo')?.value.trim() || 'cafeteria';
+  const user = document.getElementById('ghUser')?.value.trim() || GH_USER_DEFAULT;
+  const repo = document.getElementById('ghRepo')?.value.trim() || GH_REPO_DEFAULT;
   return `https://api.github.com/repos/${user}/${repo}/contents/${GH_FILE}`;
+}
+
+function ghApiBase() {
+  return `https://api.github.com/repos/${GH_USER_DEFAULT}/${GH_REPO_DEFAULT}/contents/${GH_FILE}`;
 }
 
 // Encode JSON → base64 UTF-8 seguro
@@ -1372,12 +1436,20 @@ async function loadFromGitHubSilent() {
   const controller = new AbortController();
   const timer = setTimeout(()=>controller.abort(), 8000);
   try {
-    const res = await fetch(ghApi(), {
+    const res = await fetch(ghApiBase(), {
       headers: {'Accept':'application/vnd.github+json'},
       signal: controller.signal
     });
     clearTimeout(timer);
-    if (!res.ok) return;
+    if (!res.ok) {
+      // 404 = repo o archivo no existe; 403 = rate limit; no mostrar error al usuario
+      if (res.status === 404) {
+        setGhStatus('', ''); // silencioso — archivo aún no publicado
+      } else if (res.status === 403 || res.status === 429) {
+        setGhStatus('⚠️ GitHub: límite de peticiones alcanzado — usando datos locales', '');
+      }
+      return;
+    }
     const json = await res.json();
     fileSHA = json.sha;
     const remoteData = JSON.parse(fromBase64(json.content));
@@ -1387,13 +1459,18 @@ async function loadFromGitHubSilent() {
       DATA = remoteData;
       localStorage.setItem('cafeRoble_v3', JSON.stringify(DATA));
       renderMenu(); renderInfo(); checkUnavailBtn();
-      setGhStatus('✅ Datos actualizados desde GitHub', 'ok');
+      setGhStatus('✅ Carta actualizada desde GitHub', 'ok');
     } else {
-      setGhStatus('✅ Datos en sync con GitHub', 'ok');
+      setGhStatus('✅ Carta en sync con GitHub', 'ok');
     }
   } catch(e) {
     clearTimeout(timer);
-    setGhStatus('⚠️ Sin conexión a GitHub — mostrando datos locales', '');
+    // Solo mostrar aviso si hay datos locales válidos (no confundir al usuario)
+    const tieneLocal = DATA && DATA.categorias && DATA.categorias.length > 0;
+    if (!tieneLocal) {
+      setGhStatus('⚠️ Sin conexión a GitHub — configura el repositorio en Admin', '');
+    }
+    // Si hay datos locales, cargamos sin molestar al usuario con el aviso
   }
 }
 
@@ -1415,11 +1492,37 @@ async function loadFromGitHub() {
   showLoad(false);
 }
 
+/* Obtiene el SHA actual del archivo en GitHub usando el token dado.
+   Actualiza fileSHA globalmente. Devuelve el sha o '' si el archivo no existe aún. */
+async function fetchCurrentSHA(apiUrl, token) {
+  try {
+    const res = await fetch(apiUrl, {
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': 'Bearer ' + token
+      }
+    });
+    if (res.status === 404) return ''; // archivo nuevo, no necesita sha
+    if (!res.ok) throw new Error('status ' + res.status);
+    const json = await res.json();
+    fileSHA = json.sha;
+    return json.sha;
+  } catch(e) {
+    return fileSHA || ''; // usar el que tenemos si falla
+  }
+}
+
 async function saveToGitHub() {
   const token = document.getElementById('ghToken')?.value.trim();
   if (!token || !token.startsWith('github_')) { toast('Token GitHub inválido','err'); return false; }
 
   showLoad(true);
+  setGhStatus('⏳ Obteniendo versión actual…', '');
+
+  // Siempre obtener SHA fresco antes de publicar para evitar el error "sha wasn't supplied"
+  const apiUrl = ghApi();
+  const sha = await fetchCurrentSHA(apiUrl, token);
+
   setGhStatus('⏳ Publicando en GitHub...', '');
   const content = toBase64(JSON.stringify(DATA, null, 2));
   const body = {
@@ -1427,9 +1530,9 @@ async function saveToGitHub() {
     content,
     committer: { name: 'Café Roble', email: 'noreply@caferoble.com' }
   };
-  if (fileSHA) body.sha = fileSHA;
+  if (sha) body.sha = sha;
   try {
-    const res = await fetch(ghApi(), {
+    const res = await fetch(apiUrl, {
       method: 'PUT',
       headers: {
         'Accept': 'application/vnd.github+json',
@@ -1580,7 +1683,18 @@ function renderMenu() {
       const qty = pedCart[key]||0;
       // Ocultar productos no disponibles de la carta
       if(p.disponible === false) return null;
+      // Sin precio → línea divisoria decorativa
+      const esDivisor = !p.precio || !String(p.precio).trim();
       const row = document.createElement('div');
+      if(esDivisor){
+        row.className = 'item-row item-divider';
+        row.innerHTML = `
+          <div style="display:flex;flex-direction:column;align-items:center;gap:.2rem;width:100%">
+            <span class="item-divider-label">${e(p.nombre)}</span>
+            ${p.desc?`<span style="font-size:.68rem;color:rgba(201,168,124,.6);text-align:center;line-height:1.4">${e(p.desc)}</span>`:''}
+          </div>`;
+        return row;
+      }
       row.className = 'item-row';
       row.innerHTML = `
         <div class="item-thumb">
@@ -1612,6 +1726,23 @@ function renderMenu() {
     const list=document.createElement('div'); list.className='items-list';
     rows.forEach(r=>list.appendChild(r));
     panel.appendChild(list);
+    // ── Botón "Hacer pedido" al final del panel ──
+    const bottomBtn = document.createElement('div');
+    bottomBtn.style.cssText = 'padding:1.2rem .3rem .5rem;display:flex;justify-content:center;';
+    bottomBtn.innerHTML = `
+      <button onclick="activarPedido()" style="
+        display:flex;align-items:center;gap:.5rem;
+        background:var(--gold);color:var(--bd);
+        border:none;border-radius:12px;
+        padding:.75rem 1.8rem;
+        font-family:'Lato',sans-serif;font-size:.85rem;font-weight:900;
+        letter-spacing:.09em;text-transform:uppercase;
+        cursor:pointer;transition:filter .18s;
+        box-shadow:0 2px 10px rgba(0,0,0,.15);
+      " onmouseover="this.style.filter='brightness(1.08)'" onmouseout="this.style.filter=''">
+        📲&nbsp;&nbsp;HACER PEDIDO
+      </button>`;
+    panel.appendChild(bottomBtn);
     if(cat.galeria?.fotos?.length){
       const gal=document.createElement('div'); gal.className='panel-gal';
       gal.innerHTML=`<p class="panel-gal-title">${e(cat.galeria.titulo||'')}</p>
@@ -3000,30 +3131,64 @@ function renderPedProds(){
     list.innerHTML = '<p style="color:var(--muted);font-size:.8rem;padding:.5rem">Sin productos en esta categoría.</p>';
     return;
   }
-  let hayProductos = false;
-  cat.productos.forEach((p,pi)=>{
-    // Ocultar no disponibles siempre
-    if(p.disponible === false) return;
-    // Ocultar "solo local" cuando el modo es domicilio
-    if(pedMode === 'domicilio' && p.noDomicilio) return;
-    hayProductos = true;
-    const key = pedActiveCat+'-'+pi;
-    const qty = pedCart[key]||0;
-    // Si ya está en el carrito, no lo mostramos aquí (aparece arriba en Tu pedido)
-    if(qty > 0) return;
-    const row = document.createElement('div');
-    row.className = 'ped-prod-row';
-    row.innerHTML = `
-      <img class="ped-prod-img" src="${e(p.img||'')}" alt="${e(p.nombre||'')}" onerror="this.style.display='none'">
-      <div class="ped-prod-info">
-        <p class="ped-prod-name">${e(p.nombre||'')} </p>
-        <p class="ped-prod-unitario"><strong>${e(p.precio||"")}</strong></p>
-      </div>
-      <div class="ped-qty" style="flex-direction:column;width:40px;align-self:stretch;border:1.5px solid var(--gold);border-radius:0;overflow:hidden;gap:0;flex-shrink:0">
-        <button class="ped-qty-btn" onclick="cambiarQty('${key}',1)">+</button>
-      </div>`;
-    list.appendChild(row);
+
+  // Agrupar productos en secciones: cada separador (sin precio) encabeza un grupo
+  // Un grupo sin separador previo se llama grupo "sin encabezado"
+  const grupos = []; // [{separador: p|null, items: [{p, pi}]}]
+  let grupoActual = { separador: null, items: [] };
+  cat.productos.forEach((p, pi) => {
+    const esDivisor = !p.precio || !String(p.precio).trim();
+    if(esDivisor){
+      // Guardar grupo anterior si tiene items
+      if(grupoActual.items.length > 0 || grupoActual.separador) grupos.push(grupoActual);
+      grupoActual = { separador: { p, pi }, items: [] };
+    } else {
+      grupoActual.items.push({ p, pi });
+    }
   });
+  if(grupoActual.items.length > 0 || grupoActual.separador) grupos.push(grupoActual);
+
+  let hayProductos = false;
+
+  grupos.forEach(grupo => {
+    // Filtrar items visibles en este grupo
+    const itemsVisibles = grupo.items.filter(({p, pi}) => {
+      if(p.disponible === false) return false;
+      if(pedMode === 'domicilio' && p.noDomicilio) return false;
+      const key = pedActiveCat+'-'+pi;
+      const qty = pedCart[key]||0;
+      return qty === 0; // los que ya están en carrito no se muestran aquí
+    });
+
+    // Solo mostrar separador si hay items visibles debajo de él
+    if(grupo.separador && itemsVisibles.length > 0){
+      const sep = document.createElement('div');
+      sep.className = 'ped-separator';
+      sep.innerHTML = `<span class="ped-separator-label">${e(grupo.separador.p.nombre||'')}</span>`;
+      if(grupo.separador.p.desc){
+        sep.innerHTML += `<span class="ped-separator-desc">${e(grupo.separador.p.desc)}</span>`;
+      }
+      list.appendChild(sep);
+    }
+
+    itemsVisibles.forEach(({p, pi}) => {
+      hayProductos = true;
+      const key = pedActiveCat+'-'+pi;
+      const row = document.createElement('div');
+      row.className = 'ped-prod-row';
+      row.innerHTML = `
+        <img class="ped-prod-img" src="${e(p.img||'')}" alt="${e(p.nombre||'')}" onerror="this.style.display='none'">
+        <div class="ped-prod-info">
+          <p class="ped-prod-name">${e(p.nombre||'')}</p>
+          <p class="ped-prod-unitario"><strong>${e(p.precio||"")}</strong></p>
+        </div>
+        <div class="ped-qty" style="flex-direction:column;width:40px;align-self:stretch;border:1.5px solid var(--gold);border-radius:0;overflow:hidden;gap:0;flex-shrink:0">
+          <button class="ped-qty-btn" onclick="cambiarQty('${key}',1)">+</button>
+        </div>`;
+      list.appendChild(row);
+    });
+  });
+
   if(!hayProductos){
     list.innerHTML = '<p style="color:var(--muted);font-size:.8rem;padding:.5rem">No hay productos disponibles para esta modalidad.</p>';
   }
@@ -3054,30 +3219,83 @@ function renderPedCart(){
     return;
   }
   let total = 0;
-  const items = keys.map(key=>{
+
+  // Construir mapa de separadores: para cada key de carrito, cuál separador le corresponde
+  // Un separador es el último producto-sin-precio que aparece antes del producto en su categoría
+  function getSeparadorParaItem(ci, pi){
+    const cat = DATA.categorias[ci];
+    if(!cat) return null;
+    let sepActual = null;
+    for(let i=0; i<=pi; i++){
+      const p = cat.productos[i];
+      if(!p) break;
+      const esDivisor = !p.precio || !String(p.precio).trim();
+      if(esDivisor) sepActual = p;
+    }
+    return sepActual;
+  }
+
+  // Agrupar keys del carrito por separador (usar nombre del separador como key del grupo)
+  // Mantener orden de aparición en el catálogo
+  const gruposCart = []; // [{sepNombre, sepDesc, items:[{key,ci,pi,p,qty}]}]
+  const grupoMap = {}; // sepNombre → índice en gruposCart
+
+  // Ordenar keys por ci y luego pi para respetar orden del catálogo
+  const keysSorted = keys.slice().sort((a,b)=>{
+    const [aci,api] = a.split('-').map(Number);
+    const [bci,bpi] = b.split('-').map(Number);
+    if(aci !== bci) return aci - bci;
+    return api - bpi;
+  });
+
+  keysSorted.forEach(key => {
     const [ci,pi] = key.split('-').map(Number);
     const p = DATA.categorias[ci]?.productos[pi];
-    if(!p) return '';
+    if(!p) return;
     const qty = pedCart[key];
     const priceNum = parsePrecio(p.precio);
     const sub = priceNum * qty;
     total += sub;
-    return `<div class="ped-cart-item">
-      <div style="flex:1;min-width:0">
-        <span class="ped-cart-name">${e(p.nombre)}</span>
-        <span style="display:block;font-size:.85rem;color:var(--muted);margin-top:1px"><strong style="color:var(--bl)">${priceNum>0?formatPrecio(priceNum):e(p.precio||"")}</strong></span>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:1px;flex-shrink:0;margin-right:4px">
-        <span style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--gold);line-height:1.2">${priceNum>0?formatPrecio(sub):''}</span>
-      </div>
-      <div class="ped-cart-qty-ctrl">
-        <button class="ped-cart-qbtn" style="border-bottom:1px solid rgba(0,0,0,.15)" onclick="cartCambiarQty('${key}',1)">+</button>
-        <button class="ped-cart-qbtn" onclick="cartCambiarQty('${key}',-1)">−</button>
-      </div>
-      <span class="ped-cart-qval" style="display:flex;align-items:center;justify-content:center">${qty}</span>
-      <button class="ped-cart-del" onclick="eliminarDelCart('${key}')">✕</button>
-    </div>`;
-  }).join('');
+
+    const sep = getSeparadorParaItem(ci, pi);
+    const sepKey = sep ? sep.nombre : '__sin_sep__';
+
+    if(!(sepKey in grupoMap)){
+      grupoMap[sepKey] = gruposCart.length;
+      gruposCart.push({ sepNombre: sep ? sep.nombre : null, sepDesc: sep ? sep.desc : null, items: [] });
+    }
+    gruposCart[grupoMap[sepKey]].items.push({ key, ci, pi, p, qty, priceNum, sub });
+  });
+
+  // Renderizar grupos
+  let html = '';
+  gruposCart.forEach(grupo => {
+    // Mostrar separador solo si tiene items
+    if(grupo.sepNombre){
+      html += `<div class="ped-cart-separator">
+        <span class="ped-cart-separator-label">${e(grupo.sepNombre)}</span>
+        ${grupo.sepDesc ? `<span class="ped-cart-separator-desc">${e(grupo.sepDesc)}</span>` : ''}
+      </div>`;
+    }
+    grupo.items.forEach(({key, p, qty, priceNum, sub}) => {
+      html += `<div class="ped-cart-item">
+        <div style="flex:1;min-width:0">
+          <span class="ped-cart-name">${e(p.nombre)}</span>
+          <span style="display:block;font-size:.85rem;color:var(--muted);margin-top:1px"><strong style="color:var(--bl)">${priceNum>0?formatPrecio(priceNum):e(p.precio||"")}</strong></span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:1px;flex-shrink:0;margin-right:4px">
+          <span style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--gold);line-height:1.2">${priceNum>0?formatPrecio(sub):''}</span>
+        </div>
+        <div class="ped-cart-qty-ctrl">
+          <button class="ped-cart-qbtn" style="border-bottom:1px solid rgba(0,0,0,.15)" onclick="cartCambiarQty('${key}',1)">+</button>
+          <button class="ped-cart-qbtn" onclick="cartCambiarQty('${key}',-1)">−</button>
+        </div>
+        <span class="ped-cart-qval" style="display:flex;align-items:center;justify-content:center">${qty}</span>
+        <button class="ped-cart-del" onclick="eliminarDelCart('${key}')">✕</button>
+      </div>`;
+    });
+  });
+
   let resumen = '';
   if(pedMode === 'domicilio'){
     const rval = (document.getElementById('domReparto')?.value || '');
@@ -3108,7 +3326,7 @@ function renderPedCart(){
       <span class="ped-cart-total-val">${total > 0 ? formatPrecio(total) : '—'}</span>
     </div>`;
   }
-  box.innerHTML = items + resumen;
+  box.innerHTML = html + resumen;
 }
 
 function cartCambiarQty(key, delta){
@@ -3795,15 +4013,25 @@ function buildEncargado(){
       const row = document.createElement('div');
       row.className = 'enc-prod-row';
       const disp = p.disponible !== false;
-      row.innerHTML = `
-        <div style="flex:1">
-          <div class="enc-prod-name">${e(p.nombre)}</div>
-          <div class="enc-prod-desc">${e(p.desc||'')}</div>
-        </div>
-        <label class="enc-toggle" title="${disp?'Disponible — click para ocultar':'No disponible — click para mostrar'}">
-          <input type="checkbox" ${disp?'checked':''} data-ci="${ci}" data-pi="${pi}" onchange="encToggle(this)">
-          <span class="enc-toggle-track"><span class="enc-toggle-thumb"></span></span>
-        </label>`;
+      // Artículo divisor (sin precio) → solo mostrar etiqueta, sin toggle
+      const esDivisor = !p.precio || !String(p.precio).trim();
+      if(esDivisor){
+        row.innerHTML = `
+          <div style="flex:1">
+            <div class="enc-prod-name" style="color:var(--muted);font-style:italic;font-size:.78rem">— ${e(p.nombre)} —</div>
+            <div class="enc-prod-desc">Divisor de sección</div>
+          </div>`;
+      } else {
+        row.innerHTML = `
+          <div style="flex:1">
+            <div class="enc-prod-name">${e(p.nombre)}</div>
+            <div class="enc-prod-desc">${e(p.desc||'')}</div>
+          </div>
+          <label class="enc-toggle" title="${disp?'Disponible — click para ocultar':'No disponible — click para mostrar'}">
+            <input type="checkbox" ${disp?'checked':''} data-ci="${ci}" data-pi="${pi}" onchange="encToggle(this)">
+            <span class="enc-toggle-track"><span class="enc-toggle-thumb"></span></span>
+          </label>`;
+      }
       card.appendChild(row);
     });
     wrap.appendChild(card);
@@ -3832,6 +4060,12 @@ async function encGuardar(){
   }
 
   btn.disabled = true;
+  statusEl.textContent = '⏳ Verificando versión actual…';
+
+  // Obtener SHA fresco con el token del encargado
+  const apiUrl = ghApi();
+  const sha = await fetchCurrentSHA(apiUrl, token);
+
   statusEl.textContent = '⏳ Publicando…';
 
   const content = toBase64(JSON.stringify(DATA, null, 2));
@@ -3840,10 +4074,10 @@ async function encGuardar(){
     content,
     committer:{ name:'Encargado', email:'encargado@caferoble.com' }
   };
-  if(fileSHA) body.sha = fileSHA;
+  if(sha) body.sha = sha;
 
   try{
-    const res = await fetch(ghApi(), {
+    const res = await fetch(apiUrl, {
       method:'PUT',
       headers:{
         'Accept':'application/vnd.github+json',
