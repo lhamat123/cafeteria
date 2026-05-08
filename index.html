@@ -27,6 +27,49 @@
     transition:transform .15s,border-color .15s;flex-shrink:0}
   .tswatch:hover{transform:scale(1.3)}
   .tswatch.active{border-color:#fff;transform:scale(1.2)}
+
+  /* ── MODAL ADVERTENCIA MESA ── */
+  #mesaWarningModal{
+    position:fixed;inset:0;z-index:9000;
+    background:rgba(0,0,0,.72);
+    display:none;align-items:center;justify-content:center;padding:1.2rem;
+  }
+  #mesaWarningModal.open{ display:flex; }
+  .mesa-warn-box{
+    background:var(--cs);border-radius:16px;max-width:360px;width:100%;
+    overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.45);
+    animation:warnPop .25s ease;
+  }
+  @keyframes warnPop{from{transform:scale(.88);opacity:0}to{transform:scale(1);opacity:1}}
+  .mesa-warn-head{
+    background:var(--bd);padding:1rem 1.2rem .8rem;
+    display:flex;align-items:center;gap:.6rem;
+  }
+  .mesa-warn-icon{font-size:1.6rem;line-height:1}
+  .mesa-warn-title{
+    font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;
+    color:var(--cream);line-height:1.2;
+  }
+  .mesa-warn-body{padding:1rem 1.2rem .9rem}
+  .mesa-warn-msg{
+    font-size:.85rem;color:var(--text);line-height:1.65;margin-bottom:.9rem;
+  }
+  .mesa-warn-num{
+    display:inline-block;background:var(--gold);color:var(--bd);
+    font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;
+    padding:.15rem .7rem;border-radius:8px;margin:0 .15rem;
+  }
+  .mesa-warn-actions{display:flex;flex-direction:column;gap:.5rem}
+  .mesa-warn-btn{
+    width:100%;padding:.7rem 1rem;border-radius:10px;border:none;
+    font-family:'Lato',sans-serif;font-size:.82rem;font-weight:700;
+    cursor:pointer;transition:opacity .15s;display:flex;align-items:center;
+    justify-content:center;gap:.4rem;
+  }
+  .mesa-warn-btn:hover{opacity:.85}
+  .mesa-warn-btn.primary{background:var(--gold);color:var(--bd)}
+  .mesa-warn-btn.secondary{background:rgba(201,168,124,.15);color:var(--bl);border:1.5px solid var(--bdr)}
+  .mesa-warn-btn.danger{background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca}
   body{font-family:'Lato',sans-serif;background:var(--cs);color:var(--text);overflow-x:hidden}
 
   /* ── PAGES ── */
@@ -1030,6 +1073,34 @@
 
     <div class="adm-tabs" id="admTabs"></div>
     <div id="admContent"></div>
+  </div>
+</div>
+
+
+<!-- ══════════ MODAL ADVERTENCIA MESA ══════════ -->
+<div id="mesaWarningModal">
+  <div class="mesa-warn-box">
+    <div class="mesa-warn-head">
+      <span class="mesa-warn-icon">⚠️</span>
+      <div class="mesa-warn-title">Verificá tu mesa antes de pedir</div>
+    </div>
+    <div class="mesa-warn-body">
+      <p class="mesa-warn-msg" id="mesaWarnMsg">
+        Este link corresponde a la <strong>Mesa <span class="mesa-warn-num" id="mesaWarnNum">—</span></strong>.<br><br>
+        Puede que ya hayas usado este link antes. Por favor confirmá que estás sentado en esa mesa.
+      </p>
+      <div class="mesa-warn-actions">
+        <button class="mesa-warn-btn primary" onclick="confirmarMesaWarning()">
+          ✅ Sí, estoy en la Mesa <span id="mesaWarnNumBtn">—</span>
+        </button>
+        <button class="mesa-warn-btn secondary" onclick="escanearDesdeWarning()">
+          📷 Escanear QR de mi mesa
+        </button>
+        <button class="mesa-warn-btn danger" onclick="cerrarMesaWarning()">
+          ✕ No soy de esa mesa — continuar sin asignar
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2564,7 +2635,7 @@ function cancelarPedido(){
   pedCart = {};
   saveCart();
   pedMesaSeleccionada = null;
-  try{ sessionStorage.removeItem('mesaAsignada'); }catch(_){}
+  try{ localStorage.removeItem('mesaAsignada'); }catch(_){}
   document.body.classList.remove('pedido-activo');
   document.querySelectorAll('.iqval').forEach(el=>{ el.textContent=''; });
   actualizarDisplayMesa();
@@ -2617,11 +2688,11 @@ function abrirPedido(mesaNum){
 
   if(mesaNum){
     pedMesaSeleccionada = parseInt(mesaNum);
-    try{ sessionStorage.setItem('mesaAsignada', mesaNum); }catch(_){}
+    try{ localStorage.setItem('mesaAsignada', mesaNum); }catch(_){}
   } else {
     // Recuperar mesa original del QR (persiste durante toda la visita)
     try{
-      const saved = sessionStorage.getItem('mesaAsignada');
+      const saved = localStorage.getItem('mesaAsignada');
       if(saved && !isNaN(saved)) pedMesaSeleccionada = parseInt(saved);
     }catch(_){}
   }
@@ -2647,10 +2718,21 @@ function abrirPedido(mesaNum){
         setTimeout(()=>goPage('info'), 500);
       }, {once:true});
     } else if(m && !isNaN(m)){
-      // QR de mesa → guardar en sessionStorage y abrir pedido
-      try{ sessionStorage.setItem('mesaAsignada', m); }catch(_){}
+      // QR de mesa → verificar si hay visita previa guardada
       window.addEventListener('DOMContentLoaded', ()=>{
-        setTimeout(()=>abrirPedido(parseInt(m)), 800);
+        setTimeout(()=>{
+          let savedMesa = null;
+          try{ savedMesa = localStorage.getItem('mesaAsignada'); }catch(_){}
+          const mesaURL = parseInt(m);
+          if(savedMesa && !isNaN(savedMesa)){
+            // Hay historial: mostrar advertencia para que el cliente confirme
+            mostrarAdvertenciaMesa(mesaURL);
+          } else {
+            // Primera vez con este QR: asignar directo
+            try{ localStorage.setItem('mesaAsignada', m); }catch(_){}
+            abrirPedido(mesaURL);
+          }
+        }, 800);
       }, {once:true});
     }
   }catch(_){}
@@ -2736,7 +2818,7 @@ function iniciarScanQR(){
         if(m && !isNaN(m)){
           cancelarScanQR();
           pedMesaSeleccionada = parseInt(m);
-          try{ sessionStorage.setItem('mesaAsignada', m); }catch(_){}
+          try{ localStorage.setItem('mesaAsignada', m); }catch(_){}
           actualizarDisplayMesa();
           updateSendBtn();
           toast('✅ Mesa ' + m + ' asignada', 'ok');
@@ -2762,6 +2844,53 @@ function cancelarScanQR(){
 }
 
 function buildMesaGrid(){ actualizarDisplayMesa(); }
+
+/* ── Advertencia de mesa (visita previa) ── */
+function mostrarAdvertenciaMesa(mesaNum){
+  const modal   = document.getElementById('mesaWarningModal');
+  const numEl   = document.getElementById('mesaWarnNum');
+  const numBtn  = document.getElementById('mesaWarnNumBtn');
+  if(!modal) { abrirPedido(mesaNum); return; }
+
+  // Guardar la mesa pendiente para usarla en confirmar/escanear
+  modal._mesaPendiente = mesaNum;
+
+  if(numEl)  numEl.textContent  = mesaNum;
+  if(numBtn) numBtn.textContent = mesaNum;
+
+  modal.classList.add('open');
+}
+
+function confirmarMesaWarning(){
+  const modal = document.getElementById('mesaWarningModal');
+  const mesa  = modal?._mesaPendiente;
+  modal?.classList.remove('open');
+  if(mesa){
+    try{ localStorage.setItem('mesaAsignada', mesa); }catch(_){}
+    abrirPedido(mesa);
+  }
+}
+
+function cerrarMesaWarning(){
+  const modal = document.getElementById('mesaWarningModal');
+  modal?.classList.remove('open');
+  // Limpiar mesa guardada — el cliente dice que no es suya
+  try{ localStorage.removeItem('mesaAsignada'); }catch(_){}
+  pedMesaSeleccionada = null;
+  abrirPedido(null);
+}
+
+function escanearDesdeWarning(){
+  const modal = document.getElementById('mesaWarningModal');
+  modal?.classList.remove('open');
+  // Abrir pedido sin mesa y arrancar el scanner
+  try{ localStorage.removeItem('mesaAsignada'); }catch(_){}
+  pedMesaSeleccionada = null;
+  abrirPedido(null);
+  // Pequeño delay para que el DOM de la página de pedido esté listo
+  setTimeout(()=>iniciarScanQR(), 400);
+}
+
 
 function selectMesa(num, customVal){
   if(customVal!==null && customVal!==undefined){
