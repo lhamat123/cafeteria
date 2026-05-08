@@ -783,6 +783,23 @@
     font-family:'Lato',sans-serif;font-size:.77rem;background:#faf9f7;color:var(--text)}
   .reparto-add-inp:focus{outline:none;border-color:var(--gold)}
 
+  /* ── ARTÍCULO DIVISOR (sin precio) ── */
+  .item-row.item-divider{
+    justify-content:center;align-items:center;
+    border-bottom:none;border-top:1px solid var(--bdr);
+    background:transparent;min-height:36px;padding:.4rem 1rem;
+    pointer-events:none;
+  }
+  .item-divider-label{
+    font-family:'Playfair Display',serif;font-size:.82rem;font-weight:600;
+    color:var(--muted);letter-spacing:.1em;text-transform:uppercase;
+    text-align:center;
+    display:flex;align-items:center;gap:.6rem;width:100%;
+  }
+  .item-divider-label::before,.item-divider-label::after{
+    content:'';flex:1;height:1px;background:var(--bdr);
+  }
+
   /* ── SOLO LOCAL badge en carta ── */
   @keyframes latido{
     0%        {transform:scale(1);   box-shadow:0 0 0 0 rgba(154,52,18,.6);filter:brightness(1)}
@@ -1580,7 +1597,14 @@ function renderMenu() {
       const qty = pedCart[key]||0;
       // Ocultar productos no disponibles de la carta
       if(p.disponible === false) return null;
+      // Sin precio → línea divisoria decorativa
+      const esDivisor = !p.precio || !String(p.precio).trim();
       const row = document.createElement('div');
+      if(esDivisor){
+        row.className = 'item-row item-divider';
+        row.innerHTML = `<span class="item-divider-label">${e(p.nombre)}</span>`;
+        return row;
+      }
       row.className = 'item-row';
       row.innerHTML = `
         <div class="item-thumb">
@@ -3004,6 +3028,8 @@ function renderPedProds(){
   cat.productos.forEach((p,pi)=>{
     // Ocultar no disponibles siempre
     if(p.disponible === false) return;
+    // Ocultar artículos divisores (sin precio) de la página de pedido
+    if(!p.precio || !String(p.precio).trim()) return;
     // Ocultar "solo local" cuando el modo es domicilio
     if(pedMode === 'domicilio' && p.noDomicilio) return;
     hayProductos = true;
@@ -3795,15 +3821,25 @@ function buildEncargado(){
       const row = document.createElement('div');
       row.className = 'enc-prod-row';
       const disp = p.disponible !== false;
-      row.innerHTML = `
-        <div style="flex:1">
-          <div class="enc-prod-name">${e(p.nombre)}</div>
-          <div class="enc-prod-desc">${e(p.desc||'')}</div>
-        </div>
-        <label class="enc-toggle" title="${disp?'Disponible — click para ocultar':'No disponible — click para mostrar'}">
-          <input type="checkbox" ${disp?'checked':''} data-ci="${ci}" data-pi="${pi}" onchange="encToggle(this)">
-          <span class="enc-toggle-track"><span class="enc-toggle-thumb"></span></span>
-        </label>`;
+      // Artículo divisor (sin precio) → solo mostrar etiqueta, sin toggle
+      const esDivisor = !p.precio || !String(p.precio).trim();
+      if(esDivisor){
+        row.innerHTML = `
+          <div style="flex:1">
+            <div class="enc-prod-name" style="color:var(--muted);font-style:italic;font-size:.78rem">— ${e(p.nombre)} —</div>
+            <div class="enc-prod-desc">Divisor de sección</div>
+          </div>`;
+      } else {
+        row.innerHTML = `
+          <div style="flex:1">
+            <div class="enc-prod-name">${e(p.nombre)}</div>
+            <div class="enc-prod-desc">${e(p.desc||'')}</div>
+          </div>
+          <label class="enc-toggle" title="${disp?'Disponible — click para ocultar':'No disponible — click para mostrar'}">
+            <input type="checkbox" ${disp?'checked':''} data-ci="${ci}" data-pi="${pi}" onchange="encToggle(this)">
+            <span class="enc-toggle-track"><span class="enc-toggle-thumb"></span></span>
+          </label>`;
+      }
       card.appendChild(row);
     });
     wrap.appendChild(card);
