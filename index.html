@@ -2563,8 +2563,11 @@ function activarPedido(){
 function cancelarPedido(){
   pedCart = {};
   saveCart();
+  pedMesaSeleccionada = null;
+  try{ sessionStorage.removeItem('mesaAsignada'); }catch(_){}
   document.body.classList.remove('pedido-activo');
   document.querySelectorAll('.iqval').forEach(el=>{ el.textContent=''; });
+  actualizarDisplayMesa();
   renderPedCart();
   updateSendBtn();
   toast('Pedido cancelado','warn');
@@ -2612,7 +2615,16 @@ function abrirPedido(mesaNum){
   pedMesaSeleccionada = null;
   document.getElementById('pedNotas').value = '';
 
-  if(mesaNum){ pedMesaSeleccionada = parseInt(mesaNum); }
+  if(mesaNum){
+    pedMesaSeleccionada = parseInt(mesaNum);
+    try{ sessionStorage.setItem('mesaAsignada', mesaNum); }catch(_){}
+  } else {
+    // Recuperar mesa original del QR (persiste durante toda la visita)
+    try{
+      const saved = sessionStorage.getItem('mesaAsignada');
+      if(saved && !isNaN(saved)) pedMesaSeleccionada = parseInt(saved);
+    }catch(_){}
+  }
 
   setPedMode('mesa');
   buildMesaGrid();
@@ -2635,7 +2647,8 @@ function abrirPedido(mesaNum){
         setTimeout(()=>goPage('info'), 500);
       }, {once:true});
     } else if(m && !isNaN(m)){
-      // QR de mesa → abrir pedido con mesa asignada
+      // QR de mesa → guardar en sessionStorage y abrir pedido
+      try{ sessionStorage.setItem('mesaAsignada', m); }catch(_){}
       window.addEventListener('DOMContentLoaded', ()=>{
         setTimeout(()=>abrirPedido(parseInt(m)), 800);
       }, {once:true});
@@ -2723,6 +2736,7 @@ function iniciarScanQR(){
         if(m && !isNaN(m)){
           cancelarScanQR();
           pedMesaSeleccionada = parseInt(m);
+          try{ sessionStorage.setItem('mesaAsignada', m); }catch(_){}
           actualizarDisplayMesa();
           updateSendBtn();
           toast('✅ Mesa ' + m + ' asignada', 'ok');
