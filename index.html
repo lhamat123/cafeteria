@@ -667,6 +667,44 @@
   .ped-domicilio-fields{display:none}
   .ped-domicilio-fields.visible{display:block}
 
+  /* ── SEPARADORES EN ELIGE PRODUCTOS ── */
+  .ped-separator{
+    display:flex;flex-direction:column;align-items:center;
+    padding:.55rem .4rem .35rem;
+    margin-top:.5rem;
+    position:relative;
+  }
+  .ped-separator::before{
+    content:'';position:absolute;top:50%;left:0;right:0;
+    height:1.5px;background:var(--gold);opacity:.35;
+  }
+  .ped-separator-label{
+    font-family:'Playfair Display',serif;font-size:.78rem;font-weight:700;
+    color:var(--gold);letter-spacing:.07em;text-transform:uppercase;
+    background:var(--cs);padding:0 .6rem;position:relative;z-index:1;
+    text-align:center;
+  }
+  .ped-separator-desc{
+    font-size:.65rem;color:var(--muted);margin-top:2px;text-align:center;
+    position:relative;z-index:1;background:var(--cs);padding:0 .4rem;
+  }
+
+  /* ── SEPARADORES EN CARRITO ── */
+  .ped-cart-separator{
+    display:flex;flex-direction:column;align-items:center;
+    padding:.5rem .8rem .3rem;
+    position:relative;
+    background:var(--bm);
+  }
+  .ped-cart-separator-label{
+    font-family:'Playfair Display',serif;font-size:.75rem;font-weight:700;
+    color:var(--gold);letter-spacing:.07em;text-transform:uppercase;
+    text-align:center;
+  }
+  .ped-cart-separator-desc{
+    font-size:.65rem;color:rgba(201,168,124,.6);margin-top:1px;text-align:center;
+  }
+
   /* ── DESGLOSE CARRITO DOMICILIO ── */
   .ped-cart-desglose{border-top:1px solid var(--bdr)}
   .ped-cart-desglose-row{
@@ -3067,32 +3105,64 @@ function renderPedProds(){
     list.innerHTML = '<p style="color:var(--muted);font-size:.8rem;padding:.5rem">Sin productos en esta categoría.</p>';
     return;
   }
-  let hayProductos = false;
-  cat.productos.forEach((p,pi)=>{
-    // Ocultar no disponibles siempre
-    if(p.disponible === false) return;
-    // Ocultar artículos divisores (sin precio) de la página de pedido
-    if(!p.precio || !String(p.precio).trim()) return;
-    // Ocultar "solo local" cuando el modo es domicilio
-    if(pedMode === 'domicilio' && p.noDomicilio) return;
-    hayProductos = true;
-    const key = pedActiveCat+'-'+pi;
-    const qty = pedCart[key]||0;
-    // Si ya está en el carrito, no lo mostramos aquí (aparece arriba en Tu pedido)
-    if(qty > 0) return;
-    const row = document.createElement('div');
-    row.className = 'ped-prod-row';
-    row.innerHTML = `
-      <img class="ped-prod-img" src="${e(p.img||'')}" alt="${e(p.nombre||'')}" onerror="this.style.display='none'">
-      <div class="ped-prod-info">
-        <p class="ped-prod-name">${e(p.nombre||'')} </p>
-        <p class="ped-prod-unitario"><strong>${e(p.precio||"")}</strong></p>
-      </div>
-      <div class="ped-qty" style="flex-direction:column;width:40px;align-self:stretch;border:1.5px solid var(--gold);border-radius:0;overflow:hidden;gap:0;flex-shrink:0">
-        <button class="ped-qty-btn" onclick="cambiarQty('${key}',1)">+</button>
-      </div>`;
-    list.appendChild(row);
+
+  // Agrupar productos en secciones: cada separador (sin precio) encabeza un grupo
+  // Un grupo sin separador previo se llama grupo "sin encabezado"
+  const grupos = []; // [{separador: p|null, items: [{p, pi}]}]
+  let grupoActual = { separador: null, items: [] };
+  cat.productos.forEach((p, pi) => {
+    const esDivisor = !p.precio || !String(p.precio).trim();
+    if(esDivisor){
+      // Guardar grupo anterior si tiene items
+      if(grupoActual.items.length > 0 || grupoActual.separador) grupos.push(grupoActual);
+      grupoActual = { separador: { p, pi }, items: [] };
+    } else {
+      grupoActual.items.push({ p, pi });
+    }
   });
+  if(grupoActual.items.length > 0 || grupoActual.separador) grupos.push(grupoActual);
+
+  let hayProductos = false;
+
+  grupos.forEach(grupo => {
+    // Filtrar items visibles en este grupo
+    const itemsVisibles = grupo.items.filter(({p, pi}) => {
+      if(p.disponible === false) return false;
+      if(pedMode === 'domicilio' && p.noDomicilio) return false;
+      const key = pedActiveCat+'-'+pi;
+      const qty = pedCart[key]||0;
+      return qty === 0; // los que ya están en carrito no se muestran aquí
+    });
+
+    // Solo mostrar separador si hay items visibles debajo de él
+    if(grupo.separador && itemsVisibles.length > 0){
+      const sep = document.createElement('div');
+      sep.className = 'ped-separator';
+      sep.innerHTML = `<span class="ped-separator-label">${e(grupo.separador.p.nombre||'')}</span>`;
+      if(grupo.separador.p.desc){
+        sep.innerHTML += `<span class="ped-separator-desc">${e(grupo.separador.p.desc)}</span>`;
+      }
+      list.appendChild(sep);
+    }
+
+    itemsVisibles.forEach(({p, pi}) => {
+      hayProductos = true;
+      const key = pedActiveCat+'-'+pi;
+      const row = document.createElement('div');
+      row.className = 'ped-prod-row';
+      row.innerHTML = `
+        <img class="ped-prod-img" src="${e(p.img||'')}" alt="${e(p.nombre||'')}" onerror="this.style.display='none'">
+        <div class="ped-prod-info">
+          <p class="ped-prod-name">${e(p.nombre||'')}</p>
+          <p class="ped-prod-unitario"><strong>${e(p.precio||"")}</strong></p>
+        </div>
+        <div class="ped-qty" style="flex-direction:column;width:40px;align-self:stretch;border:1.5px solid var(--gold);border-radius:0;overflow:hidden;gap:0;flex-shrink:0">
+          <button class="ped-qty-btn" onclick="cambiarQty('${key}',1)">+</button>
+        </div>`;
+      list.appendChild(row);
+    });
+  });
+
   if(!hayProductos){
     list.innerHTML = '<p style="color:var(--muted);font-size:.8rem;padding:.5rem">No hay productos disponibles para esta modalidad.</p>';
   }
@@ -3123,30 +3193,83 @@ function renderPedCart(){
     return;
   }
   let total = 0;
-  const items = keys.map(key=>{
+
+  // Construir mapa de separadores: para cada key de carrito, cuál separador le corresponde
+  // Un separador es el último producto-sin-precio que aparece antes del producto en su categoría
+  function getSeparadorParaItem(ci, pi){
+    const cat = DATA.categorias[ci];
+    if(!cat) return null;
+    let sepActual = null;
+    for(let i=0; i<=pi; i++){
+      const p = cat.productos[i];
+      if(!p) break;
+      const esDivisor = !p.precio || !String(p.precio).trim();
+      if(esDivisor) sepActual = p;
+    }
+    return sepActual;
+  }
+
+  // Agrupar keys del carrito por separador (usar nombre del separador como key del grupo)
+  // Mantener orden de aparición en el catálogo
+  const gruposCart = []; // [{sepNombre, sepDesc, items:[{key,ci,pi,p,qty}]}]
+  const grupoMap = {}; // sepNombre → índice en gruposCart
+
+  // Ordenar keys por ci y luego pi para respetar orden del catálogo
+  const keysSorted = keys.slice().sort((a,b)=>{
+    const [aci,api] = a.split('-').map(Number);
+    const [bci,bpi] = b.split('-').map(Number);
+    if(aci !== bci) return aci - bci;
+    return api - bpi;
+  });
+
+  keysSorted.forEach(key => {
     const [ci,pi] = key.split('-').map(Number);
     const p = DATA.categorias[ci]?.productos[pi];
-    if(!p) return '';
+    if(!p) return;
     const qty = pedCart[key];
     const priceNum = parsePrecio(p.precio);
     const sub = priceNum * qty;
     total += sub;
-    return `<div class="ped-cart-item">
-      <div style="flex:1;min-width:0">
-        <span class="ped-cart-name">${e(p.nombre)}</span>
-        <span style="display:block;font-size:.85rem;color:var(--muted);margin-top:1px"><strong style="color:var(--bl)">${priceNum>0?formatPrecio(priceNum):e(p.precio||"")}</strong></span>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:1px;flex-shrink:0;margin-right:4px">
-        <span style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--gold);line-height:1.2">${priceNum>0?formatPrecio(sub):''}</span>
-      </div>
-      <div class="ped-cart-qty-ctrl">
-        <button class="ped-cart-qbtn" style="border-bottom:1px solid rgba(0,0,0,.15)" onclick="cartCambiarQty('${key}',1)">+</button>
-        <button class="ped-cart-qbtn" onclick="cartCambiarQty('${key}',-1)">−</button>
-      </div>
-      <span class="ped-cart-qval" style="display:flex;align-items:center;justify-content:center">${qty}</span>
-      <button class="ped-cart-del" onclick="eliminarDelCart('${key}')">✕</button>
-    </div>`;
-  }).join('');
+
+    const sep = getSeparadorParaItem(ci, pi);
+    const sepKey = sep ? sep.nombre : '__sin_sep__';
+
+    if(!(sepKey in grupoMap)){
+      grupoMap[sepKey] = gruposCart.length;
+      gruposCart.push({ sepNombre: sep ? sep.nombre : null, sepDesc: sep ? sep.desc : null, items: [] });
+    }
+    gruposCart[grupoMap[sepKey]].items.push({ key, ci, pi, p, qty, priceNum, sub });
+  });
+
+  // Renderizar grupos
+  let html = '';
+  gruposCart.forEach(grupo => {
+    // Mostrar separador solo si tiene items
+    if(grupo.sepNombre){
+      html += `<div class="ped-cart-separator">
+        <span class="ped-cart-separator-label">${e(grupo.sepNombre)}</span>
+        ${grupo.sepDesc ? `<span class="ped-cart-separator-desc">${e(grupo.sepDesc)}</span>` : ''}
+      </div>`;
+    }
+    grupo.items.forEach(({key, p, qty, priceNum, sub}) => {
+      html += `<div class="ped-cart-item">
+        <div style="flex:1;min-width:0">
+          <span class="ped-cart-name">${e(p.nombre)}</span>
+          <span style="display:block;font-size:.85rem;color:var(--muted);margin-top:1px"><strong style="color:var(--bl)">${priceNum>0?formatPrecio(priceNum):e(p.precio||"")}</strong></span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:1px;flex-shrink:0;margin-right:4px">
+          <span style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--gold);line-height:1.2">${priceNum>0?formatPrecio(sub):''}</span>
+        </div>
+        <div class="ped-cart-qty-ctrl">
+          <button class="ped-cart-qbtn" style="border-bottom:1px solid rgba(0,0,0,.15)" onclick="cartCambiarQty('${key}',1)">+</button>
+          <button class="ped-cart-qbtn" onclick="cartCambiarQty('${key}',-1)">−</button>
+        </div>
+        <span class="ped-cart-qval" style="display:flex;align-items:center;justify-content:center">${qty}</span>
+        <button class="ped-cart-del" onclick="eliminarDelCart('${key}')">✕</button>
+      </div>`;
+    });
+  });
+
   let resumen = '';
   if(pedMode === 'domicilio'){
     const rval = (document.getElementById('domReparto')?.value || '');
@@ -3177,7 +3300,7 @@ function renderPedCart(){
       <span class="ped-cart-total-val">${total > 0 ? formatPrecio(total) : '—'}</span>
     </div>`;
   }
-  box.innerHTML = items + resumen;
+  box.innerHTML = html + resumen;
 }
 
 function cartCambiarQty(key, delta){
