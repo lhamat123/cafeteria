@@ -70,6 +70,13 @@
   .mesa-warn-btn.primary{background:var(--gold);color:var(--bd)}
   .mesa-warn-btn.secondary{background:rgba(201,168,124,.15);color:var(--bl);border:1.5px solid var(--bdr)}
   .mesa-warn-btn.danger{background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca}
+  .mesa-warn-qr-tip{
+    background:#fffbf0;border:1.5px solid var(--gold);border-radius:10px;
+    padding:.8rem 1rem;text-align:center;
+  }
+  .mesa-warn-qr-icon{font-size:2rem;margin-bottom:.4rem}
+  .mesa-warn-qr-tip p{font-size:.82rem;color:var(--text);line-height:1.6;margin-bottom:.25rem}
+  .mesa-warn-qr-sub{font-size:.74rem !important;color:var(--muted) !important}
   body{font-family:'Lato',sans-serif;background:var(--cs);color:var(--text);overflow-x:hidden}
 
   /* ── PAGES ── */
@@ -1087,17 +1094,25 @@
     <div class="mesa-warn-body">
       <p class="mesa-warn-msg" id="mesaWarnMsg">
         Este link corresponde a la <strong>Mesa <span class="mesa-warn-num" id="mesaWarnNum">—</span></strong>.<br><br>
-        Puede que ya hayas usado este link antes. Por favor confirmá que estás sentado en esa mesa.
+        Puede que ya hayas usado este link antes. ¿Seguís en esa mesa?
       </p>
       <div class="mesa-warn-actions">
         <button class="mesa-warn-btn primary" onclick="confirmarMesaWarning()">
           ✅ Sí, estoy en la Mesa <span id="mesaWarnNumBtn">—</span>
         </button>
-        <button class="mesa-warn-btn secondary" onclick="escanearDesdeWarning()">
-          📷 Escanear QR de mi mesa
+        <div class="mesa-warn-qr-tip" id="mesaWarnQrTip" style="display:none">
+          <div class="mesa-warn-qr-icon">📷</div>
+          <p><strong>Cerrá el navegador</strong> y escaneá el código QR de tu mesa con la cámara.</p>
+          <p class="mesa-warn-qr-sub">Tu pedido no se perderá — cuando vuelvas a entrar vas a encontrar todo lo que ya agregaste.</p>
+          <button class="mesa-warn-btn danger" style="margin-top:.6rem" onclick="cerrarMesaWarning()">
+            Entendido, voy a escanear el QR
+          </button>
+        </div>
+        <button class="mesa-warn-btn secondary" id="mesaWarnScanBtn" onclick="mostrarTipQR()">
+          📷 Estoy en otra mesa — ¿qué hago?
         </button>
-        <button class="mesa-warn-btn danger" onclick="cerrarMesaWarning()">
-          ✕ No soy de esa mesa — continuar sin asignar
+        <button class="mesa-warn-btn danger" id="mesaWarnNoBtn" onclick="cerrarMesaWarning()">
+          ✕ Continuar sin confirmar mesa
         </button>
       </div>
     </div>
@@ -2881,14 +2896,17 @@ function cerrarMesaWarning(){
 }
 
 function escanearDesdeWarning(){
-  const modal = document.getElementById('mesaWarningModal');
-  modal?.classList.remove('open');
-  // Abrir pedido sin mesa y arrancar el scanner
-  try{ localStorage.removeItem('mesaAsignada'); }catch(_){}
-  pedMesaSeleccionada = null;
-  abrirPedido(null);
-  // Pequeño delay para que el DOM de la página de pedido esté listo
-  setTimeout(()=>iniciarScanQR(), 400);
+  // Mantenido por compatibilidad — ya no se usa directamente
+  mostrarTipQR();
+}
+
+function mostrarTipQR(){
+  const tip    = document.getElementById('mesaWarnQrTip');
+  const scanBtn= document.getElementById('mesaWarnScanBtn');
+  const noBtn  = document.getElementById('mesaWarnNoBtn');
+  if(tip)     tip.style.display     = 'block';
+  if(scanBtn) scanBtn.style.display = 'none';
+  if(noBtn)   noBtn.style.display   = 'none';
 }
 
 
