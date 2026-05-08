@@ -90,6 +90,14 @@
       "label": "Cafés",
       "productos": [
         {
+          "nombre": "** CAFE **",
+          "desc": "El capuchino es el mejor",
+          "precio": "",
+          "badge": "",
+          "img": "",
+          "imgFull": ""
+        },
+        {
           "nombre": "Espresso Doble",
           "desc": "Doble carga de café molido fino, intenso y con crema perfecta. Ideal para los amantes del café puro.",
           "precio": "1345",
