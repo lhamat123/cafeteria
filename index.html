@@ -153,7 +153,7 @@
 
   /* ── ITEM ROWS ── */
   .items-list{display:flex;flex-direction:column}
-  .item-row{display:flex;align-items:center;gap:.5rem;padding:.8rem .3rem;
+  .item-row{display:flex;align-items:stretch;gap:.5rem;padding:0 .3rem;min-height:50px;
     border-bottom:1px solid var(--bdr);border-radius:8px;transition:background .15s}
   .item-row:last-child{border-bottom:none}
   .item-row:hover{background:rgba(201,168,124,.09)}
@@ -174,24 +174,24 @@
   .price{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;
     color:var(--bl);white-space:nowrap;text-align:right}
   /* ── INLINE QTY CONTROLS (in carta) ── */
-  .item-qty-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;width:80px;margin-left:auto}
+  .item-qty-wrap{display:flex;flex-direction:row;align-items:center;gap:6px;flex-shrink:0;margin-left:auto}
   .item-qty-row{
-    display:flex;align-items:center;gap:5px;
-    overflow:hidden;
-    max-height:0;opacity:0;
-    transition:max-height .24s ease,opacity .2s ease;
+    display:flex;flex-direction:column;align-items:center;gap:0px;
+    overflow:hidden;border-radius:8px;border:1.5px solid var(--gold);
+    max-height:0;opacity:0;width:0;
+    transition:max-height .24s ease,opacity .2s ease,width .2s ease;
     pointer-events:none;
   }
   body.pedido-activo .item-qty-row{
-    max-height:40px;opacity:1;pointer-events:auto;
+    max-height:200px;opacity:1;pointer-events:auto;width:32px;align-self:stretch;
   }
-  .iqbtn{width:28px;height:28px;border-radius:50%;border:none;
-    background:var(--gold);color:var(--bd);font-size:1.1rem;font-weight:700;
-    cursor:pointer;display:flex;align-items:center;justify-content:center;
-    transition:all .15s;line-height:1;flex-shrink:0}
+  .iqbtn{width:30px;flex:1;border:none;border-bottom:1px solid var(--gold);background:var(--gold);
+    color:var(--bd);font-size:1rem;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:background .12s;line-height:1;flex-shrink:0;width:100%}
+  .iqbtn:last-child{border-bottom:none;border-top:1px solid rgba(0,0,0,.15)}
   .iqbtn:hover{background:var(--bl);color:#fff}
-  .iqval{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;
-    color:var(--text);min-width:22px;text-align:center;transition:transform .12s}
+  .iqval{font-family:"Playfair Display",serif;font-size:1.15rem;font-weight:700;
+    color:var(--bl);min-width:22px;text-align:center;transition:transform .12s}
   .iqval.bump{transform:scale(1.4)}
 
   /* ── TÍTULO + BOTÓN PEDIDO ── */
@@ -533,7 +533,7 @@
     font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:all .15s}
   .ped-cat-btn.active,.ped-cat-btn:hover{background:var(--gold);color:var(--bd);border-color:var(--gold)}
   .ped-prod-list{display:flex;flex-direction:column;gap:.4rem}
-  .ped-prod-row{display:flex;align-items:center;gap:.75rem;padding:.6rem .4rem;
+  .ped-prod-row{display:flex;align-items:stretch;gap:.75rem;padding:0 .4rem;min-height:50px;
     border-radius:9px;border:1px solid var(--bdr);background:var(--card);transition:border-color .15s}
   .ped-prod-row:hover{border-color:var(--gold)}
   .ped-prod-img{width:48px;height:48px;border-radius:7px;object-fit:cover;flex-shrink:0}
@@ -541,17 +541,19 @@
   .ped-prod-name{font-family:'Playfair Display',serif;font-size:.88rem;font-weight:600;color:var(--text);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .ped-prod-price{font-size:.78rem;font-weight:700;color:var(--bl)}
-  .ped-qty{display:flex;align-items:center;gap:.3rem;flex-shrink:0}
-  .ped-qty-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--gold);
-    background:transparent;color:var(--gold);font-size:1rem;font-weight:700;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;transition:all .15s;line-height:1}
-  .ped-qty-btn:hover{background:var(--gold);color:var(--bd)}
-  .ped-qty-val{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:700;
-    color:var(--text);min-width:20px;text-align:center}
+  .ped-prod-unitario{font-size:.72rem;color:var(--muted);margin-top:2px}
+  .ped-prod-unitario strong{color:var(--bl);font-size:.82rem}
+  .ped-qty{display:flex;flex-direction:row;align-items:center;gap:5px;flex-shrink:0}
+  .ped-qty-btn{width:100%;flex:1;border:none;background:var(--gold);
+    color:var(--bd);font-size:1.05rem;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:background .12s;line-height:1}
+  .ped-qty-btn:hover{background:var(--bl);color:#fff}
+  .ped-qty-val{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;
+    color:var(--bl);min-width:22px;text-align:center;line-height:1.4}
   /* cart summary */
   .ped-cart{background:var(--card);border:1.5px solid var(--bdr);border-radius:13px;overflow:hidden}
   .ped-cart-empty{padding:1.4rem;text-align:center;color:var(--muted);font-size:.82rem;font-style:italic}
-  .ped-cart-item{display:flex;align-items:center;gap:.6rem;padding:.55rem .8rem;border-bottom:1px solid var(--bdr)}
+  .ped-cart-item{display:flex;align-items:stretch;gap:.6rem;padding:0 .8rem;min-height:50px;border-bottom:1px solid var(--bdr)}
   .ped-cart-item:last-child{border-bottom:none}
   .ped-cart-name{flex:1;font-size:.84rem;color:var(--text);font-weight:600}
   .ped-cart-qty{font-size:.78rem;color:var(--muted);flex-shrink:0}
@@ -592,13 +594,13 @@
   .ped-info-pill{background:rgba(201,168,124,.12);border:1px solid var(--bdr);border-radius:10px;
     padding:.6rem .9rem;font-size:.76rem;color:var(--muted);line-height:1.6;margin-bottom:.8rem}
   .ped-info-pill strong{color:var(--text)}
-  .ped-cart-qty-ctrl{display:flex;align-items:center;gap:.3rem;flex-shrink:0}
-  .ped-cart-qbtn{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--gold);
-    background:transparent;color:var(--gold);font-size:1rem;font-weight:700;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;transition:all .15s;line-height:1}
-  .ped-cart-qbtn:hover{background:var(--gold);color:var(--bd)}
-  .ped-cart-qval{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:700;
-    color:var(--text);min-width:20px;text-align:center}
+  .ped-cart-qty-ctrl{display:flex;flex-direction:column;align-items:stretch;flex-shrink:0;width:36px;align-self:stretch;border:1.5px solid var(--gold);border-radius:0;overflow:hidden;gap:0}
+  .ped-cart-qbtn{width:36px;height:25px;flex:1;border:none;background:var(--gold);
+    color:var(--bd);font-size:1.05rem;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:background .12s;line-height:1;flex-shrink:0}
+  .ped-cart-qbtn:hover{background:var(--bl);color:#fff}
+  .ped-cart-qval{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;
+    color:var(--bl);width:28px;text-align:center;line-height:1;flex-shrink:0}
   /* Domicilio mode toggle */
   .ped-domicilio-fields{display:none}
   .ped-domicilio-fields.visible{display:block}
@@ -1102,7 +1104,7 @@
     <div class="enc-git-card" id="encPdfCard">
       <div class="enc-git-title">📄 Generar comprobante PDF de un pedido</div>
       <p style="font-size:.74rem;color:var(--muted);margin-bottom:.8rem;line-height:1.5">
-        Copia el <strong>código verificado</strong> que aparece al final del mensaje de WhatsApp del cliente y pulsa el botón para pegarlo. El sistema lo valida y genera el PDF desde este dispositivo con tu token.
+        Cuando llegue el pedido por WhatsApp, <strong>copia todo el mensaje completo</strong> del cliente (incluyendo los productos, el nombre y el código al final) y pulsa el botón. El sistema extrae y valida el código automáticamente.
       </p>
 
       <!-- Botón principal pegar + campo readonly -->
@@ -1112,17 +1114,17 @@
                  background:#f0faf0;color:#166534;font-family:'Lato',sans-serif;
                  font-size:.9rem;font-weight:700;cursor:pointer;transition:all .18s;
                  display:flex;align-items:center;justify-content:center;gap:.5rem">
-          📋 Pegar código del pedido
+          📋 Pegar mensaje completo de WhatsApp
         </button>
         <div id="encCodigoWrap" style="display:none;position:relative">
           <textarea id="encPedidoDatos" readonly
-            style="width:100%;height:64px;resize:none;border-radius:8px;
+            style="width:100%;height:80px;resize:none;border-radius:8px;
                    border:1.5px solid #6fcf6f;background:#f0faf0;
-                   font-family:monospace;font-size:.65rem;color:#166534;
-                   padding:7px 36px 7px 10px;overflow:hidden;word-break:break-all;
+                   font-family:monospace;font-size:.62rem;color:#166534;
+                   padding:7px 36px 7px 10px;overflow-y:auto;word-break:break-all;
                    cursor:default;outline:none;line-height:1.4"></textarea>
           <!-- Botón limpiar -->
-          <button onclick="encLimpiarCodigo()" title="Limpiar y pegar otro código"
+          <button onclick="encLimpiarCodigo()" title="Limpiar y pegar otro mensaje"
             style="position:absolute;top:5px;right:6px;background:none;border:none;
                    color:#dc2626;font-size:1rem;cursor:pointer;line-height:1;padding:2px">✕</button>
         </div>
@@ -1494,10 +1496,10 @@ function renderMenu() {
         <div class="item-qty-wrap">
           <span class="price">${e(p.precio)}</span>
           <div class="item-qty-row" data-key="${key}">
-            <button class="iqbtn" data-key="${key}" data-d="-1">−</button>
-            <span class="iqval" id="miqv-${key}">${qty||''}</span>
             <button class="iqbtn" data-key="${key}" data-d="1">+</button>
+            <button class="iqbtn" data-key="${key}" data-d="-1">−</button>
           </div>
+          <span class="iqval" id="miqv-${key}">${qty||''}</span>
         </div>`;
       row.querySelector('.item-thumb').addEventListener('click',()=>lbProduct(ci,pi));
       row.querySelectorAll('.iqbtn').forEach(btn=>{
@@ -2796,17 +2798,17 @@ function renderPedProds(){
     hayProductos = true;
     const key = pedActiveCat+'-'+pi;
     const qty = pedCart[key]||0;
+    // Si ya está en el carrito, no lo mostramos aquí (aparece arriba en Tu pedido)
+    if(qty > 0) return;
     const row = document.createElement('div');
     row.className = 'ped-prod-row';
     row.innerHTML = `
       <img class="ped-prod-img" src="${e(p.img||'')}" alt="${e(p.nombre||'')}" onerror="this.style.display='none'">
       <div class="ped-prod-info">
-        <p class="ped-prod-name">${e(p.nombre||'')}</p>
-        <p class="ped-prod-price">${e(p.precio||'')}</p>
+        <p class="ped-prod-name">${e(p.nombre||'')} </p>
+        <p class="ped-prod-unitario"><strong>${e(p.precio||"")}</strong></p>
       </div>
-      <div class="ped-qty">
-        <button class="ped-qty-btn" onclick="cambiarQty('${key}',-1)">−</button>
-        <span class="ped-qty-val" id="qty-${key}">${qty}</span>
+      <div class="ped-qty" style="flex-direction:column;width:40px;align-self:stretch;border:1.5px solid var(--gold);border-radius:0;overflow:hidden;gap:0;flex-shrink:0">
         <button class="ped-qty-btn" onclick="cambiarQty('${key}',1)">+</button>
       </div>`;
     list.appendChild(row);
@@ -2827,6 +2829,7 @@ function cambiarQty(key, delta){
   const mel = document.getElementById('miqv-'+key);
   if(mel){ mel.textContent = pedCart[key]||''; }
   renderPedCart();
+  renderPedProds(); // migrar: ocultar si qty>0, mostrar si qty=0
   updateSendBtn();
 }
 
@@ -2849,17 +2852,21 @@ function renderPedCart(){
     const sub = priceNum * qty;
     total += sub;
     return `<div class="ped-cart-item">
-      <span class="ped-cart-name">${e(p.nombre)}</span>
-      <span class="ped-cart-sub">${priceNum>0?formatPrecio(sub):''}</span>
-      <div class="ped-cart-qty-ctrl">
-        <button class="ped-cart-qbtn" onclick="cartCambiarQty('${key}',-1)">−</button>
-        <span class="ped-cart-qval">${qty}</span>
-        <button class="ped-cart-qbtn" onclick="cartCambiarQty('${key}',1)">+</button>
+      <div style="flex:1;min-width:0">
+        <span class="ped-cart-name">${e(p.nombre)}</span>
+        <span style="display:block;font-size:.85rem;color:var(--muted);margin-top:1px"><strong style="color:var(--bl)">${priceNum>0?formatPrecio(priceNum):e(p.precio||"")}</strong></span>
       </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:1px;flex-shrink:0;margin-right:4px">
+        <span style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--gold);line-height:1.2">${priceNum>0?formatPrecio(sub):''}</span>
+      </div>
+      <div class="ped-cart-qty-ctrl">
+        <button class="ped-cart-qbtn" style="border-bottom:1px solid rgba(0,0,0,.15)" onclick="cartCambiarQty('${key}',1)">+</button>
+        <button class="ped-cart-qbtn" onclick="cartCambiarQty('${key}',-1)">−</button>
+      </div>
+      <span class="ped-cart-qval" style="display:flex;align-items:center;justify-content:center">${qty}</span>
       <button class="ped-cart-del" onclick="eliminarDelCart('${key}')">✕</button>
     </div>`;
   }).join('');
-  // Desglose para domicilio
   let resumen = '';
   if(pedMode === 'domicilio'){
     const rval = (document.getElementById('domReparto')?.value || '');
@@ -2912,6 +2919,7 @@ function cartCambiarQty(key, delta){
   }
   saveCart();
   renderPedCart();
+  renderPedProds(); // migrar de vuelta si qty llega a 0
   updateSendBtn();
   updateFloatBadge();
 }
@@ -2924,6 +2932,7 @@ function eliminarDelCart(key){
   const mel = document.getElementById('miqv-'+key);
   if(mel) mel.textContent = '';
   renderPedCart();
+  renderPedProds(); // devolver producto a la lista
   updateSendBtn();
 }
 
@@ -3360,10 +3369,27 @@ function encDecodificarPedido(texto){
   }
 
   try{
-    // Extraer cadena Base64 larga del bloque pegado
-    const match = texto.match(/([A-Za-z0-9+/=]{40,})/);
-    if(!match) throw new Error('no base64');
-    const jsonStr = decodeURIComponent(escape(atob(match[1].trim())));
+    // Extraer el código Base64 del mensaje completo de WhatsApp.
+    // Estrategia 1: buscar el bloque entre los separadores ─────
+    let encoded = '';
+    const bloqueMatch = texto.match(/─{3,}[\s\S]*?🔐[^\n]*\n([A-Za-z0-9+/=\s]{40,?})\n[\s\S]*?─{3,}/);
+    if(bloqueMatch){
+      encoded = bloqueMatch[1].replace(/\s/g,'');
+    } else {
+      // Estrategia 2: línea que sigue a "DATOS VERIFICADOS"
+      const lineas = texto.split('\n');
+      const idxMarker = lineas.findIndex(l => l.includes('DATOS VERIFICADOS') || l.includes('🔐'));
+      if(idxMarker >= 0 && lineas[idxMarker+1]){
+        encoded = lineas[idxMarker+1].trim().replace(/\s/g,'');
+      }
+    }
+    // Estrategia 3 (fallback): primera cadena Base64 larga del texto
+    if(!encoded || encoded.length < 40){
+      const fallback = texto.replace(/\s/g,'').match(/[A-Za-z0-9+/=]{60,}/);
+      if(fallback) encoded = fallback[0];
+    }
+    if(!encoded || encoded.length < 40) throw new Error('no base64');
+    const jsonStr = decodeURIComponent(escape(atob(encoded)));
     const p = JSON.parse(jsonStr);
     if(!p || !p.numero || !p.items || !p.modotitulo) throw new Error('incompleto');
 
