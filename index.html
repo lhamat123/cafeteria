@@ -1123,6 +1123,7 @@
     <span class="adm-bar-title">⚙️ Administración — Café Roble</span>
     <button class="ab ab-ghost" onclick="goPage('menu')">← Salir</button>
     <button class="ab ab-green" onclick="admApply()">☁ Guardar y Publicar</button>
+    <button class="ab ab-red" onclick="admResetYRecargar()" title="Borra localStorage y carga datos frescos de GitHub">🔄 Recargar desde GitHub</button>
     <button class="ab ab-gold" onclick="admExport()">⬇ Exportar JSON</button>
     <label class="ab ab-blue" style="cursor:pointer">
       📂 Importar JSON
@@ -2569,6 +2570,41 @@ async function admSaveGitHub(){
     renderMenu(); renderInfo(); checkUnavailBtn();
     toast('Carta publicada en GitHub','ok');
   }
+}
+
+async function admResetYRecargar(){
+  if(!confirm('¿Borrar datos locales y cargar todo desde GitHub?\n\nEsto reemplazará lo que ves ahora con la versión guardada en el repositorio.')) return;
+
+  const token = document.getElementById('ghToken')?.value.trim();
+  const apiUrl = ghApi();
+
+  showLoad(true);
+  setGhStatus('⏳ Cargando desde GitHub…', '');
+
+  try {
+    const headers = { 'Accept': 'application/vnd.github+json' };
+    if(token && token.startsWith('github_')) headers['Authorization'] = 'Bearer ' + token;
+
+    const res = await fetch(apiUrl, { headers });
+    if(!res.ok) throw new Error('HTTP ' + res.status + ' — ¿el repo existe y el archivo menu-data.json está publicado?');
+    const json = await res.json();
+    fileSHA = json.sha;
+    const remoteData = JSON.parse(fromBase64(json.content));
+
+    // Borrar localStorage y guardar los datos de GitHub
+    localStorage.removeItem('cafeRoble_v3');
+    localStorage.removeItem('cafeRoble_theme');
+    DATA = remoteData;
+    localStorage.setItem('cafeRoble_v3', JSON.stringify(DATA));
+
+    renderMenu(); renderInfo(); checkUnavailBtn(); buildAdmin();
+    setGhStatus('✅ Datos cargados desde GitHub — localStorage actualizado', 'ok');
+    toast('✅ Datos frescos de GitHub cargados', 'ok');
+  } catch(err) {
+    setGhStatus('❌ ' + err.message, 'err');
+    toast('Error: ' + err.message, 'err');
+  }
+  showLoad(false);
 }
 
 function admExport(){
