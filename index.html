@@ -786,18 +786,19 @@
   /* ── ARTÍCULO DIVISOR (sin precio) ── */
   .item-row.item-divider{
     justify-content:center;align-items:center;
-    border-bottom:none;border-top:1px solid var(--bdr);
-    background:transparent;min-height:36px;padding:.4rem 1rem;
-    pointer-events:none;
+    border-bottom:none;border-top:none;
+    background:var(--bm);min-height:36px;padding:.45rem 1.2rem;
+    pointer-events:none;border-radius:0;
+    margin:0 -.3rem;
   }
   .item-divider-label{
-    font-family:'Playfair Display',serif;font-size:.82rem;font-weight:600;
-    color:var(--muted);letter-spacing:.1em;text-transform:uppercase;
+    font-family:'Playfair Display',serif;font-size:.78rem;font-weight:700;
+    color:var(--gold);letter-spacing:.12em;text-transform:uppercase;
     text-align:center;
     display:flex;align-items:center;gap:.6rem;width:100%;
   }
   .item-divider-label::before,.item-divider-label::after{
-    content:'';flex:1;height:1px;background:var(--bdr);
+    content:'';flex:1;height:1px;background:rgba(201,168,124,.3);
   }
 
   /* ── SOLO LOCAL badge en carta ── */
@@ -1602,7 +1603,11 @@ function renderMenu() {
       const row = document.createElement('div');
       if(esDivisor){
         row.className = 'item-row item-divider';
-        row.innerHTML = `<span class="item-divider-label">${e(p.nombre)}</span>`;
+        row.innerHTML = `
+          <div style="display:flex;flex-direction:column;align-items:center;gap:.2rem;width:100%">
+            <span class="item-divider-label">${e(p.nombre)}</span>
+            ${p.desc?`<span style="font-size:.68rem;color:rgba(201,168,124,.6);text-align:center;line-height:1.4">${e(p.desc)}</span>`:''}
+          </div>`;
         return row;
       }
       row.className = 'item-row';
