@@ -907,7 +907,13 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="Carta"/>
   <meta name="application-name" content="Carta"/>
-  <meta name="theme-color" content="#2C1A0E"/>
+  <!-- theme-color controla el color del splash en Android Chrome -->
+  <meta name="theme-color" content="#2C1A0E" media="(prefers-color-scheme: light)"/>
+  <meta name="theme-color" content="#2C1A0E" media="(prefers-color-scheme: dark)"/>
+  <meta name="msapplication-navbutton-color" content="#2C1A0E"/>
+  <meta name="msapplication-starturl" content="./"/>
+  <!-- Evita que Android abra la app con una URL de caché obsoleta -->
+  <meta http-equiv="Cache-Control" content="no-cache, must-revalidate"/>
   <link id="pwa-manifest" rel="manifest" href="#"/>
   <!-- Apple touch icons — se sobreescriben dinámicamente desde el banner -->
   <link id="apple-touch-icon" rel="apple-touch-icon" sizes="180x180" href=""/>
@@ -3003,6 +3009,15 @@ function buildThemePicker(){
 
 
 document.addEventListener('DOMContentLoaded', async ()=>{
+  // 0. Limpiar SW defectuosos de versiones anteriores (evita splash colgado)
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.getRegistrations().then(regs=>{
+      regs.forEach(reg=>{
+        const url = reg.active?.scriptURL || reg.installing?.scriptURL || '';
+        if(url.startsWith('blob:') || url==='') reg.unregister();
+      });
+    }).catch(()=>{});
+  }
   // 1. Cargar localStorage al instante — el usuario ve contenido de inmediato
   loadLocalData();
   loadCart();
@@ -4464,18 +4479,41 @@ function getQRUrl(mesaNum){
     return {i512, i192, i180};
   }
 
+  /* ── Limpiar cualquier SW previo mal registrado (causa del splash colgado) ── */
+  /* Un SW de blob: URL registrado antes intercepta requests y hace que    */
+  /* Chrome se quede esperando indefinidamente al abrir la app instalada.  */
+  function _cleanupOldSW(){
+    if(!('serviceWorker' in navigator)) return;
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      regs.forEach(reg => {
+        const swUrl = reg.active?.scriptURL || reg.installing?.scriptURL || reg.waiting?.scriptURL || '';
+        // Eliminar cualquier SW con URL blob: (registros defectuosos anteriores)
+        if(swUrl.startsWith('blob:') || swUrl === '') {
+          reg.unregister();
+        }
+      });
+    }).catch(() => {});
+  }
+
+  /* Nota: No registramos un SW nuevo porque un HTML single-file en GitHub Pages
+     no puede registrar un SW con scope válido desde blob: URL.
+     La PWA funciona perfectamente sin SW — el splash de Chrome dura ~2s
+     y luego carga la página normal desde la red (rápido en GitHub Pages). */
+  function _registerSW(){ _cleanupOldSW(); }
+
   /* ── Inyectar manifest como data-URI (compatible con Chrome Android) ─── */
   async function injectManifest(appName, slogan, bannerSrc){
     const {i512, i192, i180} = await applyIcons(bannerSrc);
     const shortName = appName.length > 12 ? appName.substring(0,12) : appName;
-    const startUrl  = location.href.split('?')[0] + '?pwa=1';
+    // start_url = URL limpia sin parámetros — evita el splash colgado
+    const cleanUrl  = location.href.split('?')[0];
 
     const mf = {
       name: appName,
       short_name: shortName,
       description: slogan || 'Carta digital',
-      start_url: startUrl,
-      scope: location.href.split('?')[0],
+      start_url: cleanUrl,
+      scope: cleanUrl,
       display: 'standalone',
       orientation: 'portrait-primary',
       background_color: '#2C1A0E',
@@ -4498,6 +4536,9 @@ function getQRUrl(mesaNum){
       .forEach(m => m.content = shortName);
     document.querySelectorAll('meta[name="application-name"]')
       .forEach(m => m.content = appName);
+
+    // Registrar SW ahora que el manifest está listo
+    _registerSW();
   }
 
   /* ── Verificar si debemos mostrar el modal ───────────────────────────── */
