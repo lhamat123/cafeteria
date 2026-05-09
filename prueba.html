@@ -3376,20 +3376,19 @@ function pedProdQty(key, delta){
   updateFloatBadge();
 }
 
-/* Muestra/oculta los acápites de la lista de productos según si su grupo tiene qty > 0 */
+/* Muestra/oculta acápites según si su grupo tiene productos visibles (qty=0) en la lista */
 function actualizarDivisoresPedProds(){
   const list = document.getElementById('pedProdList');
   if(!list) return;
   const dividers = list.querySelectorAll('.ped-prod-divider');
   dividers.forEach(div=>{
-    // El siguiente sibling visible es el primer ped-prod-row del grupo
     let next = div.nextElementSibling;
-    let grupoTieneQty = false;
+    let grupoTieneVisible = false;
     while(next && !next.classList.contains('ped-prod-divider')){
-      if(next.classList.contains('has-qty')){ grupoTieneQty = true; break; }
+      if(next.classList.contains('ped-prod-row')){ grupoTieneVisible = true; break; }
       next = next.nextElementSibling;
     }
-    div.style.display = grupoTieneQty ? '' : 'none';
+    div.style.display = grupoTieneVisible ? '' : 'none';
   });
 }
 
