@@ -3301,17 +3301,14 @@ function renderPedProds(){
     hayProductos = true;
     const key = pedActiveCat+'-'+pi;
     const qty = pedCart[key]||0;
+    // Si ya tiene cantidad, no aparece en la lista — vive solo en el carrito
+    if(qty > 0) return;
     const row = document.createElement('div');
-    row.className = 'ped-prod-row' + (qty > 0 ? ' has-qty' : '');
+    row.className = 'ped-prod-row';
     row.id = 'ped-row-'+key;
     row.innerHTML = `
       <img class="ped-prod-img" src="${e(p.img||'')}" alt="${e(p.nombre||'')}" onerror="this.style.display='none'">
       <div class="ped-prod-info">
-        <div class="ped-qty-top">
-          <button class="ped-qty-top-btn" onclick="pedProdQty('${key}',-1)">−</button>
-          <span class="ped-qty-top-val" id="qtyt-${key}">${qty||''}</span>
-          <button class="ped-qty-top-btn" onclick="pedProdQty('${key}',1)">+</button>
-        </div>
         <p class="ped-prod-name">${e(p.nombre||'')}</p>
         <p class="ped-prod-price">${e(p.precio||'')}</p>
       </div>
@@ -3333,21 +3330,20 @@ function pedProdQty(key, delta){
   if(pedCart[key]===0) delete pedCart[key];
   saveCart();
 
-  // Actualizar fila
-  const row = document.getElementById('ped-row-'+key);
-  if(row){
-    const qty = pedCart[key]||0;
-    row.classList.toggle('has-qty', qty > 0);
-    const topVal = document.getElementById('qtyt-'+key);
-    if(topVal) topVal.textContent = qty||'';
+  // Si pasó a tener qty → eliminar la fila de "Elige tus productos"
+  // Si bajó a 0 desde el carrito → volver a renderizar la lista para que reaparezca
+  if((pedCart[key]||0) > 0){
+    const row = document.getElementById('ped-row-'+key);
+    if(row) row.remove();
+    actualizarDivisoresPedProds();
+  } else {
+    // Volvió a 0: re-renderizar la lista entera para que reaparezca en su posición
+    renderPedProds();
   }
 
   // Sincronizar con la carta
   const mel = document.getElementById('miqv-'+key);
   if(mel){ mel.textContent = pedCart[key]||''; }
-
-  // Actualizar visibilidad de acápites en la lista de productos
-  actualizarDivisoresPedProds();
 
   renderPedCart();
   updateSendBtn();
@@ -3469,22 +3465,14 @@ function renderPedCart(){
 function cartCambiarQty(key, delta){
   if(!pedCart[key]) return;
   pedCart[key] += delta;
-  if(pedCart[key] <= 0){
-    delete pedCart[key];
-    // sync qty display in product list
-    const el = document.getElementById('qty-'+key);
-    if(el) el.textContent = '0';
-    const mel = document.getElementById('miqv-'+key);
-    if(mel) mel.textContent = '';
-  } else {
-    // sync qty display in product list
-    const el = document.getElementById('qty-'+key);
-    if(el) el.textContent = pedCart[key];
-    const mel = document.getElementById('miqv-'+key);
-    if(mel) mel.textContent = pedCart[key];
-  }
+  const volvioCero = pedCart[key] <= 0;
+  if(volvioCero) delete pedCart[key];
+  const mel = document.getElementById('miqv-'+key);
+  if(mel) mel.textContent = pedCart[key]||'';
   saveCart();
   renderPedCart();
+  // Si bajó a 0 → reaparece en "Elige tus productos"
+  if(volvioCero) renderPedProds();
   updateSendBtn();
   updateFloatBadge();
 }
@@ -3492,12 +3480,13 @@ function cartCambiarQty(key, delta){
 function eliminarDelCart(key){
   delete pedCart[key];
   saveCart();
-  const el = document.getElementById('qty-'+key);
-  if(el) el.textContent = '0';
   const mel = document.getElementById('miqv-'+key);
   if(mel) mel.textContent = '';
   renderPedCart();
+  // Reaparece en "Elige tus productos"
+  renderPedProds();
   updateSendBtn();
+  updateFloatBadge();
 }
 
 function parsePrecio(str){
