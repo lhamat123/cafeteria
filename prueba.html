@@ -4,6 +4,14 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Café Yupy</title>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Café Yupy"/>
+  <meta name="theme-color" content="#1C1208"/>
+  <link rel="apple-touch-icon" id="pwaAppleIcon" href=""/>
+  <link rel="icon" id="pwaFavicon" type="image/png" href=""/>
+  <link rel="manifest" id="pwaManifest" href=""/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
@@ -944,7 +952,42 @@
     font-family:'Space Mono',monospace;font-size:.77rem;background:#FAFAF8;color:var(--text)}
   .reparto-add-inp:focus{outline:none;border-color:var(--gold)}
 
-  /* ── ARTÍCULO DIVISOR (sin precio) ── */
+  /* ── PWA INSTALL BUTTON ── */
+  #pwaInstallBar{
+    display:none;
+    position:fixed;bottom:64px;left:0;right:0;z-index:450;
+    padding:.55rem 1rem;
+    background:var(--bm);border-top:2px solid var(--gold);
+    align-items:center;gap:.75rem;
+    font-family:'Space Mono',monospace;
+  }
+  #pwaInstallBar.visible{ display:flex; }
+  #pwaInstallIcon{
+    width:40px;height:40px;border-radius:0;object-fit:cover;flex-shrink:0;
+    clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,0 100%);
+    background:var(--bd);
+  }
+  #pwaInstallText{ flex:1;min-width:0; }
+  #pwaInstallText strong{
+    display:block;font-size:.75rem;letter-spacing:.06em;color:var(--gold);
+    text-transform:uppercase;
+  }
+  #pwaInstallText span{
+    font-size:.62rem;color:var(--muted);line-height:1.4;
+  }
+  #pwaInstallBtn{
+    flex-shrink:0;padding:7px 14px;border-radius:0;border:2px solid var(--gold);
+    background:var(--gold);color:var(--bd);font-family:'Space Mono',monospace;
+    font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    cursor:pointer;transition:all .15s;white-space:nowrap;
+    clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,0 100%);
+  }
+  #pwaInstallBtn:hover{ filter:brightness(1.1); }
+  #pwaInstallClose{
+    flex-shrink:0;background:none;border:none;color:var(--muted);
+    font-size:1.1rem;cursor:pointer;padding:4px;line-height:1;
+  }
+  #pwaInstallClose:hover{ color:var(--gold); }
   .item-row.item-divider{
     justify-content:center;align-items:center;
     border-bottom:none;border-top:none;
@@ -1495,7 +1538,7 @@ async function loadFromGitHubSilent() {
       if(eliminados.length > 0){
         toast('⚠️ ' + eliminados.length + ' producto(s) de tu pedido ya no están en la carta y fueron removidos.', 'warn');
       }
-      renderMenu(); renderInfo(); checkUnavailBtn();
+      renderMenu(); renderInfo(); checkUnavailBtn(); pwaInit();
       updateFloatBadge();
       setGhStatus('✅ Datos actualizados desde GitHub', 'ok');
     } else {
@@ -2801,6 +2844,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   renderInfo();
   updateFloatBadge();
   checkUnavailBtn();
+  pwaInit();
   // 2. GitHub actualiza en segundo plano sin bloquear ni mostrar spinner
   loadFromGitHubSilent();
 });
@@ -3754,6 +3798,161 @@ function buildQrDirsPage(){
     grid.appendChild(card);
   }
 }
-</script>
+
+/* ═══════════════════════════════════════
+   PWA — ICONOS DINÁMICOS + INSTALAR
+═══════════════════════════════════════ */
+
+// No mostrar el botón de instalación si se accede desde un QR de mesa o info
+const _pwaParams = new URLSearchParams(window.location.search);
+const _esMesaQR  = !!_pwaParams.get('mesa') || !!_pwaParams.get('info');
+
+let _pwaPrompt = null; // evento beforeinstallprompt guardado
+
+// Generar icono cuadrado desde la imagen del banner usando Canvas
+function pwaGenerarIcono(imgUrl, cb){
+  if(!imgUrl){ cb(null); return; }
+  const canvas = document.getElementById('pwaCanvas');
+  const ctx = canvas.getContext('2d');
+  const SIZE = 512;
+  canvas.width = SIZE; canvas.height = SIZE;
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = ()=>{
+    // Fondo oscuro
+    ctx.fillStyle = '#1C1208';
+    ctx.fillRect(0, 0, SIZE, SIZE);
+    // Imagen centrada cubriendo el canvas (object-fit: cover)
+    const ratio = Math.max(SIZE / img.width, SIZE / img.height);
+    const w = img.width * ratio;
+    const h = img.height * ratio;
+    ctx.drawImage(img, (SIZE - w) / 2, (SIZE - h) / 2, w, h);
+    cb(canvas.toDataURL('image/png'));
+  };
+  img.onerror = ()=>cb(null);
+  img.src = imgUrl;
+}
+
+// Crear/actualizar el manifest dinámico con el icono generado
+function pwaActualizarManifest(iconDataUrl, nombre){
+  const manifest = {
+    name: nombre || 'Café Yupy',
+    short_name: nombre || 'Café Yupy',
+    start_url: window.location.href.split('?')[0], // sin parámetros de mesa
+    display: 'standalone',
+    background_color: '#1C1208',
+    theme_color: '#1C1208',
+    orientation: 'portrait',
+    icons: iconDataUrl ? [
+      { src: iconDataUrl, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+    ] : []
+  };
+  const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const link = document.getElementById('pwaManifest');
+  if(link){ link.href = url; }
+  // Apple touch icon
+  if(iconDataUrl){
+    const apple = document.getElementById('pwaAppleIcon');
+    if(apple) apple.href = iconDataUrl;
+    const favicon = document.getElementById('pwaFavicon');
+    if(favicon) favicon.href = iconDataUrl;
+    const ico = document.getElementById('pwaInstallIcon');
+    if(ico) ico.src = iconDataUrl;
+  }
+}
+
+// Inicializar PWA con los datos del café
+function pwaInit(){
+  if(_esMesaQR) return; // no mostrar si viene de QR de mesa
+  const d = DATA?.info || {};
+  const nombre = d.nombre || 'Café Yupy';
+  // Actualizar título de la página
+  document.title = nombre;
+  const metaTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+  if(metaTitle) metaTitle.content = nombre;
+
+  pwaGenerarIcono(d.bannerImg || '', dataUrl=>{
+    pwaActualizarManifest(dataUrl, nombre);
+  });
+}
+
+// Escuchar evento de instalación del navegador
+window.addEventListener('beforeinstallprompt', ev=>{
+  if(_esMesaQR) return;
+  ev.preventDefault();
+  _pwaPrompt = ev;
+  // Mostrar barra solo si no fue descartada antes
+  try{
+    if(!localStorage.getItem('pwaDescartado')){
+      document.getElementById('pwaInstallBar')?.classList.add('visible');
+    }
+  }catch(_){}
+});
+
+// Botón instalar
+document.addEventListener('DOMContentLoaded', ()=>{
+  if(_esMesaQR) return;
+
+  document.getElementById('pwaInstallBtn')?.addEventListener('click', async ()=>{
+    if(_pwaPrompt){
+      _pwaPrompt.prompt();
+      const { outcome } = await _pwaPrompt.userChoice;
+      _pwaPrompt = null;
+      document.getElementById('pwaInstallBar')?.classList.remove('visible');
+    } else {
+      // iOS / sin prompt nativo: mostrar instrucciones
+      pwaInstruccionesIOS();
+    }
+  });
+
+  document.getElementById('pwaInstallClose')?.addEventListener('click', ()=>{
+    document.getElementById('pwaInstallBar')?.classList.remove('visible');
+    try{ localStorage.setItem('pwaDescartado','1'); }catch(_){}
+  });
+
+  // En iOS no hay beforeinstallprompt — detectar y mostrar igualmente
+  const esIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone;
+  if(esIOS){
+    try{
+      if(!localStorage.getItem('pwaDescartado')){
+        setTimeout(()=>{
+          document.getElementById('pwaInstallBar')?.classList.add('visible');
+        }, 2000);
+      }
+    }catch(_){}
+  }
+});
+
+// Instrucciones para iOS (sin prompt nativo)
+function pwaInstruccionesIOS(){
+  const ov = document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.88);display:flex;align-items:flex-end;justify-content:center;padding:1rem';
+  ov.innerHTML=`
+    <div style="background:var(--bm);border:2px solid var(--gold);border-radius:0;max-width:400px;width:100%;padding:1.2rem;font-family:'Space Mono',monospace;">
+      <p style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.1em;color:var(--gold);margin-bottom:.8rem;">Agregar al escritorio</p>
+      <p style="font-size:.75rem;color:var(--cream);line-height:1.7;margin-bottom:.5rem;">
+        1. Toca el botón <strong style="color:var(--gold)">Compartir</strong> <span style="font-size:1rem">⬆️</span> en la barra del navegador.<br>
+        2. Selecciona <strong style="color:var(--gold)">"Agregar a pantalla de inicio"</strong>.<br>
+        3. Confirma tocando <strong style="color:var(--gold)">Agregar</strong>.
+      </p>
+      <button onclick="this.closest('div').parentElement.remove()" style="margin-top:.6rem;width:100%;padding:10px;border:2px solid var(--gold);background:var(--gold);color:var(--bd);font-family:'Space Mono',monospace;font-size:.8rem;font-weight:700;letter-spacing:.06em;cursor:pointer;border-radius:0;">Entendido</button>
+    </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click', e=>{ if(e.target===ov) ov.remove(); });
+}
+
+<!-- ══════════ PWA INSTALL BAR ══════════ -->
+<div id="pwaInstallBar">
+  <img id="pwaInstallIcon" src="" alt="icono"/>
+  <div id="pwaInstallText">
+    <strong>Agregar al escritorio</strong>
+    <span>Accede rápido sin abrir el navegador</span>
+  </div>
+  <button id="pwaInstallBtn">Instalar</button>
+  <button id="pwaInstallClose" title="Cerrar">✕</button>
+</div>
+<canvas id="pwaCanvas" style="display:none"></canvas>
+
 </body>
 </html>
