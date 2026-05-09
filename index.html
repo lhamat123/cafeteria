@@ -4,6 +4,26 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Carta</title>
+
+  <!-- ═══ OPEN GRAPH / WHATSAPP / TELEGRAM / TWITTER PREVIEW ═══ -->
+  <!-- Estos valores se sobreescriben dinámicamente desde renderInfo() -->
+  <meta id="og-title"       property="og:title"       content="Carta"/>
+  <meta id="og-description" property="og:description" content="Consulta nuestra carta digital"/>
+  <meta id="og-image"       property="og:image"       content=""/>
+  <meta id="og-image-w"     property="og:image:width" content="1200"/>
+  <meta id="og-image-h"     property="og:image:height"content="630"/>
+  <meta id="og-image-alt"   property="og:image:alt"   content=""/>
+  <meta id="og-url"         property="og:url"         content=""/>
+  <meta id="og-type"        property="og:type"        content="website"/>
+  <meta id="og-site"        property="og:site_name"   content="Carta"/>
+  <!-- WhatsApp usa og:image; Twitter/X usa su propio conjunto -->
+  <meta id="tw-card"        name="twitter:card"        content="summary_large_image"/>
+  <meta id="tw-title"       name="twitter:title"       content="Carta"/>
+  <meta id="tw-description" name="twitter:description" content="Consulta nuestra carta digital"/>
+  <meta id="tw-image"       name="twitter:image"       content=""/>
+  <!-- Description genérica (SEO) -->
+  <meta id="meta-description" name="description"      content="Consulta nuestra carta digital"/>
+
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
@@ -1660,6 +1680,121 @@ function ghTokenCheck(val){
   }
 }
 
+/* ═══════════════════════════════════════════════════════
+   OPEN GRAPH — actualiza las meta tags de vista previa
+   para WhatsApp, Telegram, Facebook, Twitter/X, etc.
+   Nota: los scrapers de redes leen el HTML estático del
+   servidor, no JS. GitHub Pages sí sirve el HTML completo,
+   así que estas tags deben estar presentes en el código
+   fuente con valores reales antes de que el scraper llegue.
+   Para ello generamos una imagen OG desde el banner usando
+   <canvas> y la convertimos en data-URI que WhatsApp acepta
+   si el link es HTTPS (GitHub Pages lo es).
+═══════════════════════════════════════════════════════ */
+function updateOGTags(nombre, slogan, bannerImg, direccion){
+  const pageUrl   = location.href.split('?')[0];
+  const desc      = [slogan, direccion].filter(Boolean).join(' · ') || 'Consulta nuestra carta digital';
+
+  /* ── Función auxiliar: setea content de una meta por id ── */
+  const sm = (id, val) => {
+    const el = document.getElementById(id);
+    if(el && val) el.setAttribute('content', val);
+  };
+
+  sm('og-title',        nombre);
+  sm('og-description',  desc);
+  sm('og-url',          pageUrl);
+  sm('og-site',         nombre);
+  sm('og-image-alt',    nombre + ' — carta digital');
+  sm('tw-title',        nombre);
+  sm('tw-description',  desc);
+  sm('meta-description',desc);
+
+  /* ── Generar imagen OG 1200×630 desde el banner ─────────── */
+  if(!bannerImg) return;
+
+  const W = 1200, H = 630;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  function finalize(){
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+    sm('og-image',  dataUrl);
+    sm('tw-image',  dataUrl);
+  }
+
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    /* Fondo oscuro café */
+    ctx.fillStyle = '#2C1A0E';
+    ctx.fillRect(0, 0, W, H);
+
+    /* Imagen del banner a la izquierda, recortada al 50% */
+    const imgW = Math.round(W * 0.50);
+    const scale = Math.max(imgW / img.width, H / img.height);
+    const dw = img.width  * scale;
+    const dh = img.height * scale;
+    const dx = (imgW - dw) / 2;
+    const dy = (H    - dh) / 2;
+    ctx.drawImage(img, dx, dy, dw, dh);
+
+    /* Gradiente de izquierda a derecha sobre la foto */
+    const grad = ctx.createLinearGradient(0, 0, W, 0);
+    grad.addColorStop(0,    'rgba(44,26,14,0)');
+    grad.addColorStop(0.38, 'rgba(44,26,14,0.55)');
+    grad.addColorStop(0.52, 'rgba(44,26,14,0.97)');
+    grad.addColorStop(1,    'rgba(44,26,14,1)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    /* Línea dorada vertical decorativa */
+    ctx.strokeStyle = '#C9A87C';
+    ctx.lineWidth   = 3;
+    ctx.beginPath();
+    ctx.moveTo(Math.round(W * 0.52), 60);
+    ctx.lineTo(Math.round(W * 0.52), H - 60);
+    ctx.stroke();
+
+    /* Nombre del café */
+    const maxFontSize = 72;
+    const textX = Math.round(W * 0.555);
+    const textW  = W - textX - 60;
+    ctx.fillStyle   = '#F5ECD7';
+    ctx.textBaseline= 'middle';
+    /* Ajustar fuente para que quepa */
+    let fs = maxFontSize;
+    ctx.font = `700 ${fs}px Georgia, serif`;
+    while(ctx.measureText(nombre).width > textW && fs > 24){ fs -= 2; ctx.font = `700 ${fs}px Georgia, serif`; }
+    ctx.fillText(nombre, textX, Math.round(H * 0.40));
+
+    /* Slogan / descripción */
+    if(slogan){
+      ctx.font      = `400 ${Math.round(fs * 0.42)}px Arial, sans-serif`;
+      ctx.fillStyle = '#C9A87C';
+      ctx.fillText(slogan.substring(0,55), textX, Math.round(H * 0.40) + fs * 0.85);
+    }
+
+    /* Línea separadora inferior */
+    ctx.strokeStyle = 'rgba(201,168,124,0.4)';
+    ctx.lineWidth   = 1;
+    ctx.beginPath();
+    ctx.moveTo(textX, Math.round(H * 0.72));
+    ctx.lineTo(W - 60, Math.round(H * 0.72));
+    ctx.stroke();
+
+    /* Etiqueta "Carta Digital" */
+    ctx.font      = `700 ${Math.round(fs * 0.32)}px Arial, sans-serif`;
+    ctx.fillStyle = 'rgba(201,168,124,0.7)';
+    ctx.fillText('CARTA DIGITAL', textX, Math.round(H * 0.81));
+
+    finalize();
+  };
+  img.onerror = finalize; /* si la imagen falla, al menos poner título/desc */
+  img.src = bannerImg;
+}
+
 /* ═══════════════════════
    RENDER INFO PAGE
 ═══════════════════════ */
@@ -1667,6 +1802,13 @@ function renderInfo() {
   const d = DATA.info || {};
   // Título del navegador
   document.title = d.nombre || 'Carta';
+  // ── Open Graph / vista previa en redes sociales ──
+  updateOGTags(
+    d.nombre    || 'Carta',
+    d.slogan    || '',
+    d.bannerImg || '',
+    d.direccion || ''
+  );
   // Banner
   ['bannerPhotoMenu','bannerPhotoInfo'].forEach(id => {
     const el = document.getElementById(id);
