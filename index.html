@@ -4243,271 +4243,263 @@ function getQRUrl(mesaNum){
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   PWA — Iconos, Manifest dinámico, Prompt de instalación
-   Genera iconos desde la foto del banner al vuelo con <canvas>
+   PWA — Iconos desde banner, Manifest data-URI, Prompt Android/iOS
+   ─────────────────────────────────────────────────────────────
+   NOTAS TÉCNICAS:
+   • Chrome Android requiere manifest en mismo origen → usamos data-URI
+     (funciona en Chrome 73+ Android, Edge, Samsung Browser).
+   • beforeinstallprompt se dispara ANTES de que el modal aparezca;
+     lo capturamos en cuanto la página carga y lo guardamos.
+   • El modal se muestra al primer scroll o tras 4 s — lo que ocurra
+     primero — para respetar la heurística de Chrome (interacción previa).
+   • iOS Safari: no soporta beforeinstallprompt; mostramos guía manual.
 ═══════════════════════════════════════════════════════════════ */
-const PWA = (function(){
-  let _deferredPrompt = null;   // BeforeInstallPromptEvent (Android/Desktop)
-  let _modalShown = false;
+(function(){
+  /* ── Detección de plataforma ─────────────────────────────────────────── */
+  const UA          = navigator.userAgent;
+  const isIOS       = /iphone|ipad|ipod/i.test(UA);
+  const isAndroid   = /android/i.test(UA);
+  const isSafari    = /^((?!chrome|android).)*safari/i.test(UA);
+  const isStandalone= window.matchMedia('(display-mode:standalone)').matches
+                   || window.navigator.standalone === true;
 
-  // ── Detectores de plataforma ──────────────────────────────────────────────
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const isAndroid = /android/i.test(navigator.userAgent);
-  const isStandalone =
-    window.matchMedia('(display-mode: standalone)').matches ||
-    window.navigator.standalone === true;
+  /* ── Estado ──────────────────────────────────────────────────────────── */
+  let _deferred   = null;   // BeforeInstallPromptEvent capturado
+  let _shown      = false;
+  let _appName    = 'Carta';
+  let _icon192    = '';     // data-URI del icono 192 px (para el modal)
 
-  // ── Genera un icono cuadrado (con fondo oscuro + imagen centrada) en base64 ──
-  function generateIcon(imgSrc, size){
-    return new Promise(resolve=>{
-      const canvas = document.createElement('canvas');
-      canvas.width = size; canvas.height = size;
-      const ctx = canvas.getContext('2d');
-      // Fondo color café oscuro
+  /* ── Capturar beforeinstallprompt CUANTO ANTES (antes del init) ──────── */
+  window.addEventListener('beforeinstallprompt', ev => {
+    ev.preventDefault();
+    _deferred = ev;
+    // Si el modal ya está esperando (init llamado antes), mostrarlo ahora
+    if(_shouldShow()) _tryShowModal();
+  });
+
+  /* ── Generar icono cuadrado desde imagen de banner con <canvas> ─────── */
+  function makeIcon(src, size){
+    return new Promise(ok => {
+      const c = document.createElement('canvas');
+      c.width = c.height = size;
+      const ctx = c.getContext('2d');
       ctx.fillStyle = '#2C1A0E';
       ctx.fillRect(0,0,size,size);
-      if(!imgSrc){ resolve(canvas.toDataURL('image/png')); return; }
+      if(!src){ ok(c.toDataURL('image/png')); return; }
       const img = new Image();
       img.crossOrigin = 'anonymous';
-      img.onload = ()=>{
-        // Recorte cuadrado centrado
-        const min = Math.min(img.width, img.height);
-        const sx = (img.width  - min) / 2;
-        const sy = (img.height - min) / 2;
-        // Padding del 8%
-        const pad = Math.round(size * 0.08);
-        ctx.drawImage(img, sx, sy, min, min, pad, pad, size-pad*2, size-pad*2);
-        resolve(canvas.toDataURL('image/png'));
+      img.onload = () => {
+        const m = Math.min(img.width, img.height);
+        const sx = (img.width  - m) / 2;
+        const sy = (img.height - m) / 2;
+        const pad = Math.round(size * 0.07);
+        ctx.drawImage(img, sx, sy, m, m, pad, pad, size-pad*2, size-pad*2);
+        ok(c.toDataURL('image/png'));
       };
-      img.onerror = ()=>{ resolve(canvas.toDataURL('image/png')); };
-      img.src = imgSrc;
+      img.onerror = () => ok(c.toDataURL('image/png'));
+      img.src = src;
     });
   }
 
-  // ── Inyecta los <link> de apple-touch-icon y favicon ─────────────────────
+  /* ── Aplicar iconos al DOM (favicons + apple-touch-icon) ─────────────── */
   async function applyIcons(bannerSrc){
-    const sizes = [512, 192, 180, 152, 120, 32, 16];
-    const icons = {};
-    await Promise.all(sizes.map(async s=>{
-      icons[s] = await generateIcon(bannerSrc, s);
-    }));
+    // Generar todos los tamaños en paralelo
+    const [i512,i192,i180,i152,i120,i32,i16] = await Promise.all(
+      [512,192,180,152,120,32,16].map(s => makeIcon(bannerSrc,s))
+    );
+    _icon192 = i192;
 
-    const set = (id, src)=>{
-      const el = document.getElementById(id);
-      if(el) el.href = src;
-    };
-    set('apple-touch-icon',     icons[180]);
-    set('apple-touch-icon-152', icons[152]);
-    set('apple-touch-icon-120', icons[120]);
-    set('favicon-32',           icons[32]);
-    set('favicon-16',           icons[16]);
+    const sh = (id,v) => { const el=document.getElementById(id); if(el) el.href=v; };
+    sh('apple-touch-icon',     i180);
+    sh('apple-touch-icon-152', i152);
+    sh('apple-touch-icon-120', i120);
+    sh('favicon-32',           i32);
+    sh('favicon-16',           i16);
 
-    // Actualizar icono del modal
     const prev = document.getElementById('pwaIconPreview');
-    if(prev) prev.src = icons[192];
+    if(prev) prev.src = i192;
 
-    return icons;
+    return {i512, i192, i180};
   }
 
-  // ── Genera e inyecta el Web App Manifest en línea ─────────────────────────
-  async function applyManifest(appName, appSlogan, bannerSrc){
-    const icons = await applyIcons(bannerSrc);
+  /* ── Inyectar manifest como data-URI (compatible con Chrome Android) ─── */
+  async function injectManifest(appName, slogan, bannerSrc){
+    const {i512, i192, i180} = await applyIcons(bannerSrc);
+    const shortName = appName.length > 12 ? appName.substring(0,12) : appName;
+    const startUrl  = location.href.split('?')[0] + '?pwa=1';
 
-    const manifest = {
-      name: appName || 'Carta',
-      short_name: (appName || 'Carta').substring(0,12),
-      description: appSlogan || 'Carta digital',
-      start_url: './',
-      scope: './',
+    const mf = {
+      name: appName,
+      short_name: shortName,
+      description: slogan || 'Carta digital',
+      start_url: startUrl,
+      scope: location.href.split('?')[0],
       display: 'standalone',
-      orientation: 'portrait',
+      orientation: 'portrait-primary',
       background_color: '#2C1A0E',
       theme_color: '#2C1A0E',
       icons: [
-        { src: icons[192], sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
-        { src: icons[512], sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
-        { src: icons[180], sizes: '180x180', type: 'image/png', purpose: 'apple touch icon' }
+        { src: i192, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+        { src: i512, sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+        { src: i180, sizes: '180x180', type: 'image/png' }
       ]
     };
 
-    const blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
-    const url  = URL.createObjectURL(blob);
-    const link = document.getElementById('pwa-manifest');
-    if(link){ link.href = url; }
+    // data-URI — mismo origen, aceptado por Chrome Android
+    const encoded  = 'data:application/manifest+json;charset=utf-8,'
+                   + encodeURIComponent(JSON.stringify(mf));
+    const linkEl   = document.getElementById('pwa-manifest');
+    if(linkEl) linkEl.href = encoded;
 
-    // Actualizar título de la app en los meta tags de Apple
-    document.querySelectorAll('meta[name="apple-mobile-web-app-title"]').forEach(m=>{
-      m.content = manifest.short_name;
-    });
-    document.querySelectorAll('meta[name="application-name"]').forEach(m=>{
-      m.content = manifest.name;
-    });
+    // Meta tags Apple
+    document.querySelectorAll('meta[name="apple-mobile-web-app-title"]')
+      .forEach(m => m.content = shortName);
+    document.querySelectorAll('meta[name="application-name"]')
+      .forEach(m => m.content = appName);
   }
 
-  // ── Registrar Service Worker (para caché offline) ─────────────────────────
-  function registerSW(){
-    if(!('serviceWorker' in navigator)) return;
-    // El SW se inyecta como Blob para no necesitar archivo externo
-    const swCode = `
-const CACHE = 'carta-v1';
-const ASSETS = [location.href || '/'];
-self.addEventListener('install', e=>{
-  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).catch(()=>{}));
-  self.skipWaiting();
-});
-self.addEventListener('activate', e=>{
-  e.waitUntil(caches.keys().then(keys=>
-    Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))
-  ));
-  self.clients.claim();
-});
-self.addEventListener('fetch', e=>{
-  if(e.request.method!=='GET') return;
-  e.respondWith(
-    caches.match(e.request).then(cached=>{
-      const net = fetch(e.request).then(res=>{
-        const clone = res.clone();
-        caches.open(CACHE).then(c=>c.put(e.request, clone)).catch(()=>{});
-        return res;
-      }).catch(()=>cached);
-      return cached || net;
-    })
-  );
-});`;
-    const blob = new Blob([swCode], {type:'application/javascript'});
-    const url  = URL.createObjectURL(blob);
-    navigator.serviceWorker.register(url, {scope: './'}).catch(()=>{});
-  }
-
-  // ── Mostrar modal de instalación ──────────────────────────────────────────
-  function showModal(appName){
-    if(_modalShown) return;
-    _modalShown = true;
-
-    const modal   = document.getElementById('pwaInstallModal');
-    const title   = document.getElementById('pwaModalTitle');
-    const nameEl  = document.getElementById('pwaModalName');
-    const actions = document.getElementById('pwaActions');
-    if(!modal) return;
-
-    if(title)  title.textContent  = appName || 'Carta';
-    if(nameEl) nameEl.textContent = appName || 'esta carta';
-
-    actions.innerHTML = '';
-
-    if(isIOS){
-      // iOS no soporta BeforeInstallPrompt — mostrar instrucciones manuales
-      actions.innerHTML = `
-        <div class="pwa-ios-tip">
-          <div class="tip-icon">📲</div>
-          <p>Para instalar en iPhone/iPad:<br>
-          1. Toca el ícono <strong>Compartir</strong> (□↑) en Safari<br>
-          2. Selecciona <strong>"Agregar a pantalla de inicio"</strong></p>
-          <p class="pwa-ios-sub">Solo funciona en Safari, no en Chrome</p>
-        </div>
-        <button class="pwa-btn secondary" onclick="PWA.closeModal()" style="margin-top:.5rem">Entendido</button>`;
-    } else if(_deferredPrompt){
-      // Android / Desktop — prompt nativo disponible
-      actions.innerHTML = `
-        <button class="pwa-btn primary" id="pwaBtnInstall">📲 &nbsp;Agregar al escritorio</button>
-        <button class="pwa-btn secondary" id="pwaBtnNever">Ahora no</button>`;
-      document.getElementById('pwaBtnInstall')?.addEventListener('click', ()=>{ nativeInstall(); });
-      document.getElementById('pwaBtnNever')?.addEventListener('click',   ()=>{ closeModal(true); });
-    } else {
-      // Navegador no soporta instalación
-      closeModal(); return;
-    }
-
-    modal.classList.add('open');
-    modal.addEventListener('click', ev=>{ if(ev.target===modal) closeModal(); }, {once:true});
-  }
-
-  // ── Disparar el prompt nativo de Android/Desktop ──────────────────────────
-  async function nativeInstall(){
-    if(!_deferredPrompt) return;
-    _deferredPrompt.prompt();
-    const { outcome } = await _deferredPrompt.userChoice;
-    _deferredPrompt = null;
-    closeModal();
-    if(outcome === 'accepted'){
-      try{ localStorage.setItem('pwa_installed', '1'); }catch(_){}
-    }
-  }
-
-  // ── Cerrar modal ──────────────────────────────────────────────────────────
-  function closeModal(permanent){
-    const modal = document.getElementById('pwaInstallModal');
-    if(modal) modal.classList.remove('open');
-    if(permanent){
-      try{ localStorage.setItem('pwa_dismissed', Date.now()); }catch(_){}
-    }
-  }
-
-  // ── Decidir si mostrar el modal ───────────────────────────────────────────
-  function shouldShowModal(){
-    // No mostrar si ya está instalado como app
+  /* ── Verificar si debemos mostrar el modal ───────────────────────────── */
+  function _shouldShow(){
     if(isStandalone) return false;
     try{
       if(localStorage.getItem('pwa_installed')) return false;
-      const dismissed = parseInt(localStorage.getItem('pwa_dismissed')||'0');
-      // Volver a preguntar después de 7 días si rechazó
-      if(dismissed && (Date.now() - dismissed) < 7 * 24 * 3600 * 1000) return false;
+      const d = parseInt(localStorage.getItem('pwa_dismissed')||'0');
+      if(d && Date.now()-d < 7*24*3600*1000) return false;
     }catch(_){}
-    return true;
+    // Necesitamos prompt nativo (Android) o ser iOS
+    return !!_deferred || isIOS;
   }
 
-  // ── API pública ───────────────────────────────────────────────────────────
-  return {
-    closeModal,
-    // Llamada principal — se ejecuta cuando los datos del restaurante están listos
-    init(appName, appSlogan, bannerSrc){
-      applyManifest(appName, appSlogan, bannerSrc).catch(()=>{});
-      registerSW();
+  /* ── Mostrar modal ───────────────────────────────────────────────────── */
+  function _tryShowModal(){
+    if(_shown || !_shouldShow()) return;
+    _shown = true;
 
-      if(!shouldShowModal()) return;
+    const modal   = document.getElementById('pwaInstallModal');
+    const titleEl = document.getElementById('pwaModalTitle');
+    const nameEl  = document.getElementById('pwaModalName');
+    const actions = document.getElementById('pwaActions');
+    if(!modal || !actions) return;
 
-      // Android / Desktop — esperar el evento nativo
-      window.addEventListener('beforeinstallprompt', ev=>{
-        ev.preventDefault();
-        _deferredPrompt = ev;
-        // Mostrar modal con pequeño retardo para no interrumpir la carga
-        setTimeout(()=> showModal(appName), 2500);
-      });
+    if(titleEl) titleEl.textContent = _appName;
+    if(nameEl)  nameEl.textContent  = _appName;
+    const prev = document.getElementById('pwaIconPreview');
+    if(prev && _icon192) prev.src = _icon192;
 
-      // iOS — mostrar instrucciones manuales tras 3 s
-      if(isIOS){
-        setTimeout(()=> showModal(appName), 3000);
-      }
+    if(isIOS){
+      // Safari iOS — instrucciones manuales
+      actions.innerHTML = `
+        <div class="pwa-ios-tip">
+          <div class="tip-icon">📲</div>
+          <p>Para instalar en iPhone / iPad:<br>
+          1. Toca <strong>Compartir</strong> (□↑) en la barra de Safari<br>
+          2. Elige <strong>"Agregar a pantalla de inicio"</strong></p>
+          <p class="pwa-ios-sub">Solo disponible en Safari</p>
+        </div>
+        <button class="pwa-btn secondary" id="pwaBtnClose" style="margin-top:.6rem">Entendido</button>`;
+      document.getElementById('pwaBtnClose')
+        ?.addEventListener('click', () => _close(false));
+
+    } else if(_deferred){
+      // Android / Chrome Desktop — prompt nativo
+      actions.innerHTML = `
+        <button class="pwa-btn primary"    id="pwaBtnYes">📲 &nbsp;Sí, agregar al escritorio</button>
+        <button class="pwa-btn secondary"  id="pwaBtnNo">Ahora no</button>`;
+      document.getElementById('pwaBtnYes')
+        ?.addEventListener('click', _nativeInstall);
+      document.getElementById('pwaBtnNo')
+        ?.addEventListener('click', () => _close(true));
+    } else {
+      return; // No hay forma de instalar → no mostrar nada
+    }
+
+    modal.classList.add('open');
+    // Cerrar al tocar el fondo
+    modal.addEventListener('click', ev => {
+      if(ev.target === modal) _close(false);
+    }, {once:true});
+  }
+
+  /* ── Disparar prompt nativo (Android / Desktop) ──────────────────────── */
+  async function _nativeInstall(){
+    if(!_deferred) return;
+    try{
+      _deferred.prompt();
+      const { outcome } = await _deferred.userChoice;
+      _deferred = null;
+      _close(false);
+      if(outcome === 'accepted')
+        try{ localStorage.setItem('pwa_installed','1'); }catch(_){}
+    }catch(e){
+      _close(false);
+    }
+  }
+
+  /* ── Cerrar modal ────────────────────────────────────────────────────── */
+  function _close(saveDismiss){
+    const modal = document.getElementById('pwaInstallModal');
+    if(modal) modal.classList.remove('open');
+    if(saveDismiss)
+      try{ localStorage.setItem('pwa_dismissed', Date.now()); }catch(_){}
+  }
+
+  /* ── Punto de entrada público ────────────────────────────────────────── */
+  window.PWA = {
+    closeModal: () => _close(false),
+
+    init(appName, slogan, bannerSrc){
+      _appName = appName || 'Carta';
+
+      // 1. Manifest + iconos (async, no bloquea)
+      injectManifest(_appName, slogan, bannerSrc).catch(()=>{});
+
+      // 2. Decidir si y cuándo mostrar el modal
+      if(!_shouldShow()) return;
+
+      // Mostrar al primer scroll real del usuario (señal de interacción)
+      const onScroll = () => {
+        window.removeEventListener('scroll', onScroll);
+        window.removeEventListener('touchmove', onScroll);
+        setTimeout(_tryShowModal, 600);
+      };
+      window.addEventListener('scroll',    onScroll, {passive:true, once:true});
+      window.addEventListener('touchmove', onScroll, {passive:true, once:true});
+
+      // Fallback: si no hay scroll en 4 s, mostrar igual
+      setTimeout(() => {
+        window.removeEventListener('scroll',    onScroll);
+        window.removeEventListener('touchmove', onScroll);
+        _tryShowModal();
+      }, 4000);
     }
   };
-})();
 
-/* ── Iniciar PWA cuando los datos estén disponibles ─────────────────────── */
-(function(){
-  let pwaInited = false;
-  function tryInitPWA(){
-    if(pwaInited) return;
-    const nombre    = (typeof DATA !== 'undefined' && DATA?.info?.nombre)    || document.title || '';
-    const slogan    = (typeof DATA !== 'undefined' && DATA?.info?.slogan)    || '';
-    const bannerImg = (typeof DATA !== 'undefined' && DATA?.info?.bannerImg) || '';
-    if(nombre && nombre !== 'Carta' || bannerImg){
-      pwaInited = true;
+  /* ── Arrancar cuando los datos del restaurante estén listos ─────────── */
+  let _inited = false;
+  function _tryInit(){
+    if(_inited) return;
+    const nombre    = (typeof DATA !== 'undefined') ? (DATA?.info?.nombre    || '') : '';
+    const slogan    = (typeof DATA !== 'undefined') ? (DATA?.info?.slogan    || '') : '';
+    const bannerImg = (typeof DATA !== 'undefined') ? (DATA?.info?.bannerImg || '') : '';
+    if(nombre || bannerImg){
+      _inited = true;
       PWA.init(nombre || 'Carta', slogan, bannerImg);
     }
   }
-  document.addEventListener('DOMContentLoaded', ()=>{
-    // Intento 1: tras carga localStorage
-    setTimeout(tryInitPWA, 900);
-    // Intento 2: tras posible carga GitHub
-    setTimeout(tryInitPWA, 5500);
-    // MutationObserver: se activa cuando bannerNameMenu cambia (renderInfo lo actualiza)
-    const el = document.getElementById('bannerNameMenu');
-    if(el){
-      const obs = new MutationObserver(()=>{ setTimeout(tryInitPWA, 150); });
-      obs.observe(el, {childList:true, characterData:true, subtree:true});
+
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(_tryInit, 800);   // tras carga localStorage
+    setTimeout(_tryInit, 6000);  // tras carga GitHub (fallback)
+
+    // Reaccionar cuando renderInfo actualiza el banner con el nombre real
+    const bannerEl = document.getElementById('bannerNameMenu');
+    if(bannerEl){
+      new MutationObserver(() => setTimeout(_tryInit, 150))
+        .observe(bannerEl, {childList:true, characterData:true, subtree:true});
     }
   });
-})();
+
+})(); // fin módulo PWA
 </script>
 </body>
 </html>
