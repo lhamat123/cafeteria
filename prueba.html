@@ -1301,7 +1301,7 @@
       <h3 class="ped-sec-title">📝 Notas adicionales</h3>
       <textarea class="ped-notes" id="pedNotas" placeholder="Alergias, preferencias, instrucciones especiales..."></textarea>
     </div>
-    <div class="ped-section">
+    <div class="ped-section" id="pedEligeSec">
       <h3 class="ped-sec-title">☕ Elige tus productos</h3>
       <div class="ped-cat-nav" id="pedCatNav"></div>
       <div class="ped-prod-list" id="pedProdList"></div>
@@ -3232,11 +3232,33 @@ function procesarQR(url){
 }
 
 /* ── Catálogo en página de pedido ── */
+function catTieneElegibles(i){
+  const cat = DATA.categorias[i];
+  if(!cat) return false;
+  return cat.productos.some((p,pi)=>{
+    if(p.disponible === false) return false;
+    if(!p.precio || !String(p.precio).trim()) return false; // divisor
+    if(pedMode === 'domicilio' && p.noDomicilio) return false;
+    const key = i+'-'+pi;
+    return !(pedCart[key] > 0); // solo si aún no está en el carrito
+  });
+}
+
 function buildPedCatNav(){
   const nav = document.getElementById('pedCatNav');
   if(!nav) return;
   nav.innerHTML = '';
+
+  // Si la categoría activa ya no tiene elegibles, buscar la primera que sí tenga
+  if(!catTieneElegibles(pedActiveCat)){
+    const primera = DATA.categorias.findIndex((_,i)=>catTieneElegibles(i));
+    if(primera >= 0) pedActiveCat = primera;
+  }
+
+  let alguna = false;
   DATA.categorias.forEach((cat,i)=>{
+    if(!catTieneElegibles(i)) return; // ocultar si no hay nada que elegir
+    alguna = true;
     const btn = document.createElement('button');
     btn.className = 'ped-cat-btn'+(i===pedActiveCat?' active':'');
     btn.textContent = cat.label;
@@ -3244,12 +3266,15 @@ function buildPedCatNav(){
       pedActiveCat=i;
       buildPedCatNav();
       renderPedProds();
-      // scroll active button into view
       const activeBtn = nav.querySelector('.ped-cat-btn.active');
       if(activeBtn) activeBtn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
     };
     nav.appendChild(btn);
   });
+
+  // Ocultar toda la sección si no hay ninguna categoría con elegibles
+  const seccion = document.getElementById('pedEligeSec');
+  if(seccion) seccion.style.display = alguna ? '' : 'none';
 }
 function renderPedProds(){
   const list = document.getElementById('pedProdList');
@@ -3336,9 +3361,10 @@ function pedProdQty(key, delta){
     const row = document.getElementById('ped-row-'+key);
     if(row) row.remove();
     actualizarDivisoresPedProds();
+    buildPedCatNav();
   } else {
-    // Volvió a 0: re-renderizar la lista entera para que reaparezca en su posición
     renderPedProds();
+    buildPedCatNav();
   }
 
   // Sincronizar con la carta
@@ -3471,8 +3497,7 @@ function cartCambiarQty(key, delta){
   if(mel) mel.textContent = pedCart[key]||'';
   saveCart();
   renderPedCart();
-  // Si bajó a 0 → reaparece en "Elige tus productos"
-  if(volvioCero) renderPedProds();
+  if(volvioCero){ renderPedProds(); buildPedCatNav(); }
   updateSendBtn();
   updateFloatBadge();
 }
@@ -3483,8 +3508,8 @@ function eliminarDelCart(key){
   const mel = document.getElementById('miqv-'+key);
   if(mel) mel.textContent = '';
   renderPedCart();
-  // Reaparece en "Elige tus productos"
   renderPedProds();
+  buildPedCatNav();
   updateSendBtn();
   updateFloatBadge();
 }
