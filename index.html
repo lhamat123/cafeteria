@@ -204,14 +204,13 @@
   .swipe-hint.hidden{opacity:0;pointer-events:none}
 
   /* ── SLIDER ── */
-  /* scroll multi-categoria */
-  .slider-vp{overflow:visible;width:100%;cursor:default}
+  .slider-vp{overflow:hidden;width:100%;cursor:grab}
+  .slider-vp.grabbing{cursor:grabbing}
   .slider-track{position:relative;width:100%}
-  .cat-section .items-list{padding:0 .9rem}
+  .slide-panel{position:absolute;top:0;left:0;width:100%;padding:0 1.2rem 2.5rem;will-change:transform}
   @media(min-width:860px){
-    .cat-section .items-list{
-      padding-left:calc((100vw - 860px)/2 + .9rem);
-      padding-right:calc((100vw - 860px)/2 + .9rem)}
+    .slide-panel{padding-left:calc((100vw - 860px)/2 + 1.2rem);
+      padding-right:calc((100vw - 860px)/2 + 1.2rem)}
   }
 
   /* ── ITEM ROWS ── */
@@ -668,6 +667,44 @@
   .ped-domicilio-fields{display:none}
   .ped-domicilio-fields.visible{display:block}
 
+  /* ── SEPARADORES EN ELIGE PRODUCTOS ── */
+  .ped-separator{
+    display:flex;flex-direction:column;align-items:center;
+    padding:.55rem .4rem .35rem;
+    margin-top:.5rem;
+    position:relative;
+  }
+  .ped-separator::before{
+    content:'';position:absolute;top:50%;left:0;right:0;
+    height:1.5px;background:var(--gold);opacity:.35;
+  }
+  .ped-separator-label{
+    font-family:'Playfair Display',serif;font-size:.78rem;font-weight:700;
+    color:var(--gold);letter-spacing:.07em;text-transform:uppercase;
+    background:var(--cs);padding:0 .6rem;position:relative;z-index:1;
+    text-align:center;
+  }
+  .ped-separator-desc{
+    font-size:.65rem;color:var(--muted);margin-top:2px;text-align:center;
+    position:relative;z-index:1;background:var(--cs);padding:0 .4rem;
+  }
+
+  /* ── SEPARADORES EN CARRITO ── */
+  .ped-cart-separator{
+    display:flex;flex-direction:column;align-items:center;
+    padding:.5rem .8rem .3rem;
+    position:relative;
+    background:var(--bm);
+  }
+  .ped-cart-separator-label{
+    font-family:'Playfair Display',serif;font-size:.75rem;font-weight:700;
+    color:var(--gold);letter-spacing:.07em;text-transform:uppercase;
+    text-align:center;
+  }
+  .ped-cart-separator-desc{
+    font-size:.65rem;color:rgba(201,168,124,.6);margin-top:1px;text-align:center;
+  }
+
   /* ── DESGLOSE CARRITO DOMICILIO ── */
   .ped-cart-desglose{border-top:1px solid var(--bdr)}
   .ped-cart-desglose-row{
@@ -783,6 +820,24 @@
   .reparto-add-inp{flex:1;padding:5px 9px;border-radius:7px;border:1.5px solid #d8d5d0;
     font-family:'Lato',sans-serif;font-size:.77rem;background:#faf9f7;color:var(--text)}
   .reparto-add-inp:focus{outline:none;border-color:var(--gold)}
+
+  /* ── ARTÍCULO DIVISOR (sin precio) ── */
+  .item-row.item-divider{
+    justify-content:center;align-items:center;
+    border-bottom:none;border-top:none;
+    background:var(--bm);min-height:36px;padding:.45rem 1.2rem;
+    pointer-events:none;border-radius:0;
+    margin:0 -.3rem;
+  }
+  .item-divider-label{
+    font-family:'Playfair Display',serif;font-size:.78rem;font-weight:700;
+    color:var(--gold);letter-spacing:.12em;text-transform:uppercase;
+    text-align:center;
+    display:flex;align-items:center;gap:.6rem;width:100%;
+  }
+  .item-divider-label::before,.item-divider-label::after{
+    content:'';flex:1;height:1px;background:rgba(201,168,124,.3);
+  }
 
   /* ── SOLO LOCAL badge en carta ── */
   @keyframes latido{
@@ -1067,8 +1122,8 @@
   <div class="adm-bar">
     <span class="adm-bar-title">⚙️ Administración — Café Roble</span>
     <button class="ab ab-ghost" onclick="goPage('menu')">← Salir</button>
-    <button class="ab ab-green" onclick="admApply()">✔ Guardar local</button>
-    <button class="ab ab-purple" onclick="admSaveGitHub()">☁ Publicar en GitHub</button>
+    <button class="ab ab-green" onclick="admApply()">☁ Guardar y Publicar</button>
+    <button class="ab ab-red" onclick="admResetYRecargar()" title="Borra localStorage y carga datos frescos de GitHub">🔄 Recargar desde GitHub</button>
     <button class="ab ab-gold" onclick="admExport()">⬇ Exportar JSON</button>
     <label class="ab ab-blue" style="cursor:pointer">
       📂 Importar JSON
@@ -1078,17 +1133,21 @@
   <div class="adm-body">
     <!-- GitHub Config Panel -->
     <div class="gh-panel">
-      <div class="gh-panel-title">☁️ Publicar en GitHub Pages</div>
+      <div class="gh-panel-title">☁️ GitHub — Publicación en vivo</div>
       <input type="hidden" id="ghUser" value="lhamat123"/>
       <input type="hidden" id="ghRepo" value="cafeteria"/>
       <div class="gh-field">
-        <label class="gh-label">Token de acceso</label>
-        <input class="gh-inp" type="password" id="ghToken" placeholder="github_pat_..." autocomplete="off"/>
+        <label class="gh-label">Token de acceso (requerido para publicar)</label>
+        <input class="gh-inp" type="password" id="ghToken" placeholder="github_pat_..."
+          autocomplete="off" oninput="ghTokenCheck(this.value)"/>
       </div>
       <input type="hidden" id="ghPass" value=""/>
       <div style="width:100%">
-        <div class="gh-status" id="ghStatus">Ingresa tu token para publicar</div>
+        <div class="gh-status" id="ghStatus">⚠️ Sin token — los cambios solo se guardan en este dispositivo</div>
       </div>
+      <p style="font-size:.62rem;color:rgba(201,168,124,.45);width:100%;margin-top:.2rem">
+        Repo: <strong style="color:rgba(201,168,124,.7)">lhamat123/cafeteria</strong> · archivo: menu-data.json
+      </p>
     </div>
 
     <div class="adm-tabs" id="admTabs"></div>
@@ -1314,77 +1373,20 @@ const ENC_PASS      = 'Enc2025';    // ← contraseña encargado (cámbiala)
    (vacío — se carga siempre desde GitHub / JSON)
 ═══════════════════════ */
 const DEFAULT_DATA = {
-  "info":{
-    "nombre":"Burgers & Tacos","slogan":"Lo mejor de dos mundos 🍔🌮",
-    "bannerImg":"","aboutImg":"","aboutBadge":"Desde 2018",
-    "aboutTitle":"Sabor con identidad",
-    "aboutText1":"Nacimos con la idea de unir lo mejor de la comida callejera en un solo lugar.",
-    "aboutText2":"Cada ingrediente es seleccionado con cuidado para garantizar la mejor experiencia.",
-    "direccion":"Av. Principal 123, Ciudad","telefono":"555-1234-5678",
-    "email":"hola@burgersytacos.com","instagram":"@burgersytacos",
-    "mapEmbed":"","mapLink":"",
-    "horariosLV":"12:00 – 22:00","horariosSab":"11:00 – 23:00",
-    "horariosDom":"12:00 – 21:00","horariosFest":"Consultar",
-    "footerLine1":"Burgers & Tacos © 2025","footerLine2":"Hecho con 🔥 y buena sazón",
-    "promoImg":"","promoTag":"🔥 Oferta del mes",
-    "promoTitle":"Combo Doble Identidad",
-    "promoDesc":"1 hamburguesa clásica + 2 tacos al pastor + bebida",
-    "promoPrice":"$12.99",
-    "repartos":{
-      "zona1":{"nombre":"Zona Centro","precio":"$2.50","zonas":["Centro","Zócalo","Centro Histórico"]},
-      "zona2":{"nombre":"Zona Norte","precio":"$4.00","zonas":["Colonia Norte","Parque Industrial","Villa Alta"]}
+  info:{
+    nombre:"", slogan:"", bannerImg:"", aboutImg:"", aboutBadge:"",
+    aboutTitle:"", aboutText1:"", aboutText2:"",
+    direccion:"", telefono:"", email:"", instagram:"",
+    mapEmbed:"", mapLink:"",
+    horariosLV:"", horariosSab:"", horariosDom:"", horariosFest:"",
+    footerLine1:"", footerLine2:"",
+    promoImg:"", promoTag:"", promoTitle:"", promoDesc:"", promoPrice:"",
+    repartos:{
+      anillo1:{ nombre:"1er Anillo", precio:"$20.00", zonas:["Centro Sur","Centro Norte","Peralta","Pueblo Nuevo"] },
+      anillo2:{ nombre:"2do Anillo", precio:"$40.00", zonas:["Sanfield","La Quinta","Vista Alegre","Libertad","Fornet","Ramón Quintana","Hilda Torres","Villa Nueva","26 de Julio"] }
     }
   },
-  "categorias":[
-    {
-      "label":"🍔 Hamburguesas",
-      "productos":[
-        {"nombre":"Clásica BBQ","desc":"Carne angus 150g, queso cheddar, lechuga, tomate, cebolla caramelizada y salsa BBQ artesanal","precio":"$8.99","img":"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&h=300&fit=crop","imgFull":"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800","badge":"⭐ Popular","disponible":true,"noDomicilio":false},
-        {"nombre":"Doble Smash","desc":"Dos patties smash de carne premium, doble queso americano, pepinillos, mostaza y ketchup especial","precio":"$11.50","img":"https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=300&h=300&fit=crop","imgFull":"https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=800","badge":"🔥 Nuevo","disponible":true,"noDomicilio":false},
-        {"nombre":"Pollo Crispy","desc":"Pechuga de pollo empanizada crujiente, mayonesa de chipotle, col morada y jalapeños frescos","precio":"$9.50","img":"https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=300&h=300&fit=crop","imgFull":"https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=800","badge":"","disponible":true,"noDomicilio":false},
-        {"nombre":"Veggie Deluxe","desc":"Patty de garbanzos y quinoa, aguacate, brotes, tomate cherry y aderezo de tahini","precio":"$9.99","img":"https://images.unsplash.com/photo-1525059696034-4967a8e1dca2?w=300&h=300&fit=crop","imgFull":"https://images.unsplash.com/photo-1525059696034-4967a8e1dca2?w=800","badge":"🌱 Vegana","disponible":true,"noDomicilio":false}
-      ],
-      "galeria":{"titulo":"","fotos":[]}
-    },
-    {
-      "label":"🌮 Tacos",
-      "productos":[
-        {"nombre":"Al Pastor","desc":"Cerdo marinado en achiote con piña asada, cebolla, cilantro y salsa verde tatemada. 3 piezas","precio":"$6.50","img":"https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=300&h=300&fit=crop","imgFull":"https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=800","badge":"⭐ Estrella","disponible":true,"noDomicilio":false},
-        {"nombre":"Birria Estilo Jalisco","desc":"Res estofada en chile guajillo y especias, consomé para dipear, queso Oaxaca. 3 piezas","precio":"$8.99","img":"https://images.unsplash.com/photo-1613514785940-daed07799d9b?w=300&h=300&fit=crop","imgFull":"https://images.unsplash.com/photo-1613514785940-daed07799d9b?w=800","badge":"🔥 Hot","disponible":true,"noDomicilio":false},
-        {"nombre":"Camarón a la Diabla","desc":"Camarones salteados en salsa diabla casera, aguacate, pico de gallo. 3 piezas","precio":"$10.50","img":"https://images.unsplash.com/photo-1599974579688-8dbdd335c77f?w=300&h=300&fit=crop","imgFull":"https://images.unsplash.com/photo-1599974579688-8dbdd335c77f?w=800","badge":"🌶️ Picante","disponible":true,"noDomicilio":false},
-        {"nombre":"Veganos de Hongos","desc":"Portobello y champiñones salteados con salsa de chipotle, guacamole y col tostada. 3 piezas","precio":"$7.50","img":"https://images.unsplash.com/photo-1578020190125-f4f7c18bc9cb?w=300&h=300&fit=crop","imgFull":"https://images.unsplash.com/photo-1578020190125-f4f7c18bc9cb?w=800","badge":"🌱 Vegano","disponible":true,"noDomicilio":false}
-      ],
-      "galeria":{"titulo":"","fotos":[]}
-    },
-    {
-      "label":"🥤 Bebidas",
-      "productos":[
-        {"nombre":"Agua de Jamaica","desc":"Flor de jamaica natural, sin colorantes artificiales. 500ml","precio":"$2.50","img":"https://images.unsplash.com/photo-1622597467836-f3e8b42b9c1f?w=300&h=300&fit=crop","imgFull":"https://images.unsplash.com/photo-1622597467836-f3e8b42b9c1f?w=800","badge":"","disponible":true,"noDomicilio":false},
-        {"nombre":"Limonada Mineral","desc":"Limón fresco, agua mineral, menta y un toque de sal. 400ml","precio":"$3.00","img":"https://images.unsplash.com/photo-1523677011781-c91d1bbe2f9e?w=300&h=300&fit=crop","imgFull":"https://images.unsplash.com/photo-1523677011781-c91d1bbe2f9e?w=800","badge":"🔥 Fav","disponible":true,"noDomicilio":false},
-        {"nombre":"Malteada Clásica","desc":"Vainilla, chocolate o fresa. Helado artesanal batido con leche entera. 350ml","precio":"$5.50","img":"https://images.unsplash.com/photo-1568901839119-631418a3910d?w=300&h=300&fit=crop","imgFull":"https://images.unsplash.com/photo-1568901839119-631418a3910d?w=800","badge":"","disponible":true,"noDomicilio":false},
-        {"nombre":"Refresco","desc":"Coca-Cola, Sprite, Fanta o agua mineral. Lata 355ml","precio":"$2.00","img":"https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=300&h=300&fit=crop","imgFull":"https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=800","badge":"","disponible":true,"noDomicilio":false}
-      ],
-      "galeria":{"titulo":"","fotos":[]}
-    },
-    {
-      "label":"🍟 Extras",
-      "productos":[
-        {"nombre":"Papas Fritas","desc":"Papas crujientes con sal de mar. Tamaño regular. Salsas de tu elección","precio":"$3.50","img":"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=300&h=300&fit=crop","imgFull":"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=800","badge":"","disponible":true,"noDomicilio":false},
-        {"nombre":"Papas con Queso y Jalapeños","desc":"Papas fritas bañadas en queso cheddar derretido y jalapeños en escabeche","precio":"$5.00","img":"https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=300&h=300&fit=crop","imgFull":"https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=800","badge":"🌶️","disponible":true,"noDomicilio":false},
-        {"nombre":"Guacamole + Totopos","desc":"Aguacate fresco, jitomate, cebolla morada, cilantro y limón. Porción para 2","precio":"$4.50","img":"https://images.unsplash.com/photo-1574484284002-952d92456975?w=300&h=300&fit=crop","imgFull":"https://images.unsplash.com/photo-1574484284002-952d92456975?w=800","badge":"🌱","disponible":true,"noDomicilio":false}
-      ],
-      "galeria":{"titulo":"","fotos":[]}
-    },
-    {
-      "label":"🍮 Postres",
-      "productos":[
-        {"nombre":"Churros con Chocolate","desc":"Churros recién hechos con azúcar y canela, taza de chocolate caliente para dipear","precio":"$4.99","img":"https://images.unsplash.com/photo-1609349093905-c5e68a10e3f4?w=300&h=300&fit=crop","imgFull":"https://images.unsplash.com/photo-1609349093905-c5e68a10e3f4?w=800","badge":"⭐","disponible":true,"noDomicilio":false},
-        {"nombre":"Helado Artesanal","desc":"Bola de helado artesanal: vainilla, chocolate, mango con chile o fresa. Cono o vaso","precio":"$3.50","img":"https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=300&h=300&fit=crop","imgFull":"https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=800","badge":"","disponible":true,"noDomicilio":false},
-        {"nombre":"Brownie Caliente","desc":"Brownie de chocolate semi-amargo tibio con bola de helado de vainilla y caramelo","precio":"$5.99","img":"https://images.unsplash.com/photo-1564355808539-22fda35bed7e?w=300&h=300&fit=crop","imgFull":"https://images.unsplash.com/photo-1564355808539-22fda35bed7e?w=800","badge":"🍫","disponible":true,"noDomicilio":false}
-      ],
-      "galeria":{"titulo":"","fotos":[]}
-    }
-  ]
+  categorias:[]
 };
 
 /* ═══════════════════════
@@ -1405,10 +1407,18 @@ function loadLocalData() {
 /* ═══════════════════════
    GITHUB API
 ═══════════════════════ */
+// Usuario y repo hardcodeados para la carga inicial (no depende del DOM)
+const GH_USER_DEFAULT = 'lhamat123';
+const GH_REPO_DEFAULT = 'cafeteria';
+
 function ghApi() {
-  const user = document.getElementById('ghUser')?.value.trim() || 'lhamat123';
-  const repo = document.getElementById('ghRepo')?.value.trim() || 'cafeteria';
+  const user = document.getElementById('ghUser')?.value.trim() || GH_USER_DEFAULT;
+  const repo = document.getElementById('ghRepo')?.value.trim() || GH_REPO_DEFAULT;
   return `https://api.github.com/repos/${user}/${repo}/contents/${GH_FILE}`;
+}
+
+function ghApiBase() {
+  return `https://api.github.com/repos/${GH_USER_DEFAULT}/${GH_REPO_DEFAULT}/contents/${GH_FILE}`;
 }
 
 // Encode JSON → base64 UTF-8 seguro
@@ -1430,12 +1440,20 @@ async function loadFromGitHubSilent() {
   const controller = new AbortController();
   const timer = setTimeout(()=>controller.abort(), 8000);
   try {
-    const res = await fetch(ghApi(), {
+    const res = await fetch(ghApiBase(), {
       headers: {'Accept':'application/vnd.github+json'},
       signal: controller.signal
     });
     clearTimeout(timer);
-    if (!res.ok) return;
+    if (!res.ok) {
+      // 404 = repo o archivo no existe; 403 = rate limit; no mostrar error al usuario
+      if (res.status === 404) {
+        setGhStatus('', ''); // silencioso — archivo aún no publicado
+      } else if (res.status === 403 || res.status === 429) {
+        setGhStatus('⚠️ GitHub: límite de peticiones alcanzado — usando datos locales', '');
+      }
+      return;
+    }
     const json = await res.json();
     fileSHA = json.sha;
     const remoteData = JSON.parse(fromBase64(json.content));
@@ -1445,13 +1463,18 @@ async function loadFromGitHubSilent() {
       DATA = remoteData;
       localStorage.setItem('cafeRoble_v3', JSON.stringify(DATA));
       renderMenu(); renderInfo(); checkUnavailBtn();
-      setGhStatus('✅ Datos actualizados desde GitHub', 'ok');
+      setGhStatus('✅ Carta actualizada desde GitHub', 'ok');
     } else {
-      setGhStatus('✅ Datos en sync con GitHub', 'ok');
+      setGhStatus('✅ Carta en sync con GitHub', 'ok');
     }
   } catch(e) {
     clearTimeout(timer);
-    setGhStatus('⚠️ Sin conexión a GitHub — mostrando datos locales', '');
+    // Solo mostrar aviso si hay datos locales válidos (no confundir al usuario)
+    const tieneLocal = DATA && DATA.categorias && DATA.categorias.length > 0;
+    if (!tieneLocal) {
+      setGhStatus('⚠️ Sin conexión a GitHub — configura el repositorio en Admin', '');
+    }
+    // Si hay datos locales, cargamos sin molestar al usuario con el aviso
   }
 }
 
@@ -1473,11 +1496,37 @@ async function loadFromGitHub() {
   showLoad(false);
 }
 
+/* Obtiene el SHA actual del archivo en GitHub usando el token dado.
+   Actualiza fileSHA globalmente. Devuelve el sha o '' si el archivo no existe aún. */
+async function fetchCurrentSHA(apiUrl, token) {
+  try {
+    const res = await fetch(apiUrl, {
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': 'Bearer ' + token
+      }
+    });
+    if (res.status === 404) return ''; // archivo nuevo, no necesita sha
+    if (!res.ok) throw new Error('status ' + res.status);
+    const json = await res.json();
+    fileSHA = json.sha;
+    return json.sha;
+  } catch(e) {
+    return fileSHA || ''; // usar el que tenemos si falla
+  }
+}
+
 async function saveToGitHub() {
   const token = document.getElementById('ghToken')?.value.trim();
   if (!token || !token.startsWith('github_')) { toast('Token GitHub inválido','err'); return false; }
 
   showLoad(true);
+  setGhStatus('⏳ Obteniendo versión actual…', '');
+
+  // Siempre obtener SHA fresco antes de publicar para evitar el error "sha wasn't supplied"
+  const apiUrl = ghApi();
+  const sha = await fetchCurrentSHA(apiUrl, token);
+
   setGhStatus('⏳ Publicando en GitHub...', '');
   const content = toBase64(JSON.stringify(DATA, null, 2));
   const body = {
@@ -1485,9 +1534,9 @@ async function saveToGitHub() {
     content,
     committer: { name: 'Café Roble', email: 'noreply@caferoble.com' }
   };
-  if (fileSHA) body.sha = fileSHA;
+  if (sha) body.sha = sha;
   try {
-    const res = await fetch(ghApi(), {
+    const res = await fetch(apiUrl, {
       method: 'PUT',
       headers: {
         'Accept': 'application/vnd.github+json',
@@ -1515,6 +1564,16 @@ function setGhStatus(msg, cls) {
   if (!el) return;
   el.textContent = msg;
   el.className = 'gh-status ' + (cls||'');
+}
+
+function ghTokenCheck(val){
+  if(val && val.startsWith('github_')){
+    setGhStatus('🟢 Token válido — "Guardar y Publicar" actualizará todos los dispositivos', 'ok');
+  } else if(val){
+    setGhStatus('🔴 Token inválido — debe comenzar con github_pat_…', 'err');
+  } else {
+    setGhStatus('⚠️ Sin token — los cambios solo se guardan en este dispositivo', '');
+  }
 }
 
 /* ═══════════════════════
@@ -1614,10 +1673,9 @@ function renderInfo() {
 }
 
 /* ═══════════════════════
-   RENDER MENU — MULTI-CATEGORÍA (scroll único)
+   RENDER MENU
 ═══════════════════════ */
 function renderMenu() {
-  // ── Navegación sticky por categoría ──
   const nav = document.getElementById('catNav');
   nav.innerHTML = '';
   DATA.categorias.forEach((cat,i)=>{
@@ -1625,54 +1683,32 @@ function renderMenu() {
     b.className = 'cat-btn'+(i===0?' active':'');
     b.dataset.index = i;
     b.textContent = cat.label;
-    b.addEventListener('click', ()=>scrollToCategory(i));
+    b.addEventListener('click', ()=>goTo(i,true));
     nav.appendChild(b);
   });
-
-  // ── Contenedor único de scroll ──
   const track = document.getElementById('track');
   track.innerHTML = '';
-  // Quitar el slider y usar scroll normal
-  track.style.cssText = 'position:relative;width:100%';
-  const vp = document.getElementById('viewport');
-  vp.style.cssText = 'width:100%;overflow:visible;cursor:default';
-
+  sliderReady = false;
   DATA.categorias.forEach((cat,ci)=>{
-    // Sección por categoría
-    const section = document.createElement('div');
-    section.className = 'cat-section';
-    section.id = 'cat-section-' + ci;
-    section.style.cssText = 'padding:0 0 1.5rem';
-
-    // Encabezado de categoría
-    const heading = document.createElement('div');
-    heading.className = 'cat-section-heading';
-    heading.innerHTML = `<span class="cat-section-label">${e(cat.label)}</span>`;
-    heading.style.cssText = `
-      background:var(--bm);
-      padding:.55rem 1.2rem;
-      font-family:'Playfair Display',serif;
-      font-size:1.05rem;
-      font-weight:700;
-      color:var(--gold);
-      border-left:4px solid var(--gold);
-      display:flex;
-      align-items:center;
-      gap:.5rem;
-      letter-spacing:.03em;
-    `;
-    section.appendChild(heading);
-
-    // Lista de productos
-    const list = document.createElement('div');
-    list.className = 'items-list';
-    list.style.padding = '0 .3rem';
-
-    cat.productos.forEach((p,pi)=>{
-      if(p.disponible === false) return;
+    const panel = document.createElement('div');
+    panel.className = 'slide-panel';
+    const rows = cat.productos.map((p,pi)=>{
       const key = ci+'-'+pi;
       const qty = pedCart[key]||0;
+      // Ocultar productos no disponibles de la carta
+      if(p.disponible === false) return null;
+      // Sin precio → línea divisoria decorativa
+      const esDivisor = !p.precio || !String(p.precio).trim();
       const row = document.createElement('div');
+      if(esDivisor){
+        row.className = 'item-row item-divider';
+        row.innerHTML = `
+          <div style="display:flex;flex-direction:column;align-items:center;gap:.2rem;width:100%">
+            <span class="item-divider-label">${e(p.nombre)}</span>
+            ${p.desc?`<span style="font-size:.68rem;color:rgba(201,168,124,.6);text-align:center;line-height:1.4">${e(p.desc)}</span>`:''}
+          </div>`;
+        return row;
+      }
       row.className = 'item-row';
       row.innerHTML = `
         <div class="item-thumb">
@@ -1699,14 +1735,30 @@ function renderMenu() {
           menuCambiarQty(btn.dataset.key, parseInt(btn.dataset.d));
         });
       });
-      list.appendChild(row);
-    });
-    section.appendChild(list);
-
-    // Galería de la categoría (si tiene)
+      return row;
+    }).filter(Boolean);
+    const list=document.createElement('div'); list.className='items-list';
+    rows.forEach(r=>list.appendChild(r));
+    panel.appendChild(list);
+    // ── Botón "Hacer pedido" al final del panel ──
+    const bottomBtn = document.createElement('div');
+    bottomBtn.style.cssText = 'padding:1.2rem .3rem .5rem;display:flex;justify-content:center;';
+    bottomBtn.innerHTML = `
+      <button onclick="activarPedido()" style="
+        display:flex;align-items:center;gap:.5rem;
+        background:var(--gold);color:var(--bd);
+        border:none;border-radius:12px;
+        padding:.75rem 1.8rem;
+        font-family:'Lato',sans-serif;font-size:.85rem;font-weight:900;
+        letter-spacing:.09em;text-transform:uppercase;
+        cursor:pointer;transition:filter .18s;
+        box-shadow:0 2px 10px rgba(0,0,0,.15);
+      " onmouseover="this.style.filter='brightness(1.08)'" onmouseout="this.style.filter=''">
+        📲&nbsp;&nbsp;HACER PEDIDO
+      </button>`;
+    panel.appendChild(bottomBtn);
     if(cat.galeria?.fotos?.length){
       const gal=document.createElement('div'); gal.className='panel-gal';
-      gal.style.margin='0 1.2rem';
       gal.innerHTML=`<p class="panel-gal-title">${e(cat.galeria.titulo||'')}</p>
         <div class="panel-gal-grid">${cat.galeria.fotos.map((f,fi)=>`
           <div class="pgc" data-ci="${ci}" data-fi="${fi}">
@@ -1717,62 +1769,17 @@ function renderMenu() {
       gal.querySelectorAll('.pgc').forEach(c=>{
         c.addEventListener('click',()=>lbGal(+c.dataset.ci,+c.dataset.fi));
       });
-      section.appendChild(gal);
+      panel.appendChild(gal);
     }
-
-    // Divisor entre categorías
-    const divider = document.createElement('div');
-    divider.style.cssText = 'height:1px;background:var(--bdr);margin:.5rem 1.2rem 0';
-    section.appendChild(divider);
-
-    track.appendChild(section);
+    track.appendChild(panel);
   });
-
-  // ── Activar nav por scroll ──
-  sliderReady = true;
-  setupScrollSpy();
-
-  // Ocultar swipe hint (no aplica en modo scroll)
-  const hint = document.getElementById('swipeHint');
-  if(hint) hint.style.display='none';
-
-  // Ocultar título de sección individual (ya están en cada sección)
-  const secRow = document.getElementById('secTitleRow');
-  if(secRow) secRow.style.display='none';
-
+  currentCat=0; initSlider();
+  // Set initial category label
+  const lbl=document.getElementById('secTitleLabel');
+  if(lbl && DATA?.categorias?.[0]) lbl.textContent=DATA.categorias[0].label;
   updateFloatBadge();
   checkUnavailBtn();
 }
-
-// Scroll suave a una categoría
-function scrollToCategory(ci){
-  const sec = document.getElementById('cat-section-' + ci);
-  if(!sec) return;
-  const offset = document.querySelector('.cat-nav-wrap')?.offsetHeight || 45;
-  const top = sec.getBoundingClientRect().top + window.scrollY - offset - 4;
-  window.scrollTo({ top, behavior:'smooth' });
-}
-
-// Resaltar tab activo según sección visible
-function setupScrollSpy(){
-  if(window._scrollSpyListener) window.removeEventListener('scroll', window._scrollSpyListener);
-  window._scrollSpyListener = ()=>{
-    const navH = document.querySelector('.cat-nav-wrap')?.offsetHeight || 45;
-    let active = 0;
-    DATA.categorias.forEach((_, ci)=>{
-      const sec = document.getElementById('cat-section-' + ci);
-      if(!sec) return;
-      if(sec.getBoundingClientRect().top <= navH + 8) active = ci;
-    });
-    document.querySelectorAll('.cat-btn').forEach((b,i)=>{
-      b.classList.toggle('active', i===active);
-    });
-  };
-  window.addEventListener('scroll', window._scrollSpyListener, { passive:true });
-}
-
-// STUB: goTo para compatibilidad con código existente
-function goTo(i, animate){ scrollToCategory(i); }
 
 /* ═══════════════════════
    LIGHTBOX
@@ -1813,7 +1820,7 @@ function goPage(name){
   const eb=document.getElementById('encargadoBtn');
   if(btn) btn.style.display = name==='admin' ? 'none' : (_doradoTaps>=0&&btn.style.display==='block'?'block':'none');
   if(eb)  eb.style.display  = name==='encargado' ? 'none' : (eb.style.display==='block'?'block':'none');
-  if(name==='menu'){ renderMenu(); try{ const last=parseInt(localStorage.getItem('cafeRoble_lastCat')||'0'); setTimeout(()=>scrollToCategory(last),80); }catch(_){} }
+  if(name==='menu'){ renderMenu(); try{ const last=parseInt(localStorage.getItem('cafeRoble_lastCat')||'0'); setTimeout(()=>goTo(last,false),50); }catch(_){} }
   if(name==='info') renderInfo();
 }
 function goAdmin(){
@@ -1823,15 +1830,65 @@ function goAdmin(){
 }
 
 /* ═══════════════════════
-   SLIDER — reemplazado por scroll multi-categoría
-   Stubs para compatibilidad con código existente
+   SLIDER
 ═══════════════════════ */
 let currentCat=0, sliderReady=false, dragging=false, startX=0, dragDelta=0;
-function getPanels(){ return []; }
+function getPanels(){ return Array.from(document.querySelectorAll('.slide-panel')); }
 function getCatBtns(){ return Array.from(document.querySelectorAll('.cat-btn')); }
-function initSlider(){ sliderReady=true; }
-function layout(delta){}
-function syncH(anim){}
+function initSlider(){
+  if(sliderReady) return; sliderReady=true;
+  const ps=getPanels();
+  ps.forEach(p=>{ p.style.position='absolute'; p.style.top='0'; p.style.left='0'; });
+  layout(0); syncH(false);
+}
+function layout(delta){
+  const vw=document.getElementById('viewport').offsetWidth;
+  getPanels().forEach((p,i)=>{ p.style.transform=`translateX(${(i-currentCat)*vw+delta}px)`; });
+}
+function syncH(anim){
+  const ps=getPanels(); if(!ps[currentCat]) return;
+  const t=document.getElementById('track');
+  t.style.transition=anim?'height .35s cubic-bezier(.25,.46,.45,.94)':'none';
+  t.style.height=ps[currentCat].scrollHeight+'px';
+}
+function goTo(idx,anim){
+  const ps=getPanels(), bs=getCatBtns(), TOTAL=ps.length;
+  idx=Math.max(0,Math.min(TOTAL-1,idx)); currentCat=idx;
+  ps.forEach(p=>{ p.style.transition=anim?'transform .35s cubic-bezier(.25,.46,.45,.94)':'none'; });
+  layout(0); syncH(anim);
+  bs.forEach((b,i)=>b.classList.toggle('active',i===idx));
+  const btn=bs[idx], nav=document.getElementById('catNav');
+  if(btn&&nav) nav.scrollTo({left:Math.max(0,(btn.offsetLeft-52)-(nav.offsetWidth/2-btn.offsetWidth/2)),behavior:'smooth'});
+  document.getElementById('swipeHint').classList.add('hidden');
+  // Update category title label
+  const lbl=document.getElementById('secTitleLabel');
+  if(lbl && DATA?.categorias?.[idx]) lbl.textContent=DATA.categorias[idx].label;
+  try{ localStorage.setItem('cafeRoble_lastCat', idx); }catch(_){}
+}
+const vp=document.getElementById('viewport');
+function gX(ev){ return ev.touches?ev.touches[0].clientX:ev.clientX; }
+function onS(ev){
+  if(ev.target.closest('.item-thumb,.pgc,.pgc-img')) return;
+  dragging=true; startX=gX(ev); dragDelta=0;
+  getPanels().forEach(p=>p.style.transition='none');
+  document.getElementById('track').style.transition='none';
+  vp.classList.add('grabbing');
+}
+function onM(ev){ if(!dragging) return; dragDelta=gX(ev)-startX; layout(dragDelta); }
+function onE(){
+  if(!dragging) return; dragging=false; vp.classList.remove('grabbing');
+  const thr=vp.offsetWidth*.2, TOTAL=getPanels().length;
+  if(dragDelta<-thr&&currentCat<TOTAL-1) goTo(currentCat+1,true);
+  else if(dragDelta>thr&&currentCat>0)   goTo(currentCat-1,true);
+  else                                    goTo(currentCat,true);
+}
+vp.addEventListener('mousedown',onS);
+window.addEventListener('mousemove',onM);
+window.addEventListener('mouseup',onE);
+vp.addEventListener('touchstart',onS,{passive:true});
+vp.addEventListener('touchmove',onM,{passive:true});
+vp.addEventListener('touchend',onE);
+window.addEventListener('resize',()=>{ if(sliderReady){layout(0);syncH(false);} });
 
 /* ═══════════════════════
    IMAGE CROPPER
@@ -2493,10 +2550,17 @@ function moveProd(ci, pi, dir){
 }
 
 /* apply / github / export / import */
-function admApply(){
+async function admApply(){
   localStorage.setItem('cafeRoble_v3', JSON.stringify(DATA));
   renderMenu(); renderInfo(); checkUnavailBtn(); buildRepartoSelect();
-  toast('✔ Cambios guardados localmente','ok');
+  const token = document.getElementById('ghToken')?.value.trim();
+  if(token && token.startsWith('github_')){
+    toast('Guardando en GitHub…','');
+    const ok = await saveToGitHub();
+    if(ok) toast('Guardado y publicado en GitHub','ok');
+  } else {
+    toast('Solo local — agrega token GitHub para publicar','warn');
+  }
 }
 
 async function admSaveGitHub(){
@@ -2504,8 +2568,43 @@ async function admSaveGitHub(){
   if(ok){
     localStorage.setItem('cafeRoble_v3',JSON.stringify(DATA));
     renderMenu(); renderInfo(); checkUnavailBtn();
-    toast('☁ Carta publicada en GitHub Pages','ok');
+    toast('Carta publicada en GitHub','ok');
   }
+}
+
+async function admResetYRecargar(){
+  if(!confirm('¿Borrar datos locales y cargar todo desde GitHub?\n\nEsto reemplazará lo que ves ahora con la versión guardada en el repositorio.')) return;
+
+  const token = document.getElementById('ghToken')?.value.trim();
+  const apiUrl = ghApi();
+
+  showLoad(true);
+  setGhStatus('⏳ Cargando desde GitHub…', '');
+
+  try {
+    const headers = { 'Accept': 'application/vnd.github+json' };
+    if(token && token.startsWith('github_')) headers['Authorization'] = 'Bearer ' + token;
+
+    const res = await fetch(apiUrl, { headers });
+    if(!res.ok) throw new Error('HTTP ' + res.status + ' — ¿el repo existe y el archivo menu-data.json está publicado?');
+    const json = await res.json();
+    fileSHA = json.sha;
+    const remoteData = JSON.parse(fromBase64(json.content));
+
+    // Borrar localStorage y guardar los datos de GitHub
+    localStorage.removeItem('cafeRoble_v3');
+    localStorage.removeItem('cafeRoble_theme');
+    DATA = remoteData;
+    localStorage.setItem('cafeRoble_v3', JSON.stringify(DATA));
+
+    renderMenu(); renderInfo(); checkUnavailBtn(); buildAdmin();
+    setGhStatus('✅ Datos cargados desde GitHub — localStorage actualizado', 'ok');
+    toast('✅ Datos frescos de GitHub cargados', 'ok');
+  } catch(err) {
+    setGhStatus('❌ ' + err.message, 'err');
+    toast('Error: ' + err.message, 'err');
+  }
+  showLoad(false);
 }
 
 function admExport(){
@@ -3088,30 +3187,64 @@ function renderPedProds(){
     list.innerHTML = '<p style="color:var(--muted);font-size:.8rem;padding:.5rem">Sin productos en esta categoría.</p>';
     return;
   }
-  let hayProductos = false;
-  cat.productos.forEach((p,pi)=>{
-    // Ocultar no disponibles siempre
-    if(p.disponible === false) return;
-    // Ocultar "solo local" cuando el modo es domicilio
-    if(pedMode === 'domicilio' && p.noDomicilio) return;
-    hayProductos = true;
-    const key = pedActiveCat+'-'+pi;
-    const qty = pedCart[key]||0;
-    // Si ya está en el carrito, no lo mostramos aquí (aparece arriba en Tu pedido)
-    if(qty > 0) return;
-    const row = document.createElement('div');
-    row.className = 'ped-prod-row';
-    row.innerHTML = `
-      <img class="ped-prod-img" src="${e(p.img||'')}" alt="${e(p.nombre||'')}" onerror="this.style.display='none'">
-      <div class="ped-prod-info">
-        <p class="ped-prod-name">${e(p.nombre||'')} </p>
-        <p class="ped-prod-unitario"><strong>${e(p.precio||"")}</strong></p>
-      </div>
-      <div class="ped-qty" style="flex-direction:column;width:40px;align-self:stretch;border:1.5px solid var(--gold);border-radius:0;overflow:hidden;gap:0;flex-shrink:0">
-        <button class="ped-qty-btn" onclick="cambiarQty('${key}',1)">+</button>
-      </div>`;
-    list.appendChild(row);
+
+  // Agrupar productos en secciones: cada separador (sin precio) encabeza un grupo
+  // Un grupo sin separador previo se llama grupo "sin encabezado"
+  const grupos = []; // [{separador: p|null, items: [{p, pi}]}]
+  let grupoActual = { separador: null, items: [] };
+  cat.productos.forEach((p, pi) => {
+    const esDivisor = !p.precio || !String(p.precio).trim();
+    if(esDivisor){
+      // Guardar grupo anterior si tiene items
+      if(grupoActual.items.length > 0 || grupoActual.separador) grupos.push(grupoActual);
+      grupoActual = { separador: { p, pi }, items: [] };
+    } else {
+      grupoActual.items.push({ p, pi });
+    }
   });
+  if(grupoActual.items.length > 0 || grupoActual.separador) grupos.push(grupoActual);
+
+  let hayProductos = false;
+
+  grupos.forEach(grupo => {
+    // Filtrar items visibles en este grupo
+    const itemsVisibles = grupo.items.filter(({p, pi}) => {
+      if(p.disponible === false) return false;
+      if(pedMode === 'domicilio' && p.noDomicilio) return false;
+      const key = pedActiveCat+'-'+pi;
+      const qty = pedCart[key]||0;
+      return qty === 0; // los que ya están en carrito no se muestran aquí
+    });
+
+    // Solo mostrar separador si hay items visibles debajo de él
+    if(grupo.separador && itemsVisibles.length > 0){
+      const sep = document.createElement('div');
+      sep.className = 'ped-separator';
+      sep.innerHTML = `<span class="ped-separator-label">${e(grupo.separador.p.nombre||'')}</span>`;
+      if(grupo.separador.p.desc){
+        sep.innerHTML += `<span class="ped-separator-desc">${e(grupo.separador.p.desc)}</span>`;
+      }
+      list.appendChild(sep);
+    }
+
+    itemsVisibles.forEach(({p, pi}) => {
+      hayProductos = true;
+      const key = pedActiveCat+'-'+pi;
+      const row = document.createElement('div');
+      row.className = 'ped-prod-row';
+      row.innerHTML = `
+        <img class="ped-prod-img" src="${e(p.img||'')}" alt="${e(p.nombre||'')}" onerror="this.style.display='none'">
+        <div class="ped-prod-info">
+          <p class="ped-prod-name">${e(p.nombre||'')}</p>
+          <p class="ped-prod-unitario"><strong>${e(p.precio||"")}</strong></p>
+        </div>
+        <div class="ped-qty" style="flex-direction:column;width:40px;align-self:stretch;border:1.5px solid var(--gold);border-radius:0;overflow:hidden;gap:0;flex-shrink:0">
+          <button class="ped-qty-btn" onclick="cambiarQty('${key}',1)">+</button>
+        </div>`;
+      list.appendChild(row);
+    });
+  });
+
   if(!hayProductos){
     list.innerHTML = '<p style="color:var(--muted);font-size:.8rem;padding:.5rem">No hay productos disponibles para esta modalidad.</p>';
   }
@@ -3142,30 +3275,83 @@ function renderPedCart(){
     return;
   }
   let total = 0;
-  const items = keys.map(key=>{
+
+  // Construir mapa de separadores: para cada key de carrito, cuál separador le corresponde
+  // Un separador es el último producto-sin-precio que aparece antes del producto en su categoría
+  function getSeparadorParaItem(ci, pi){
+    const cat = DATA.categorias[ci];
+    if(!cat) return null;
+    let sepActual = null;
+    for(let i=0; i<=pi; i++){
+      const p = cat.productos[i];
+      if(!p) break;
+      const esDivisor = !p.precio || !String(p.precio).trim();
+      if(esDivisor) sepActual = p;
+    }
+    return sepActual;
+  }
+
+  // Agrupar keys del carrito por separador (usar nombre del separador como key del grupo)
+  // Mantener orden de aparición en el catálogo
+  const gruposCart = []; // [{sepNombre, sepDesc, items:[{key,ci,pi,p,qty}]}]
+  const grupoMap = {}; // sepNombre → índice en gruposCart
+
+  // Ordenar keys por ci y luego pi para respetar orden del catálogo
+  const keysSorted = keys.slice().sort((a,b)=>{
+    const [aci,api] = a.split('-').map(Number);
+    const [bci,bpi] = b.split('-').map(Number);
+    if(aci !== bci) return aci - bci;
+    return api - bpi;
+  });
+
+  keysSorted.forEach(key => {
     const [ci,pi] = key.split('-').map(Number);
     const p = DATA.categorias[ci]?.productos[pi];
-    if(!p) return '';
+    if(!p) return;
     const qty = pedCart[key];
     const priceNum = parsePrecio(p.precio);
     const sub = priceNum * qty;
     total += sub;
-    return `<div class="ped-cart-item">
-      <div style="flex:1;min-width:0">
-        <span class="ped-cart-name">${e(p.nombre)}</span>
-        <span style="display:block;font-size:.85rem;color:var(--muted);margin-top:1px"><strong style="color:var(--bl)">${priceNum>0?formatPrecio(priceNum):e(p.precio||"")}</strong></span>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:1px;flex-shrink:0;margin-right:4px">
-        <span style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--gold);line-height:1.2">${priceNum>0?formatPrecio(sub):''}</span>
-      </div>
-      <div class="ped-cart-qty-ctrl">
-        <button class="ped-cart-qbtn" style="border-bottom:1px solid rgba(0,0,0,.15)" onclick="cartCambiarQty('${key}',1)">+</button>
-        <button class="ped-cart-qbtn" onclick="cartCambiarQty('${key}',-1)">−</button>
-      </div>
-      <span class="ped-cart-qval" style="display:flex;align-items:center;justify-content:center">${qty}</span>
-      <button class="ped-cart-del" onclick="eliminarDelCart('${key}')">✕</button>
-    </div>`;
-  }).join('');
+
+    const sep = getSeparadorParaItem(ci, pi);
+    const sepKey = sep ? sep.nombre : '__sin_sep__';
+
+    if(!(sepKey in grupoMap)){
+      grupoMap[sepKey] = gruposCart.length;
+      gruposCart.push({ sepNombre: sep ? sep.nombre : null, sepDesc: sep ? sep.desc : null, items: [] });
+    }
+    gruposCart[grupoMap[sepKey]].items.push({ key, ci, pi, p, qty, priceNum, sub });
+  });
+
+  // Renderizar grupos
+  let html = '';
+  gruposCart.forEach(grupo => {
+    // Mostrar separador solo si tiene items
+    if(grupo.sepNombre){
+      html += `<div class="ped-cart-separator">
+        <span class="ped-cart-separator-label">${e(grupo.sepNombre)}</span>
+        ${grupo.sepDesc ? `<span class="ped-cart-separator-desc">${e(grupo.sepDesc)}</span>` : ''}
+      </div>`;
+    }
+    grupo.items.forEach(({key, p, qty, priceNum, sub}) => {
+      html += `<div class="ped-cart-item">
+        <div style="flex:1;min-width:0">
+          <span class="ped-cart-name">${e(p.nombre)}</span>
+          <span style="display:block;font-size:.85rem;color:var(--muted);margin-top:1px"><strong style="color:var(--bl)">${priceNum>0?formatPrecio(priceNum):e(p.precio||"")}</strong></span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:1px;flex-shrink:0;margin-right:4px">
+          <span style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--gold);line-height:1.2">${priceNum>0?formatPrecio(sub):''}</span>
+        </div>
+        <div class="ped-cart-qty-ctrl">
+          <button class="ped-cart-qbtn" style="border-bottom:1px solid rgba(0,0,0,.15)" onclick="cartCambiarQty('${key}',1)">+</button>
+          <button class="ped-cart-qbtn" onclick="cartCambiarQty('${key}',-1)">−</button>
+        </div>
+        <span class="ped-cart-qval" style="display:flex;align-items:center;justify-content:center">${qty}</span>
+        <button class="ped-cart-del" onclick="eliminarDelCart('${key}')">✕</button>
+      </div>`;
+    });
+  });
+
   let resumen = '';
   if(pedMode === 'domicilio'){
     const rval = (document.getElementById('domReparto')?.value || '');
@@ -3196,7 +3382,7 @@ function renderPedCart(){
       <span class="ped-cart-total-val">${total > 0 ? formatPrecio(total) : '—'}</span>
     </div>`;
   }
-  box.innerHTML = items + resumen;
+  box.innerHTML = html + resumen;
 }
 
 function cartCambiarQty(key, delta){
@@ -3883,15 +4069,25 @@ function buildEncargado(){
       const row = document.createElement('div');
       row.className = 'enc-prod-row';
       const disp = p.disponible !== false;
-      row.innerHTML = `
-        <div style="flex:1">
-          <div class="enc-prod-name">${e(p.nombre)}</div>
-          <div class="enc-prod-desc">${e(p.desc||'')}</div>
-        </div>
-        <label class="enc-toggle" title="${disp?'Disponible — click para ocultar':'No disponible — click para mostrar'}">
-          <input type="checkbox" ${disp?'checked':''} data-ci="${ci}" data-pi="${pi}" onchange="encToggle(this)">
-          <span class="enc-toggle-track"><span class="enc-toggle-thumb"></span></span>
-        </label>`;
+      // Artículo divisor (sin precio) → solo mostrar etiqueta, sin toggle
+      const esDivisor = !p.precio || !String(p.precio).trim();
+      if(esDivisor){
+        row.innerHTML = `
+          <div style="flex:1">
+            <div class="enc-prod-name" style="color:var(--muted);font-style:italic;font-size:.78rem">— ${e(p.nombre)} —</div>
+            <div class="enc-prod-desc">Divisor de sección</div>
+          </div>`;
+      } else {
+        row.innerHTML = `
+          <div style="flex:1">
+            <div class="enc-prod-name">${e(p.nombre)}</div>
+            <div class="enc-prod-desc">${e(p.desc||'')}</div>
+          </div>
+          <label class="enc-toggle" title="${disp?'Disponible — click para ocultar':'No disponible — click para mostrar'}">
+            <input type="checkbox" ${disp?'checked':''} data-ci="${ci}" data-pi="${pi}" onchange="encToggle(this)">
+            <span class="enc-toggle-track"><span class="enc-toggle-thumb"></span></span>
+          </label>`;
+      }
       card.appendChild(row);
     });
     wrap.appendChild(card);
@@ -3920,6 +4116,12 @@ async function encGuardar(){
   }
 
   btn.disabled = true;
+  statusEl.textContent = '⏳ Verificando versión actual…';
+
+  // Obtener SHA fresco con el token del encargado
+  const apiUrl = ghApi();
+  const sha = await fetchCurrentSHA(apiUrl, token);
+
   statusEl.textContent = '⏳ Publicando…';
 
   const content = toBase64(JSON.stringify(DATA, null, 2));
@@ -3928,10 +4130,10 @@ async function encGuardar(){
     content,
     committer:{ name:'Encargado', email:'encargado@caferoble.com' }
   };
-  if(fileSHA) body.sha = fileSHA;
+  if(sha) body.sha = sha;
 
   try{
-    const res = await fetch(ghApi(), {
+    const res = await fetch(apiUrl, {
       method:'PUT',
       headers:{
         'Accept':'application/vnd.github+json',
