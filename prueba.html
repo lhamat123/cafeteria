@@ -3249,15 +3249,19 @@ function buildPedCatNav(){
   if(!nav) return;
   nav.innerHTML = '';
 
-  // Si la categoría activa ya no tiene elegibles, buscar la primera que sí tenga
+  // Si la categoría activa ya no tiene elegibles, saltar a la siguiente que sí tenga
   if(!catTieneElegibles(pedActiveCat)){
-    const primera = DATA.categorias.findIndex((_,i)=>catTieneElegibles(i));
-    if(primera >= 0) pedActiveCat = primera;
+    const siguiente = DATA.categorias.findIndex((_,i)=>catTieneElegibles(i));
+    if(siguiente >= 0 && siguiente !== pedActiveCat){
+      pedActiveCat = siguiente;
+      // Actualizar lista inmediatamente con la nueva categoría
+      renderPedProds();
+    }
   }
 
   let alguna = false;
   DATA.categorias.forEach((cat,i)=>{
-    if(!catTieneElegibles(i)) return; // ocultar si no hay nada que elegir
+    if(!catTieneElegibles(i)) return;
     alguna = true;
     const btn = document.createElement('button');
     btn.className = 'ped-cat-btn'+(i===pedActiveCat?' active':'');
@@ -3271,6 +3275,10 @@ function buildPedCatNav(){
     };
     nav.appendChild(btn);
   });
+
+  // Scroll al botón activo
+  const activeBtn = nav.querySelector('.ped-cat-btn.active');
+  if(activeBtn) activeBtn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
 
   // Ocultar toda la sección si no hay ninguna categoría con elegibles
   const seccion = document.getElementById('pedEligeSec');
