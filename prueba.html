@@ -1231,6 +1231,10 @@
           <span style="font-size:1.6rem">📷</span>
           <span>Escanear QR de la mesa</span>
         </button>
+        <p style="margin-top:.75rem;font-size:.68rem;color:var(--muted);text-align:center;line-height:1.6;font-family:'Space Mono',monospace;">
+          ⚠️ Si la cámara no funciona, cierra esta página y escanea el QR de la mesa con la cámara de tu teléfono.<br>
+          <span style="color:var(--gold);font-weight:700;">Tu selección del menú no se perderá.</span>
+        </p>
       </div>
       <!-- Escáner QR modal -->
       <div id="qrScanOverlay" style="display:none">
@@ -1245,6 +1249,9 @@
           </div>
           <p class="qr-scan-status" id="qrScanStatus">Iniciando cámara...</p>
           <canvas id="qrCanvas" style="display:none"></canvas>
+          <p style="padding:.5rem 1rem .75rem;font-size:.65rem;color:rgba(232,184,109,.55);text-align:center;line-height:1.6;font-family:'Space Mono',monospace;">
+            ¿No funciona la cámara? Cierra esta página y escanea el QR con la cámara de tu teléfono — tu selección del menú se conservará.
+          </p>
         </div>
       </div>
     </div>
@@ -2752,15 +2759,33 @@ function loadCart(){
 /* ── Persistencia mesa QR ── */
 function saveMesa(num){
   try{
-    if(num) localStorage.setItem(MESA_KEY, String(num));
-    else localStorage.removeItem(MESA_KEY);
+    if(num){
+      const data = { mesa: num, ts: Date.now() };
+      localStorage.setItem(MESA_KEY, JSON.stringify(data));
+    } else {
+      localStorage.removeItem(MESA_KEY);
+    }
   }catch(_){}
 }
 function loadMesa(){
   try{
     const raw = localStorage.getItem(MESA_KEY);
-    const n = parseInt(raw);
-    return (!isNaN(n) && n > 0) ? n : null;
+    if(!raw) return null;
+    // Soporte formato antiguo (solo número)
+    if(!raw.startsWith('{')){ 
+      const n = parseInt(raw);
+      return (!isNaN(n) && n > 0) ? n : null;
+    }
+    const data = JSON.parse(raw);
+    const n = parseInt(data.mesa);
+    if(isNaN(n) || n <= 0) return null;
+    // Expirar después de 3 horas
+    const TRES_HORAS = 3 * 60 * 60 * 1000;
+    if(Date.now() - data.ts > TRES_HORAS){
+      localStorage.removeItem(MESA_KEY);
+      return null;
+    }
+    return n;
   }catch(_){ return null; }
 }
 
