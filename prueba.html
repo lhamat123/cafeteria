@@ -776,6 +776,39 @@
     font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:all .15s}
   .ped-cat-btn.active,.ped-cat-btn:hover{background:var(--gold);color:var(--bd);border-color:var(--gold)}
   .ped-prod-list{display:flex;flex-direction:column;gap:.4rem}
+
+  /* ── Divisor en "Elige tus productos" ── */
+  .ped-prod-divider{
+    background:var(--bm);padding:.4rem 1rem;margin:0 -.05rem;
+    display:flex;flex-direction:column;align-items:center;gap:.15rem;
+    border-radius:0;
+  }
+  .ped-prod-divider-label{
+    font-family:'Bebas Neue',sans-serif;font-size:.78rem;letter-spacing:.14em;
+    color:var(--gold);text-transform:uppercase;text-align:center;
+    display:flex;align-items:center;gap:.5rem;width:100%;
+  }
+  .ped-prod-divider-label::before,.ped-prod-divider-label::after{
+    content:'';flex:1;height:1px;background:rgba(232,184,109,.3);
+  }
+  .ped-prod-divider-desc{
+    font-size:.65rem;color:rgba(232,184,109,.6);text-align:center;line-height:1.4;
+    font-family:'Space Mono',monospace;
+  }
+
+  /* ── Divisor en el carrito ── */
+  .ped-cart-divider{
+    background:var(--bm);padding:.35rem 1rem;
+    display:flex;align-items:center;
+  }
+  .ped-cart-divider-label{
+    font-family:'Bebas Neue',sans-serif;font-size:.72rem;letter-spacing:.12em;
+    color:var(--gold);text-transform:uppercase;text-align:center;
+    display:flex;align-items:center;gap:.5rem;width:100%;
+  }
+  .ped-cart-divider-label::before,.ped-cart-divider-label::after{
+    content:'';flex:1;height:1px;background:rgba(232,184,109,.3);
+  }
   .ped-prod-row{display:flex;align-items:center;gap:.75rem;padding:.6rem .4rem;
     border-radius:0;border:2px solid var(--bdr);background:var(--card);transition:border-color .15s}
   .ped-prod-row:hover{border-color:var(--gold)}
@@ -786,12 +819,37 @@
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .ped-prod-price{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.04em;color:var(--rust)}
   .ped-qty{display:flex;align-items:center;gap:.3rem;flex-shrink:0}
-  .ped-qty-btn{width:28px;height:28px;border-radius:0;border:2px solid var(--gold);
+  /* Solo el + por defecto */
+  .ped-qty-btn.minus{ display:none; }
+  .ped-qty-val{ display:none; font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.04em;
+    color:var(--text);min-width:20px;text-align:center }
+  /* Cuando tiene qty activa */
+  .ped-prod-row.has-qty .ped-qty-btn.minus{ display:flex; }
+  .ped-prod-row.has-qty .ped-qty-val{ display:block; }
+  /* Control de qty arriba (dentro de la info) cuando hay selección */
+  .ped-qty-top{
+    display:none;align-items:center;gap:.3rem;margin-bottom:.25rem;
+  }
+  .ped-prod-row.has-qty .ped-qty-top{ display:flex; }
+  .ped-prod-row.has-qty .ped-qty-bottom{ display:none; }
+  .ped-qty-top-btn{
+    width:24px;height:24px;border-radius:0;border:2px solid var(--gold);
+    background:transparent;color:var(--gold);font-size:.9rem;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:all .15s;line-height:1;
+    clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,0 100%);
+  }
+  .ped-qty-top-btn:hover{background:var(--gold);color:var(--bd)}
+  .ped-qty-top-val{
+    font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.04em;
+    color:var(--gold);min-width:18px;text-align:center;
+  }
+  .ped-qty-btn{
+    width:28px;height:28px;border-radius:0;border:2px solid var(--gold);
     background:transparent;color:var(--gold);font-size:1rem;font-weight:700;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;transition:all .15s;line-height:1}
+    display:flex;align-items:center;justify-content:center;transition:all .15s;line-height:1;
+    clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,0 100%);
+  }
   .ped-qty-btn:hover{background:var(--gold);color:var(--bd)}
-  .ped-qty-val{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.04em;
-    color:var(--text);min-width:20px;text-align:center}
   /* cart summary */
   .ped-cart{background:var(--card);border:2px solid var(--bdr);border-radius:0;overflow:hidden}
   .ped-cart-empty{padding:1.4rem;text-align:center;color:var(--muted);font-size:.82rem;font-style:italic;font-family:'DM Serif Display',serif}
@@ -3202,50 +3260,119 @@ function renderPedProds(){
     list.innerHTML = '<p style="color:var(--muted);font-size:.8rem;padding:.5rem">Sin productos en esta categoría.</p>';
     return;
   }
+
+  // Pre-calcular qué productos son visibles para saber si el acápite siguiente tiene contenido
+  const visibles = cat.productos.map((p,pi)=>{
+    if(p.disponible === false) return false;
+    if(!p.precio || !String(p.precio).trim()) return false; // divisor
+    if(pedMode === 'domicilio' && p.noDomicilio) return false;
+    return true;
+  });
+
   let hayProductos = false;
+  let pendingDivisor = null; // acápite en espera de confirmar que hay producto visible después
+
   cat.productos.forEach((p,pi)=>{
-    // Ocultar no disponibles siempre
     if(p.disponible === false) return;
-    // Ocultar artículos divisores (sin precio) de la página de pedido
-    if(!p.precio || !String(p.precio).trim()) return;
-    // Ocultar "solo local" cuando el modo es domicilio
+    const esDivisor = !p.precio || !String(p.precio).trim();
+
+    if(esDivisor){
+      // Buscar si hay al menos un producto visible después de este índice
+      const hayDespues = visibles.slice(pi+1).some(Boolean);
+      if(hayDespues){
+        pendingDivisor = p; // guardar para insertar antes del primer producto siguiente
+      }
+      return;
+    }
+
     if(pedMode === 'domicilio' && p.noDomicilio) return;
+
+    // Hay un producto visible — insertar divisor pendiente si existe
+    if(pendingDivisor){
+      const div = document.createElement('div');
+      div.className = 'ped-prod-divider';
+      div.innerHTML = `
+        <div class="ped-prod-divider-label">${e(pendingDivisor.nombre)}</div>
+        ${pendingDivisor.desc?`<div class="ped-prod-divider-desc">${e(pendingDivisor.desc)}</div>`:''}`;
+      list.appendChild(div);
+      pendingDivisor = null;
+    }
+
     hayProductos = true;
     const key = pedActiveCat+'-'+pi;
     const qty = pedCart[key]||0;
     const row = document.createElement('div');
-    row.className = 'ped-prod-row';
+    row.className = 'ped-prod-row' + (qty > 0 ? ' has-qty' : '');
+    row.id = 'ped-row-'+key;
     row.innerHTML = `
       <img class="ped-prod-img" src="${e(p.img||'')}" alt="${e(p.nombre||'')}" onerror="this.style.display='none'">
       <div class="ped-prod-info">
+        <div class="ped-qty-top">
+          <button class="ped-qty-top-btn" onclick="pedProdQty('${key}',-1)">−</button>
+          <span class="ped-qty-top-val" id="qtyt-${key}">${qty||''}</span>
+          <button class="ped-qty-top-btn" onclick="pedProdQty('${key}',1)">+</button>
+        </div>
         <p class="ped-prod-name">${e(p.nombre||'')}</p>
         <p class="ped-prod-price">${e(p.precio||'')}</p>
       </div>
-      <div class="ped-qty">
-        <button class="ped-qty-btn" onclick="cambiarQty('${key}',-1)">−</button>
-        <span class="ped-qty-val" id="qty-${key}">${qty}</span>
-        <button class="ped-qty-btn" onclick="cambiarQty('${key}',1)">+</button>
+      <div class="ped-qty ped-qty-bottom">
+        <button class="ped-qty-btn" onclick="pedProdQty('${key}',1)">+</button>
       </div>`;
     list.appendChild(row);
   });
   if(!hayProductos){
     list.innerHTML = '<p style="color:var(--muted);font-size:.8rem;padding:.5rem">No hay productos disponibles para esta modalidad.</p>';
   }
+  // Ocultar acápites sin productos con qty en su grupo
+  actualizarDivisoresPedProds();
 }
 
-/* ── qty desde página de pedido ── */
-function cambiarQty(key, delta){
+/* ── qty desde página de pedido (nuevo UI) ── */
+function pedProdQty(key, delta){
   pedCart[key] = Math.max(0, (pedCart[key]||0) + delta);
   if(pedCart[key]===0) delete pedCart[key];
   saveCart();
-  const el = document.getElementById('qty-'+key);
-  if(el) el.textContent = pedCart[key]||0;
-  // sync menu view if visible
+
+  // Actualizar fila
+  const row = document.getElementById('ped-row-'+key);
+  if(row){
+    const qty = pedCart[key]||0;
+    row.classList.toggle('has-qty', qty > 0);
+    const topVal = document.getElementById('qtyt-'+key);
+    if(topVal) topVal.textContent = qty||'';
+  }
+
+  // Sincronizar con la carta
   const mel = document.getElementById('miqv-'+key);
   if(mel){ mel.textContent = pedCart[key]||''; }
+
+  // Actualizar visibilidad de acápites en la lista de productos
+  actualizarDivisoresPedProds();
+
   renderPedCart();
   updateSendBtn();
+  updateFloatBadge();
 }
+
+/* Muestra/oculta los acápites de la lista de productos según si su grupo tiene qty > 0 */
+function actualizarDivisoresPedProds(){
+  const list = document.getElementById('pedProdList');
+  if(!list) return;
+  const dividers = list.querySelectorAll('.ped-prod-divider');
+  dividers.forEach(div=>{
+    // El siguiente sibling visible es el primer ped-prod-row del grupo
+    let next = div.nextElementSibling;
+    let grupoTieneQty = false;
+    while(next && !next.classList.contains('ped-prod-divider')){
+      if(next.classList.contains('has-qty')){ grupoTieneQty = true; break; }
+      next = next.nextElementSibling;
+    }
+    div.style.display = grupoTieneQty ? '' : 'none';
+  });
+}
+
+/* ── qty desde página de pedido (legacy, keep for compat) ── */
+function cambiarQty(key, delta){ pedProdQty(key, delta); }
 
 /* ── Carrito ── */
 function renderPedCart(){
@@ -3257,33 +3384,61 @@ function renderPedCart(){
     return;
   }
   let total = 0;
-  const items = keys.map(key=>{
-    const [ci,pi] = key.split('-').map(Number);
-    const p = DATA.categorias[ci]?.productos[pi];
-    if(!p){ return ''; } // producto eliminado — ignorar
-    const qty = pedCart[key];
-    // Siempre usar el precio actual de la carta
-    const priceNum = parsePrecio(p.precio);
-    const sub = priceNum * qty;
-    total += sub;
-    return `<div class="ped-cart-item">
-      <span class="ped-cart-name">${e(p.nombre)}</span>
-      <span class="ped-cart-sub">${priceNum>0?formatPrecio(sub):''}</span>
-      <div class="ped-cart-qty-ctrl">
-        <button class="ped-cart-qbtn" onclick="cartCambiarQty('${key}',-1)">−</button>
-        <span class="ped-cart-qval">${qty}</span>
-        <button class="ped-cart-qbtn" onclick="cartCambiarQty('${key}',1)">+</button>
-      </div>
-      <button class="ped-cart-del" onclick="eliminarDelCart('${key}')">✕</button>
-    </div>`;
-  }).join('');
+
+  // Construir mapa de items en carrito por categoría para lookup rápido
+  const cartSet = new Set(keys);
+
+  let html = '';
+  // Iterar todas las categorías y sus productos para respetar el orden y los acápites
+  DATA.categorias.forEach((cat, ci)=>{
+    let pendingDivisor = null;
+    cat.productos.forEach((p, pi)=>{
+      const key = ci+'-'+pi;
+      const esDivisor = !p.precio || !String(p.precio).trim();
+      if(esDivisor){
+        // Guardar acápite y verificar si hay algún producto de su grupo en el carrito
+        const hayEnCarritoDespues = cat.productos.slice(pi+1).some((pp, offset)=>{
+          const esDivNext = !pp.precio || !String(pp.precio).trim();
+          if(esDivNext) return false; // no cruzar siguiente acápite
+          return cartSet.has(ci+'-'+(pi+1+offset));
+        });
+        pendingDivisor = hayEnCarritoDespues ? p : null;
+        return;
+      }
+      if(!cartSet.has(key)) return;
+      const qty = pedCart[key];
+      if(!qty) return;
+
+      // Insertar acápite pendiente antes del primer item de su grupo
+      if(pendingDivisor){
+        html += `<div class="ped-cart-divider">
+          <span class="ped-cart-divider-label">${e(pendingDivisor.nombre)}</span>
+        </div>`;
+        pendingDivisor = null;
+      }
+
+      const priceNum = parsePrecio(p.precio);
+      const sub = priceNum * qty;
+      total += sub;
+      html += `<div class="ped-cart-item">
+        <span class="ped-cart-name">${e(p.nombre)}</span>
+        <span class="ped-cart-sub">${priceNum>0?formatPrecio(sub):''}</span>
+        <div class="ped-cart-qty-ctrl">
+          <button class="ped-cart-qbtn" onclick="cartCambiarQty('${key}',-1)">−</button>
+          <span class="ped-cart-qval">${qty}</span>
+          <button class="ped-cart-qbtn" onclick="cartCambiarQty('${key}',1)">+</button>
+        </div>
+        <button class="ped-cart-del" onclick="eliminarDelCart('${key}')">✕</button>
+      </div>`;
+    });
+  });
+
   // Desglose para domicilio
   let resumen = '';
   if(pedMode === 'domicilio'){
     const rval = (document.getElementById('domReparto')?.value || '');
     const parts = rval.split('||');
     const zonaLabel = parts[0] || '';
-    const anilloLabel = parts[1] || '';
     const precioEnvio = parts[2] ? parsePrecio(parts[2]) : 0;
     const precioEnvioStr = parts[2] || '';
     const totalFinal = total + precioEnvio;
@@ -3308,7 +3463,7 @@ function renderPedCart(){
       <span class="ped-cart-total-val">${total > 0 ? formatPrecio(total) : '—'}</span>
     </div>`;
   }
-  box.innerHTML = items + resumen;
+  box.innerHTML = html + resumen;
 }
 
 function cartCambiarQty(key, delta){
