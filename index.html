@@ -880,11 +880,95 @@
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <!-- ═══ PWA META TAGS ═══ -->
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Carta"/>
+  <meta name="application-name" content="Carta"/>
+  <meta name="theme-color" content="#2C1A0E"/>
+  <link id="pwa-manifest" rel="manifest" href="#"/>
+  <!-- Apple touch icons — se sobreescriben dinámicamente desde el banner -->
+  <link id="apple-touch-icon" rel="apple-touch-icon" sizes="180x180" href=""/>
+  <link id="apple-touch-icon-152" rel="apple-touch-icon" sizes="152x152" href=""/>
+  <link id="apple-touch-icon-120" rel="apple-touch-icon" sizes="120x120" href=""/>
+  <link id="favicon-32" rel="icon" type="image/png" sizes="32x32" href=""/>
+  <link id="favicon-16" rel="icon" type="image/png" sizes="16x16" href=""/>
+
+  <!-- ═══ MODAL INSTALAR APP ═══ -->
+  <style>
+  #pwaInstallModal{
+    position:fixed;inset:0;z-index:9500;
+    background:rgba(0,0,0,.55);
+    display:none;align-items:flex-end;justify-content:center;
+  }
+  #pwaInstallModal.open{display:flex}
+  .pwa-box{
+    background:var(--cs);border-radius:20px 20px 0 0;
+    width:100%;max-width:480px;
+    padding-bottom:env(safe-area-inset-bottom,16px);
+    box-shadow:0 -4px 40px rgba(0,0,0,.4);
+    animation:slideUp .28s ease;overflow:hidden;
+  }
+  .pwa-handle{width:40px;height:4px;border-radius:2px;background:rgba(0,0,0,.15);margin:10px auto 0}
+  .pwa-head{background:var(--bd);padding:.85rem 1.1rem .75rem;display:flex;align-items:center;gap:.75rem}
+  .pwa-icon-wrap{width:52px;height:52px;border-radius:12px;overflow:hidden;flex-shrink:0;background:var(--bm);display:flex;align-items:center;justify-content:center}
+  .pwa-icon-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+  .pwa-head-txt{flex:1}
+  .pwa-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--cream);line-height:1.2}
+  .pwa-sub{font-size:.68rem;color:var(--gold);margin-top:2px}
+  .pwa-body{padding:.9rem 1.1rem 1rem}
+  .pwa-msg{font-size:.83rem;color:var(--text);line-height:1.65;margin-bottom:.9rem}
+  .pwa-benefits{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1rem}
+  .pwa-benefit{display:flex;align-items:center;gap:.55rem;font-size:.79rem;color:var(--text)}
+  .pwa-benefit-icon{font-size:1rem;flex-shrink:0}
+  .pwa-actions{display:flex;flex-direction:column;gap:.5rem}
+  .pwa-btn{width:100%;padding:.78rem 1rem;border-radius:12px;border:none;cursor:pointer;
+    font-family:'Lato',sans-serif;font-size:.87rem;font-weight:700;
+    display:flex;align-items:center;justify-content:center;gap:.4rem;
+    -webkit-tap-highlight-color:transparent;transition:filter .15s}
+  .pwa-btn:active{filter:brightness(.92)}
+  .pwa-btn.primary{background:var(--gold);color:var(--bd)}
+  .pwa-btn.secondary{background:rgba(201,168,124,.13);color:var(--bl);border:1.5px solid var(--bdr)}
+  .pwa-ios-tip{
+    background:#fffbf0;border:1.5px solid var(--gold);border-radius:12px;
+    padding:.75rem 1rem;text-align:center;margin-top:.5rem;
+  }
+  .pwa-ios-tip p{font-size:.79rem;color:var(--text);line-height:1.6;margin-bottom:.2rem}
+  .pwa-ios-tip .tip-icon{font-size:1.5rem;margin-bottom:.3rem}
+  .pwa-ios-sub{font-size:.7rem;color:var(--muted) !important}
+  </style>
 </head>
 <body>
 
 <!-- LOADING BAR -->
 <div id="loading-bar"></div>
+
+<!-- ═══ PWA INSTALL MODAL ═══ -->
+<div id="pwaInstallModal">
+  <div class="pwa-box">
+    <div class="pwa-handle"></div>
+    <div class="pwa-head">
+      <div class="pwa-icon-wrap"><img id="pwaIconPreview" src="" alt=""/></div>
+      <div class="pwa-head-txt">
+        <div class="pwa-title" id="pwaModalTitle">Café Roble</div>
+        <div class="pwa-sub">Instalar aplicación</div>
+      </div>
+    </div>
+    <div class="pwa-body">
+      <p class="pwa-msg">¿Deseas agregar <strong id="pwaModalName">esta carta</strong> a tu pantalla de inicio para acceder más rápido?</p>
+      <div class="pwa-benefits">
+        <div class="pwa-benefit"><span class="pwa-benefit-icon">⚡</span>Acceso instantáneo sin abrir el navegador</div>
+        <div class="pwa-benefit"><span class="pwa-benefit-icon">📴</span>Funciona sin conexión (menú en caché)</div>
+        <div class="pwa-benefit"><span class="pwa-benefit-icon">🖥️</span>Se abre en pantalla completa, sin barras</div>
+      </div>
+      <div class="pwa-actions" id="pwaActions">
+        <!-- Se rellena dinámicamente según el dispositivo -->
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- LIGHTBOX -->
 <div id="lb" onclick="lbBg(event)">
@@ -4157,6 +4241,273 @@ async function encGuardar(){
 function getQRUrl(mesaNum){
   return window.location.href.split('?')[0] + '?mesa=' + mesaNum;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   PWA — Iconos, Manifest dinámico, Prompt de instalación
+   Genera iconos desde la foto del banner al vuelo con <canvas>
+═══════════════════════════════════════════════════════════════ */
+const PWA = (function(){
+  let _deferredPrompt = null;   // BeforeInstallPromptEvent (Android/Desktop)
+  let _modalShown = false;
+
+  // ── Detectores de plataforma ──────────────────────────────────────────────
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isAndroid = /android/i.test(navigator.userAgent);
+  const isStandalone =
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true;
+
+  // ── Genera un icono cuadrado (con fondo oscuro + imagen centrada) en base64 ──
+  function generateIcon(imgSrc, size){
+    return new Promise(resolve=>{
+      const canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      // Fondo color café oscuro
+      ctx.fillStyle = '#2C1A0E';
+      ctx.fillRect(0,0,size,size);
+      if(!imgSrc){ resolve(canvas.toDataURL('image/png')); return; }
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = ()=>{
+        // Recorte cuadrado centrado
+        const min = Math.min(img.width, img.height);
+        const sx = (img.width  - min) / 2;
+        const sy = (img.height - min) / 2;
+        // Padding del 8%
+        const pad = Math.round(size * 0.08);
+        ctx.drawImage(img, sx, sy, min, min, pad, pad, size-pad*2, size-pad*2);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = ()=>{ resolve(canvas.toDataURL('image/png')); };
+      img.src = imgSrc;
+    });
+  }
+
+  // ── Inyecta los <link> de apple-touch-icon y favicon ─────────────────────
+  async function applyIcons(bannerSrc){
+    const sizes = [512, 192, 180, 152, 120, 32, 16];
+    const icons = {};
+    await Promise.all(sizes.map(async s=>{
+      icons[s] = await generateIcon(bannerSrc, s);
+    }));
+
+    const set = (id, src)=>{
+      const el = document.getElementById(id);
+      if(el) el.href = src;
+    };
+    set('apple-touch-icon',     icons[180]);
+    set('apple-touch-icon-152', icons[152]);
+    set('apple-touch-icon-120', icons[120]);
+    set('favicon-32',           icons[32]);
+    set('favicon-16',           icons[16]);
+
+    // Actualizar icono del modal
+    const prev = document.getElementById('pwaIconPreview');
+    if(prev) prev.src = icons[192];
+
+    return icons;
+  }
+
+  // ── Genera e inyecta el Web App Manifest en línea ─────────────────────────
+  async function applyManifest(appName, appSlogan, bannerSrc){
+    const icons = await applyIcons(bannerSrc);
+
+    const manifest = {
+      name: appName || 'Carta',
+      short_name: (appName || 'Carta').substring(0,12),
+      description: appSlogan || 'Carta digital',
+      start_url: './',
+      scope: './',
+      display: 'standalone',
+      orientation: 'portrait',
+      background_color: '#2C1A0E',
+      theme_color: '#2C1A0E',
+      icons: [
+        { src: icons[192], sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+        { src: icons[512], sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+        { src: icons[180], sizes: '180x180', type: 'image/png', purpose: 'apple touch icon' }
+      ]
+    };
+
+    const blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
+    const url  = URL.createObjectURL(blob);
+    const link = document.getElementById('pwa-manifest');
+    if(link){ link.href = url; }
+
+    // Actualizar título de la app en los meta tags de Apple
+    document.querySelectorAll('meta[name="apple-mobile-web-app-title"]').forEach(m=>{
+      m.content = manifest.short_name;
+    });
+    document.querySelectorAll('meta[name="application-name"]').forEach(m=>{
+      m.content = manifest.name;
+    });
+  }
+
+  // ── Registrar Service Worker (para caché offline) ─────────────────────────
+  function registerSW(){
+    if(!('serviceWorker' in navigator)) return;
+    // El SW se inyecta como Blob para no necesitar archivo externo
+    const swCode = `
+const CACHE = 'carta-v1';
+const ASSETS = [location.href || '/'];
+self.addEventListener('install', e=>{
+  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).catch(()=>{}));
+  self.skipWaiting();
+});
+self.addEventListener('activate', e=>{
+  e.waitUntil(caches.keys().then(keys=>
+    Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))
+  ));
+  self.clients.claim();
+});
+self.addEventListener('fetch', e=>{
+  if(e.request.method!=='GET') return;
+  e.respondWith(
+    caches.match(e.request).then(cached=>{
+      const net = fetch(e.request).then(res=>{
+        const clone = res.clone();
+        caches.open(CACHE).then(c=>c.put(e.request, clone)).catch(()=>{});
+        return res;
+      }).catch(()=>cached);
+      return cached || net;
+    })
+  );
+});`;
+    const blob = new Blob([swCode], {type:'application/javascript'});
+    const url  = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(url, {scope: './'}).catch(()=>{});
+  }
+
+  // ── Mostrar modal de instalación ──────────────────────────────────────────
+  function showModal(appName){
+    if(_modalShown) return;
+    _modalShown = true;
+
+    const modal   = document.getElementById('pwaInstallModal');
+    const title   = document.getElementById('pwaModalTitle');
+    const nameEl  = document.getElementById('pwaModalName');
+    const actions = document.getElementById('pwaActions');
+    if(!modal) return;
+
+    if(title)  title.textContent  = appName || 'Carta';
+    if(nameEl) nameEl.textContent = appName || 'esta carta';
+
+    actions.innerHTML = '';
+
+    if(isIOS){
+      // iOS no soporta BeforeInstallPrompt — mostrar instrucciones manuales
+      actions.innerHTML = `
+        <div class="pwa-ios-tip">
+          <div class="tip-icon">📲</div>
+          <p>Para instalar en iPhone/iPad:<br>
+          1. Toca el ícono <strong>Compartir</strong> (□↑) en Safari<br>
+          2. Selecciona <strong>"Agregar a pantalla de inicio"</strong></p>
+          <p class="pwa-ios-sub">Solo funciona en Safari, no en Chrome</p>
+        </div>
+        <button class="pwa-btn secondary" onclick="PWA.closeModal()" style="margin-top:.5rem">Entendido</button>`;
+    } else if(_deferredPrompt){
+      // Android / Desktop — prompt nativo disponible
+      actions.innerHTML = `
+        <button class="pwa-btn primary" id="pwaBtnInstall">📲 &nbsp;Agregar al escritorio</button>
+        <button class="pwa-btn secondary" id="pwaBtnNever">Ahora no</button>`;
+      document.getElementById('pwaBtnInstall')?.addEventListener('click', ()=>{ nativeInstall(); });
+      document.getElementById('pwaBtnNever')?.addEventListener('click',   ()=>{ closeModal(true); });
+    } else {
+      // Navegador no soporta instalación
+      closeModal(); return;
+    }
+
+    modal.classList.add('open');
+    modal.addEventListener('click', ev=>{ if(ev.target===modal) closeModal(); }, {once:true});
+  }
+
+  // ── Disparar el prompt nativo de Android/Desktop ──────────────────────────
+  async function nativeInstall(){
+    if(!_deferredPrompt) return;
+    _deferredPrompt.prompt();
+    const { outcome } = await _deferredPrompt.userChoice;
+    _deferredPrompt = null;
+    closeModal();
+    if(outcome === 'accepted'){
+      try{ localStorage.setItem('pwa_installed', '1'); }catch(_){}
+    }
+  }
+
+  // ── Cerrar modal ──────────────────────────────────────────────────────────
+  function closeModal(permanent){
+    const modal = document.getElementById('pwaInstallModal');
+    if(modal) modal.classList.remove('open');
+    if(permanent){
+      try{ localStorage.setItem('pwa_dismissed', Date.now()); }catch(_){}
+    }
+  }
+
+  // ── Decidir si mostrar el modal ───────────────────────────────────────────
+  function shouldShowModal(){
+    // No mostrar si ya está instalado como app
+    if(isStandalone) return false;
+    try{
+      if(localStorage.getItem('pwa_installed')) return false;
+      const dismissed = parseInt(localStorage.getItem('pwa_dismissed')||'0');
+      // Volver a preguntar después de 7 días si rechazó
+      if(dismissed && (Date.now() - dismissed) < 7 * 24 * 3600 * 1000) return false;
+    }catch(_){}
+    return true;
+  }
+
+  // ── API pública ───────────────────────────────────────────────────────────
+  return {
+    closeModal,
+    // Llamada principal — se ejecuta cuando los datos del restaurante están listos
+    init(appName, appSlogan, bannerSrc){
+      applyManifest(appName, appSlogan, bannerSrc).catch(()=>{});
+      registerSW();
+
+      if(!shouldShowModal()) return;
+
+      // Android / Desktop — esperar el evento nativo
+      window.addEventListener('beforeinstallprompt', ev=>{
+        ev.preventDefault();
+        _deferredPrompt = ev;
+        // Mostrar modal con pequeño retardo para no interrumpir la carga
+        setTimeout(()=> showModal(appName), 2500);
+      });
+
+      // iOS — mostrar instrucciones manuales tras 3 s
+      if(isIOS){
+        setTimeout(()=> showModal(appName), 3000);
+      }
+    }
+  };
+})();
+
+/* ── Iniciar PWA cuando los datos estén disponibles ─────────────────────── */
+(function(){
+  let pwaInited = false;
+  function tryInitPWA(){
+    if(pwaInited) return;
+    const nombre    = (typeof DATA !== 'undefined' && DATA?.info?.nombre)    || document.title || '';
+    const slogan    = (typeof DATA !== 'undefined' && DATA?.info?.slogan)    || '';
+    const bannerImg = (typeof DATA !== 'undefined' && DATA?.info?.bannerImg) || '';
+    if(nombre && nombre !== 'Carta' || bannerImg){
+      pwaInited = true;
+      PWA.init(nombre || 'Carta', slogan, bannerImg);
+    }
+  }
+  document.addEventListener('DOMContentLoaded', ()=>{
+    // Intento 1: tras carga localStorage
+    setTimeout(tryInitPWA, 900);
+    // Intento 2: tras posible carga GitHub
+    setTimeout(tryInitPWA, 5500);
+    // MutationObserver: se activa cuando bannerNameMenu cambia (renderInfo lo actualiza)
+    const el = document.getElementById('bannerNameMenu');
+    if(el){
+      const obs = new MutationObserver(()=>{ setTimeout(tryInitPWA, 150); });
+      obs.observe(el, {childList:true, characterData:true, subtree:true});
+    }
+  });
+})();
 </script>
 </body>
 </html>
