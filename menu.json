@@ -1,0 +1,261 @@
+{
+  "info": {
+    "nombre": "Burgers & Tacos",
+    "slogan": "Lo mejor de dos mundos 🍔🌮",
+    "bannerImg": "",
+    "aboutImg": "",
+    "aboutBadge": "Desde 2018",
+    "aboutTitle": "Sabor con identidad",
+    "aboutText1": "Nacimos con la idea de unir lo mejor de la comida callejera en un solo lugar: hamburguesas jugosas y tacos auténticos.",
+    "aboutText2": "Cada ingrediente es seleccionado con cuidado para garantizar la mejor experiencia.",
+    "direccion": "Av. Principal 123, Ciudad",
+    "telefono": "555-1234-5678",
+    "email": "hola@burgersytacos.com",
+    "instagram": "@burgersytacos",
+    "mapEmbed": "",
+    "mapLink": "",
+    "horariosLV": "12:00 – 22:00",
+    "horariosSab": "11:00 – 23:00",
+    "horariosDom": "12:00 – 21:00",
+    "horariosFest": "Consultar",
+    "footerLine1": "Burgers & Tacos © 2025",
+    "footerLine2": "Hecho con 🔥 y buena sazón",
+    "promoImg": "",
+    "promoTag": "🔥 Oferta del mes",
+    "promoTitle": "Combo Doble Identidad",
+    "promoDesc": "1 hamburguesa clásica + 2 tacos al pastor + bebida",
+    "promoPrice": "$12.99",
+    "repartos": {
+      "zona1": { "nombre": "Zona Centro", "precio": "$2.50", "zonas": ["Centro", "Zócalo", "Centro Histórico"] },
+      "zona2": { "nombre": "Zona Norte", "precio": "$4.00", "zonas": ["Colonia Norte", "Parque Industrial", "Villa Alta"] }
+    }
+  },
+  "categorias": [
+    {
+      "label": "🍔 Hamburguesas",
+      "productos": [
+        {
+          "nombre": "Clásica BBQ",
+          "desc": "Carne angus 150g, queso cheddar, lechuga, tomate, cebolla caramelizada y salsa BBQ artesanal",
+          "precio": "$8.99",
+          "img": "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&h=300&fit=crop",
+          "imgFull": "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800",
+          "badge": "⭐ Popular",
+          "disponible": true,
+          "noDomicilio": false
+        },
+        {
+          "nombre": "Doble Smash",
+          "desc": "Dos patties smash de carne premium, doble queso americano, pepinillos, mostaza y ketchup especial",
+          "precio": "$11.50",
+          "img": "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=300&h=300&fit=crop",
+          "imgFull": "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=800",
+          "badge": "🔥 Nuevo",
+          "disponible": true,
+          "noDomicilio": false
+        },
+        {
+          "nombre": "Pollo Crispy",
+          "desc": "Pechuga de pollo empanizada crujiente, mayonesa de chipotle, col morada y jalapeños frescos",
+          "precio": "$9.50",
+          "img": "https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=300&h=300&fit=crop",
+          "imgFull": "https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=800",
+          "badge": "",
+          "disponible": true,
+          "noDomicilio": false
+        },
+        {
+          "nombre": "Veggie Deluxe",
+          "desc": "Patty de garbanzos y quinoa, aguacate, brotes, tomate cherry y aderezo de tahini",
+          "precio": "$9.99",
+          "img": "https://images.unsplash.com/photo-1525059696034-4967a8e1dca2?w=300&h=300&fit=crop",
+          "imgFull": "https://images.unsplash.com/photo-1525059696034-4967a8e1dca2?w=800",
+          "badge": "🌱 Vegana",
+          "disponible": true,
+          "noDomicilio": false
+        }
+      ],
+      "galeria": {
+        "titulo": "Nuestras hamburguesas",
+        "fotos": []
+      }
+    },
+    {
+      "label": "🌮 Tacos",
+      "productos": [
+        {
+          "nombre": "Al Pastor",
+          "desc": "Cerdo marinado en achiote con piña asada, cebolla, cilantro y salsa verde tatemada. 3 piezas",
+          "precio": "$6.50",
+          "img": "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=300&h=300&fit=crop",
+          "imgFull": "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=800",
+          "badge": "⭐ Estrella",
+          "disponible": true,
+          "noDomicilio": false
+        },
+        {
+          "nombre": "Birria Estilo Jalisco",
+          "desc": "Res estofada en chile guajillo y especias, consomé para dipear, queso Oaxaca. 3 piezas",
+          "precio": "$8.99",
+          "img": "https://images.unsplash.com/photo-1613514785940-daed07799d9b?w=300&h=300&fit=crop",
+          "imgFull": "https://images.unsplash.com/photo-1613514785940-daed07799d9b?w=800",
+          "badge": "🔥 Hot",
+          "disponible": true,
+          "noDomicilio": false
+        },
+        {
+          "nombre": "Camarón a la Diabla",
+          "desc": "Camarones salteados en salsa diabla casera, aguacate, pico de gallo. 3 piezas",
+          "precio": "$10.50",
+          "img": "https://images.unsplash.com/photo-1599974579688-8dbdd335c77f?w=300&h=300&fit=crop",
+          "imgFull": "https://images.unsplash.com/photo-1599974579688-8dbdd335c77f?w=800",
+          "badge": "🌶️ Picante",
+          "disponible": true,
+          "noDomicilio": false
+        },
+        {
+          "nombre": "Canasta Surtida",
+          "desc": "Mix de frijoles, chicharrón prensado y papa con chorizo. 5 piezas en salsa roja",
+          "precio": "$7.00",
+          "img": "https://images.unsplash.com/photo-1552332386-f8dd00dc2f85?w=300&h=300&fit=crop",
+          "imgFull": "https://images.unsplash.com/photo-1552332386-f8dd00dc2f85?w=800",
+          "badge": "",
+          "disponible": true,
+          "noDomicilio": false
+        },
+        {
+          "nombre": "Veganos de Hongos",
+          "desc": "Portobello y champiñones salteados con salsa de chipotle, guacamole y col tostada. 3 piezas",
+          "precio": "$7.50",
+          "img": "https://images.unsplash.com/photo-1578020190125-f4f7c18bc9cb?w=300&h=300&fit=crop",
+          "imgFull": "https://images.unsplash.com/photo-1578020190125-f4f7c18bc9cb?w=800",
+          "badge": "🌱 Vegano",
+          "disponible": true,
+          "noDomicilio": false
+        }
+      ],
+      "galeria": {
+        "titulo": "Nuestros tacos",
+        "fotos": []
+      }
+    },
+    {
+      "label": "🥤 Bebidas",
+      "productos": [
+        {
+          "nombre": "Agua de Jamaica",
+          "desc": "Flor de jamaica natural, sin colorantes artificiales. 500ml",
+          "precio": "$2.50",
+          "img": "https://images.unsplash.com/photo-1622597467836-f3e8b42b9c1f?w=300&h=300&fit=crop",
+          "imgFull": "https://images.unsplash.com/photo-1622597467836-f3e8b42b9c1f?w=800",
+          "badge": "",
+          "disponible": true,
+          "noDomicilio": false
+        },
+        {
+          "nombre": "Limonada Mineral",
+          "desc": "Limón fresco, agua mineral, menta y un toque de sal. 400ml",
+          "precio": "$3.00",
+          "img": "https://images.unsplash.com/photo-1523677011781-c91d1bbe2f9e?w=300&h=300&fit=crop",
+          "imgFull": "https://images.unsplash.com/photo-1523677011781-c91d1bbe2f9e?w=800",
+          "badge": "🔥 Fav",
+          "disponible": true,
+          "noDomicilio": false
+        },
+        {
+          "nombre": "Malteada Clásica",
+          "desc": "Vainilla, chocolate o fresa. Helado artesanal batido con leche entera. 350ml",
+          "precio": "$5.50",
+          "img": "https://images.unsplash.com/photo-1568901839119-631418a3910d?w=300&h=300&fit=crop",
+          "imgFull": "https://images.unsplash.com/photo-1568901839119-631418a3910d?w=800",
+          "badge": "",
+          "disponible": true,
+          "noDomicilio": false
+        },
+        {
+          "nombre": "Refresco",
+          "desc": "Coca-Cola, Sprite, Fanta o agua mineral. Lata 355ml",
+          "precio": "$2.00",
+          "img": "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=300&h=300&fit=crop",
+          "imgFull": "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=800",
+          "badge": "",
+          "disponible": true,
+          "noDomicilio": false
+        }
+      ],
+      "galeria": { "titulo": "", "fotos": [] }
+    },
+    {
+      "label": "🍟 Extras",
+      "productos": [
+        {
+          "nombre": "Papas Fritas",
+          "desc": "Papas crujientes con sal de mar. Tamaño regular. Salsas de tu elección",
+          "precio": "$3.50",
+          "img": "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=300&h=300&fit=crop",
+          "imgFull": "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=800",
+          "badge": "",
+          "disponible": true,
+          "noDomicilio": false
+        },
+        {
+          "nombre": "Papas con Queso y Jalapeños",
+          "desc": "Papas fritas bañadas en queso cheddar derretido y jalapeños en escabeche",
+          "precio": "$5.00",
+          "img": "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=300&h=300&fit=crop",
+          "imgFull": "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=800",
+          "badge": "🌶️",
+          "disponible": true,
+          "noDomicilio": false
+        },
+        {
+          "nombre": "Guacamole + Totopos",
+          "desc": "Aguacate fresco, jitomate, cebolla morada, cilantro y limón. Porción para 2",
+          "precio": "$4.50",
+          "img": "https://images.unsplash.com/photo-1574484284002-952d92456975?w=300&h=300&fit=crop",
+          "imgFull": "https://images.unsplash.com/photo-1574484284002-952d92456975?w=800",
+          "badge": "🌱",
+          "disponible": true,
+          "noDomicilio": false
+        }
+      ],
+      "galeria": { "titulo": "", "fotos": [] }
+    },
+    {
+      "label": "🍮 Postres",
+      "productos": [
+        {
+          "nombre": "Churros con Chocolate",
+          "desc": "Churros recién hechos con azúcar y canela, taza de chocolate caliente para dipear",
+          "precio": "$4.99",
+          "img": "https://images.unsplash.com/photo-1609349093905-c5e68a10e3f4?w=300&h=300&fit=crop",
+          "imgFull": "https://images.unsplash.com/photo-1609349093905-c5e68a10e3f4?w=800",
+          "badge": "⭐",
+          "disponible": true,
+          "noDomicilio": false
+        },
+        {
+          "nombre": "Helado Artesanal",
+          "desc": "Bola de helado artesanal: vainilla, chocolate, mango con chile o fresa. Cono o vaso",
+          "precio": "$3.50",
+          "img": "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=300&h=300&fit=crop",
+          "imgFull": "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=800",
+          "badge": "",
+          "disponible": true,
+          "noDomicilio": false
+        },
+        {
+          "nombre": "Brownie Caliente",
+          "desc": "Brownie de chocolate semi-amargo tibio con bola de helado de vainilla y caramelo",
+          "precio": "$5.99",
+          "img": "https://images.unsplash.com/photo-1564355808539-22fda35bed7e?w=300&h=300&fit=crop",
+          "imgFull": "https://images.unsplash.com/photo-1564355808539-22fda35bed7e?w=800",
+          "badge": "🍫",
+          "disponible": true,
+          "noDomicilio": false
+        }
+      ],
+      "galeria": { "titulo": "", "fotos": [] }
+    }
+  ]
+}
