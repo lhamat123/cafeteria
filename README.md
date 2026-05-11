@@ -1,6 +1,6 @@
-# ☕ Café Roble — Web de Menú Digital
+# ☕ Café Carta — Web de Menú Digital
 
-Sitio web de menú digital para **Café Roble**, con panel de administración integrado.
+Sitio web de menú digital, con panel de administración integrado.
 
 ## 📁 Estructura del proyecto
 
