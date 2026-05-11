@@ -594,6 +594,31 @@
   .opt-zoom-hint{position:absolute;bottom:4px;right:5px;font-size:9px;color:rgba(255,255,255,.3);pointer-events:none;letter-spacing:.04em}
   .opt-zoom-reset{position:absolute;top:4px;right:5px;font-size:9px;background:rgba(0,0,0,.45);color:rgba(255,255,255,.55);border:none;border-radius:4px;padding:1px 5px;cursor:pointer;display:none}
   .opt-zoom-reset.visible{display:block}
+
+  /* ── IMG-ACTION MODAL ── */
+  #imgActionModal{position:fixed;inset:0;z-index:8500;background:rgba(0,0,0,.55);
+    display:none;align-items:flex-end;justify-content:center}
+  #imgActionModal.open{display:flex}
+  .img-action-sheet{background:var(--cs);border-radius:20px 20px 0 0;width:100%;max-width:480px;
+    padding:0 0 env(safe-area-inset-bottom,12px);animation:slideUp .24s ease;box-shadow:0 -4px 28px rgba(0,0,0,.3)}
+  .img-action-handle{width:38px;height:4px;border-radius:2px;background:rgba(0,0,0,.13);margin:10px auto 0}
+  .img-action-head{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem .6rem}
+  .img-action-preview{width:52px;height:52px;border-radius:9px;object-fit:cover;flex-shrink:0;
+    border:2px solid var(--bdr);background:#e0ddd9}
+  .img-action-title{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:700;color:var(--text)}
+  .img-action-sub{font-size:.72rem;color:var(--muted);margin-top:1px}
+  .img-action-opts{padding:.2rem .8rem .6rem;display:flex;flex-direction:column;gap:.4rem}
+  .img-action-btn{display:flex;align-items:center;gap:.7rem;padding:.7rem .9rem;border-radius:12px;
+    border:1.5px solid var(--bdr);background:rgba(201,168,124,.1);color:var(--text);
+    font-family:'Lato',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;
+    text-align:left;width:100%;transition:background .14s}
+  .img-action-btn:active{background:rgba(201,168,124,.25)}
+  .img-action-btn .iai-icon{font-size:1.2rem;flex-shrink:0;width:1.6rem;text-align:center}
+  .img-action-btn .iai-lbl{display:flex;flex-direction:column}
+  .img-action-btn .iai-desc{font-size:.72rem;color:var(--muted);font-weight:400;margin-top:1px}
+  .img-action-btn.iai-new{background:rgba(44,26,14,.06)}
+  .img-action-btn.iai-cancel{background:none;border-color:transparent;color:var(--muted);
+    font-weight:400;justify-content:center;margin-top:.1rem}
   .opt-stats{font-size:11px;color:rgba(255,255,255,.4);margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}
   .opt-stats span{background:rgba(255,255,255,.07);padding:2px 6px;border-radius:4px}
   .opt-stats span.better{color:#4ade80}
@@ -1139,6 +1164,35 @@
       <button class="crop-btn cancel" onclick="backToCrop()">← Volver a recortar</button>
       <button class="crop-btn cancel" onclick="closeCropper()">Cancelar</button>
       <button class="crop-btn apply" id="opt-apply-btn" onclick="applyOptimized()">✅ Usar optimizada</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMG ACTION MODAL -->
+<div id="imgActionModal">
+  <div class="img-action-sheet">
+    <div class="img-action-handle"></div>
+    <div class="img-action-head">
+      <img class="img-action-preview" id="iamPreview" src="" alt="">
+      <div>
+        <div class="img-action-title">Imagen existente</div>
+        <div class="img-action-sub" id="iamSub">¿Qué deseas hacer?</div>
+      </div>
+    </div>
+    <div class="img-action-opts">
+      <button class="img-action-btn" id="iamBtnCrop">
+        <span class="iai-icon">✂️</span>
+        <span class="iai-lbl"><span>Recortar</span><span class="iai-desc">Ajustar encuadre de la imagen actual</span></span>
+      </button>
+      <button class="img-action-btn" id="iamBtnOpt">
+        <span class="iai-icon">⚡</span>
+        <span class="iai-lbl"><span>Recortar y optimizar</span><span class="iai-desc">Recortar + reducir peso y formato</span></span>
+      </button>
+      <button class="img-action-btn iai-new" id="iamBtnNew">
+        <span class="iai-icon">📁</span>
+        <span class="iai-lbl"><span>Cargar imagen nueva</span><span class="iai-desc">Reemplazar con otra imagen del dispositivo</span></span>
+      </button>
+      <button class="img-action-btn iai-cancel" id="iamBtnCancel">Cancelar</button>
     </div>
   </div>
 </div>
@@ -3019,14 +3073,95 @@ function renderAdmRepartos(){
   wrap.appendChild(addAnillo);
 }
 
-function admUploadInfoGalAt(fi,imgEl){
-  pickFile(file=>{
-    openCropper(file,'gallery',(dataUrl)=>{
-      DATA.info.galeria[fi].img=dataUrl;
-      DATA.info.galeria[fi].imgFull=dataUrl;
-      if(imgEl) imgEl.src=dataUrl;
-      toast('Foto actualizada','ok');
+/* ── IMAGE ACTION MODAL ─────────────────────────────────────────────────
+   Cuando ya hay imagen: muestra opciones (recortar / optimizar / nueva).
+   Cuando NO hay imagen: va directo al picker.
+──────────────────────────────────────────────────────────────────────── */
+(function(){
+  let _resolve=null;
+
+  function openModal(currentSrc){
+    return new Promise(resolve=>{
+      _resolve=resolve;
+      const modal=document.getElementById('imgActionModal');
+      const prev =document.getElementById('iamPreview');
+      const sub  =document.getElementById('iamSub');
+      if(prev){ prev.src=currentSrc||''; prev.style.display=currentSrc?'':'none'; }
+      if(sub)  sub.textContent = currentSrc ? '¿Qué deseas hacer con la imagen?' : 'Cargar imagen';
+
+      document.getElementById('iamBtnCrop')  .onclick=()=>{ closeModal(); resolve('crop');   };
+      document.getElementById('iamBtnOpt')   .onclick=()=>{ closeModal(); resolve('opt');    };
+      document.getElementById('iamBtnNew')   .onclick=()=>{ closeModal(); resolve('new');    };
+      document.getElementById('iamBtnCancel').onclick=()=>{ closeModal(); resolve(null);     };
+
+      modal.classList.add('open');
+      modal.onclick=ev=>{ if(ev.target===modal){ closeModal(); resolve(null); } };
     });
+  }
+
+  function closeModal(){
+    document.getElementById('imgActionModal').classList.remove('open');
+  }
+
+  // Núcleo: si ya hay imagen ofrece el modal; si no, va directo a pickFile
+  async function smartPick(currentSrc, cropMode, onDone){
+    if(currentSrc && currentSrc.length>4){
+      const action = await openModal(currentSrc);
+      if(!action) return;
+      if(action==='new'){
+        pickFile(file=>openCropper(file, cropMode, onDone));
+      } else {
+        // Reusar imagen actual → cargarla en el cropper como Blob
+        urlToFile(currentSrc, file=>{
+          // Para 'crop': paso 1 solamente. Para 'opt': ir directo a paso 2.
+          if(action==='opt'){
+            openCropperGoOpt(file, cropMode, onDone);
+          } else {
+            openCropper(file, cropMode, onDone);
+          }
+        });
+      }
+    } else {
+      pickFile(file=>openCropper(file, cropMode, onDone));
+    }
+  }
+
+  // Convierte src (dataURL o URL) a File
+  function urlToFile(src, cb){
+    fetch(src).then(r=>r.blob()).then(blob=>{
+      cb(new File([blob], 'imagen.jpg', {type: blob.type||'image/jpeg'}));
+    }).catch(()=>{
+      // Si falla (URL externa con CORS), ir a picker
+      pickFile(cb);
+    });
+  }
+
+  // Abre el cropper y luego salta automáticamente al paso de optimización
+  function openCropperGoOpt(file, mode, onDone){
+    openCropper(file, mode, onDone);      // carga la imagen en el cropper
+    // Esperamos a que el cropper esté visible y disparamos goToOptimize
+    const wait=()=>{
+      const panel=document.getElementById('opt-panel-crop');
+      if(panel && panel.classList.contains('active')){
+        goToOptimize();
+      } else {
+        setTimeout(wait,80);
+      }
+    };
+    setTimeout(wait,120);
+  }
+
+  // Exponer como global
+  window.smartImagePick = smartPick;
+})();
+
+function admUploadInfoGalAt(fi,imgEl){
+  const cur = DATA.info?.galeria?.[fi]?.img || '';
+  smartImagePick(cur,'gallery',(dataUrl)=>{
+    DATA.info.galeria[fi].img=dataUrl;
+    DATA.info.galeria[fi].imgFull=dataUrl;
+    if(imgEl) imgEl.src=dataUrl;
+    toast('Foto actualizada','ok');
   });
 }
 
@@ -3036,18 +3171,17 @@ function infoField(label,key,val){
 }
 
 function admUploadInfo(field, thumbId, hintId){
-  pickFile(file=>{
-    openCropper(file, 'main', (dataUrl, sizeStr)=>{
-      if(!DATA.info) DATA.info={};
-      DATA.info[field]=dataUrl;
-      const th=document.getElementById(thumbId);
-      if(th) th.querySelector('img').src=dataUrl;
-      const inp=th?.parentElement?.querySelector('.ainp');
-      if(inp) inp.value=dataUrl;
-      const hint=document.getElementById(hintId);
-      if(hint) hint.textContent='✅ '+sizeStr;
-      toast('Imagen actualizada','ok');
-    });
+  const cur = DATA.info?.[field] || '';
+  smartImagePick(cur,'main',(dataUrl,sizeStr)=>{
+    if(!DATA.info) DATA.info={};
+    DATA.info[field]=dataUrl;
+    const th=document.getElementById(thumbId);
+    if(th) th.querySelector('img').src=dataUrl;
+    const inp=th?.parentElement?.querySelector('.ainp');
+    if(inp) inp.value=dataUrl;
+    const hint=document.getElementById(hintId);
+    if(hint) hint.textContent='✅ '+(sizeStr||'');
+    toast('Imagen actualizada','ok');
   });
 }
 
@@ -3150,18 +3284,18 @@ function renderAdmTab(ci){
 
 /* image upload helpers */
 function admUploadProd(ci,pi,imgEl){
-  pickFile(file=>{
-    openCropper(file,'main',(dataUrl,sizeStr)=>{
-      DATA.categorias[ci].productos[pi].img=dataUrl;
-      DATA.categorias[ci].productos[pi].imgFull=dataUrl;
-      imgEl.src=dataUrl;
-      const hint=document.getElementById(`phint-${ci}-${pi}`);
-      if(hint) hint.textContent='✅ '+sizeStr;
-      toast('Imagen actualizada','ok');
-    });
+  const cur = DATA.categorias[ci]?.productos[pi]?.img || '';
+  smartImagePick(cur,'main',(dataUrl,sizeStr)=>{
+    DATA.categorias[ci].productos[pi].img=dataUrl;
+    DATA.categorias[ci].productos[pi].imgFull=dataUrl;
+    imgEl.src=dataUrl;
+    const hint=document.getElementById(`phint-${ci}-${pi}`);
+    if(hint) hint.textContent='✅ '+(sizeStr||'');
+    toast('Imagen actualizada','ok');
   });
 }
 function admUploadGalMulti(ci){
+  // Galería múltiple: siempre carga nuevas (no tiene imagen previa individual)
   pickFiles(files=>{
     if(!DATA.categorias[ci].galeria) DATA.categorias[ci].galeria={titulo:'',fotos:[]};
     let idx=0;
@@ -3177,13 +3311,12 @@ function admUploadGalMulti(ci){
   });
 }
 function admUploadGalAt(ci,fi,imgEl){
-  pickFile(file=>{
-    openCropper(file,'gallery',(dataUrl)=>{
-      DATA.categorias[ci].galeria.fotos[fi].img=dataUrl;
-      DATA.categorias[ci].galeria.fotos[fi].imgFull=dataUrl;
-      imgEl.src=dataUrl;
-      toast('Foto actualizada','ok');
-    });
+  const cur = DATA.categorias[ci]?.galeria?.fotos?.[fi]?.img || '';
+  smartImagePick(cur,'gallery',(dataUrl)=>{
+    DATA.categorias[ci].galeria.fotos[fi].img=dataUrl;
+    DATA.categorias[ci].galeria.fotos[fi].imgFull=dataUrl;
+    imgEl.src=dataUrl;
+    toast('Foto actualizada','ok');
   });
 }
 function pickFile(cb){ const i=document.createElement('input'); i.type='file'; i.accept='image/*'; i.onchange=ev=>cb(ev.target.files[0]); i.click(); }
