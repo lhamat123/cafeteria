@@ -1074,12 +1074,19 @@
     <canvas id="opt-canvas"></canvas>
     <div class="opt-controls-grid" id="opt-controls">
       <div class="opt-ctrl">
-        <label>Ancho máx: <span class="opt-range-val" id="opt-val-w">800</span>px</label>
-        <input type="range" min="50" max="2000" value="800" id="opt-rw" oninput="document.getElementById('opt-val-w').textContent=this.value;optReprocess()">
+        <label style="display:flex;align-items:center;gap:.5rem">
+          Ancho máx: <span class="opt-range-val" id="opt-val-w">800</span>px
+          <button id="opt-lock-btn" onclick="toggleAspectLock()" title="Bloquear proporción" style="
+            margin-left:auto;background:none;border:1.5px solid var(--gold);border-radius:6px;
+            color:var(--gold);cursor:pointer;padding:1px 7px;font-size:.78rem;line-height:1.6;
+            transition:all .15s;flex-shrink:0;
+          ">🔒 1:1</button>
+        </label>
+        <input type="range" min="50" max="2000" value="800" id="opt-rw" oninput="optWidthChanged(this.value)">
       </div>
       <div class="opt-ctrl">
         <label>Alto máx: <span class="opt-range-val" id="opt-val-h">600</span>px</label>
-        <input type="range" min="50" max="2000" value="600" id="opt-rh" oninput="document.getElementById('opt-val-h').textContent=this.value;optReprocess()">
+        <input type="range" min="50" max="2000" value="600" id="opt-rh" oninput="optHeightChanged(this.value)">
       </div>
       <div class="opt-ctrl">
         <label>Calidad JPG/WEBP: <span class="opt-range-val" id="opt-val-q">80</span>%</label>
@@ -2289,6 +2296,11 @@ function goToOptimize(){
     document.getElementById('opt-val-w').textContent = Math.min(origImg.naturalWidth, 800);
     document.getElementById('opt-rh').value = Math.min(origImg.naturalHeight, 600);
     document.getElementById('opt-val-h').textContent = Math.min(origImg.naturalHeight, 600);
+    // Reset aspect lock
+    _optAspectLocked = false;
+    _optAspectRatio  = null;
+    const lockBtn = document.getElementById('opt-lock-btn');
+    if(lockBtn){ lockBtn.style.background='none'; lockBtn.style.color='var(--gold)'; lockBtn.textContent='🔓 libre'; lockBtn.title='Bloquear proporción'; }
     optReprocess();
   };
 }
@@ -2310,6 +2322,63 @@ function optQuantize(ctx, w, h, levels){
     px[i+2] = Math.round(px[i+2]/step)*step;
   }
   ctx.putImageData(d,0,0);
+}
+
+/* ── ASPECT RATIO LOCK ── */
+let _optAspectLocked = false;
+let _optAspectRatio  = null; // w/h
+
+function toggleAspectLock(){
+  _optAspectLocked = !_optAspectLocked;
+  const btn = document.getElementById('opt-lock-btn');
+  if(_optAspectLocked){
+    // Capturar la relación actual de la imagen original
+    const orig = document.getElementById('opt-img-orig');
+    if(orig && orig.naturalWidth && orig.naturalHeight){
+      _optAspectRatio = orig.naturalWidth / orig.naturalHeight;
+    } else {
+      const w = parseInt(document.getElementById('opt-rw').value);
+      const h = parseInt(document.getElementById('opt-rh').value);
+      _optAspectRatio = w / h;
+    }
+    btn.style.background = 'var(--gold)';
+    btn.style.color       = 'var(--bd)';
+    btn.title = 'Desbloquear proporción';
+    // Mostrar la relación como texto legible
+    const gcd = (a,b)=>b?gcd(b,a%b):a;
+    const origW = document.getElementById('opt-img-orig').naturalWidth  || parseInt(document.getElementById('opt-rw').value);
+    const origH = document.getElementById('opt-img-orig').naturalHeight || parseInt(document.getElementById('opt-rh').value);
+    const d = gcd(origW, origH);
+    btn.textContent = `🔒 ${origW/d}:${origH/d}`;
+  } else {
+    _optAspectRatio = null;
+    btn.style.background = 'none';
+    btn.style.color       = 'var(--gold)';
+    btn.title = 'Bloquear proporción';
+    btn.textContent = '🔓 libre';
+  }
+}
+
+function optWidthChanged(val){
+  val = parseInt(val);
+  document.getElementById('opt-val-w').textContent = val;
+  if(_optAspectLocked && _optAspectRatio){
+    const newH = Math.max(50, Math.min(2000, Math.round(val / _optAspectRatio)));
+    document.getElementById('opt-rh').value = newH;
+    document.getElementById('opt-val-h').textContent = newH;
+  }
+  optReprocess();
+}
+
+function optHeightChanged(val){
+  val = parseInt(val);
+  document.getElementById('opt-val-h').textContent = val;
+  if(_optAspectLocked && _optAspectRatio){
+    const newW = Math.max(50, Math.min(2000, Math.round(val * _optAspectRatio)));
+    document.getElementById('opt-rw').value = newW;
+    document.getElementById('opt-val-w').textContent = newW;
+  }
+  optReprocess();
 }
 
 function optReprocess(){
