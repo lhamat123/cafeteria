@@ -569,6 +569,33 @@
   #crop-target-label{font-size:11px;color:rgba(201,168,124,.6);margin-top:4px}
   .img-hint{font-size:.67rem;color:var(--muted);margin-top:3px;min-height:14px}
 
+  /* ── OPTIMIZER (step 2) ── */
+  .opt-step-indicator{display:flex;align-items:center;gap:6px;margin-bottom:12px}
+  .opt-step{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+  .opt-step.done{background:rgba(201,168,124,.3);color:var(--gold)}
+  .opt-step.active{background:var(--gold);color:var(--bd)}
+  .opt-step.pending{background:rgba(255,255,255,.1);color:rgba(255,255,255,.3)}
+  .opt-step-line{flex:1;height:1px;background:rgba(255,255,255,.15)}
+  .opt-panel{display:none;flex-direction:column;align-items:center;width:100%;max-width:700px}
+  .opt-panel.active{display:flex}
+  .opt-controls-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin:10px 0}
+  .opt-ctrl{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px 12px}
+  .opt-ctrl label{font-size:11px;color:rgba(255,255,255,.55);display:block;margin-bottom:6px;font-weight:500}
+  .opt-ctrl input[type=range]{width:100%;accent-color:var(--gold)}
+  .opt-ctrl select{width:100%;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.2);border-radius:6px;color:#fff;font-size:12px;padding:5px 8px;outline:none}
+  .opt-ctrl select option{background:#1a1008;color:#fff}
+  .opt-range-val{font-size:13px;font-weight:700;color:var(--gold);float:right}
+  .opt-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;margin-top:8px}
+  .opt-compare-box{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px}
+  .opt-compare-box h4{font-size:10px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+  .opt-compare-img{width:100%;height:130px;background:rgba(0,0,0,.4);border-radius:5px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .opt-compare-img img{max-width:100%;max-height:100%;object-fit:contain}
+  .opt-stats{font-size:11px;color:rgba(255,255,255,.4);margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}
+  .opt-stats span{background:rgba(255,255,255,.07);padding:2px 6px;border-radius:4px}
+  .opt-stats span.better{color:#4ade80}
+  .opt-btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;justify-content:center}
+  canvas#opt-canvas{display:none}
+
   /* ── TOAST ── */
   #toast{position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%) translateY(14px);
     background:#1a1a2e;color:#fff;padding:8px 18px;border-radius:30px;font-size:.77rem;
@@ -1008,27 +1035,92 @@
 
 <!-- IMAGE CROPPER -->
 <div class="cropper-overlay" id="cropper-overlay">
-  <div class="cropper-title">✂️ Recortar imagen</div>
-  <div class="cropper-wrap" id="cropper-wrap">
-    <canvas id="cropper-canvas"></canvas>
-    <div class="crop-box" id="crop-box">
-      <div class="crop-handle tl" data-h="tl"></div>
-      <div class="crop-handle tr" data-h="tr"></div>
-      <div class="crop-handle bl" data-h="bl"></div>
-      <div class="crop-handle br" data-h="br"></div>
+  <!-- Step indicator -->
+  <div class="opt-step-indicator" style="width:100%;max-width:700px">
+    <div class="opt-step active" id="step-ind-1">1</div>
+    <div class="opt-step-line"></div>
+    <div class="opt-step pending" id="step-ind-2">2</div>
+  </div>
+
+  <!-- STEP 1: CROP -->
+  <div class="opt-panel active" id="opt-panel-crop">
+    <div class="cropper-title">✂️ Recortar imagen</div>
+    <div class="cropper-wrap" id="cropper-wrap">
+      <canvas id="cropper-canvas"></canvas>
+      <div class="crop-box" id="crop-box">
+        <div class="crop-handle tl" data-h="tl"></div>
+        <div class="crop-handle tr" data-h="tr"></div>
+        <div class="crop-handle bl" data-h="bl"></div>
+        <div class="crop-handle br" data-h="br"></div>
+      </div>
+    </div>
+    <div id="crop-target-label"></div>
+    <div class="cropper-info">Arrastra para mover · esquinas para redimensionar</div>
+    <div class="quality-row">
+      <span>Calidad:</span>
+      <input type="range" id="crop-quality" min="30" max="95" value="72" oninput="updateQualityLabel()">
+      <span id="crop-qlabel">72%</span>
+      <span id="crop-size-est" style="margin-left:6px;color:var(--gold)"></span>
+    </div>
+    <div class="cropper-btns">
+      <button class="crop-btn cancel" onclick="closeCropper()">Cancelar</button>
+      <button class="crop-btn apply" onclick="goToOptimize()">Optimizar →</button>
     </div>
   </div>
-  <div id="crop-target-label"></div>
-  <div class="cropper-info">Arrastra para mover · esquinas para redimensionar</div>
-  <div class="quality-row">
-    <span>Calidad:</span>
-    <input type="range" id="crop-quality" min="30" max="95" value="72" oninput="updateQualityLabel()">
-    <span id="crop-qlabel">72%</span>
-    <span id="crop-size-est" style="margin-left:6px;color:var(--gold)"></span>
-  </div>
-  <div class="cropper-btns">
-    <button class="crop-btn cancel" onclick="closeCropper()">Cancelar</button>
-    <button class="crop-btn apply" onclick="applyCrop()">✅ Usar esta imagen</button>
+
+  <!-- STEP 2: OPTIMIZE -->
+  <div class="opt-panel" id="opt-panel-opt">
+    <div class="cropper-title">⚡ Optimizar imagen</div>
+    <canvas id="opt-canvas"></canvas>
+    <div class="opt-controls-grid" id="opt-controls">
+      <div class="opt-ctrl">
+        <label>Ancho máx: <span class="opt-range-val" id="opt-val-w">800</span>px</label>
+        <input type="range" min="50" max="2000" value="800" id="opt-rw" oninput="document.getElementById('opt-val-w').textContent=this.value;optReprocess()">
+      </div>
+      <div class="opt-ctrl">
+        <label>Alto máx: <span class="opt-range-val" id="opt-val-h">600</span>px</label>
+        <input type="range" min="50" max="2000" value="600" id="opt-rh" oninput="document.getElementById('opt-val-h').textContent=this.value;optReprocess()">
+      </div>
+      <div class="opt-ctrl">
+        <label>Calidad JPG/WEBP: <span class="opt-range-val" id="opt-val-q">80</span>%</label>
+        <input type="range" min="1" max="100" value="80" id="opt-rq" oninput="document.getElementById('opt-val-q').textContent=this.value;optReprocess()">
+      </div>
+      <div class="opt-ctrl">
+        <label>Formato de salida</label>
+        <select id="opt-fmt" onchange="optReprocess()">
+          <option value="image/jpeg">JPG</option>
+          <option value="image/png">PNG</option>
+          <option value="image/webp" selected>WEBP</option>
+        </select>
+      </div>
+      <div class="opt-ctrl" style="grid-column:1/-1">
+        <label>Paleta de colores</label>
+        <select id="opt-paleta" onchange="optReprocess()">
+          <option value="full">Color completo</option>
+          <option value="256">256 colores</option>
+          <option value="128">128 colores</option>
+          <option value="64">64 colores</option>
+          <option value="16">16 colores</option>
+        </select>
+      </div>
+    </div>
+    <div class="opt-compare" id="opt-compare">
+      <div class="opt-compare-box">
+        <h4>Recortada</h4>
+        <div class="opt-compare-img"><img id="opt-img-orig" alt=""></div>
+        <div class="opt-stats" id="opt-stats-orig"></div>
+      </div>
+      <div class="opt-compare-box">
+        <h4>Optimizada</h4>
+        <div class="opt-compare-img"><img id="opt-img-result" alt=""></div>
+        <div class="opt-stats" id="opt-stats-result"></div>
+      </div>
+    </div>
+    <div class="opt-btns">
+      <button class="crop-btn cancel" onclick="backToCrop()">← Volver a recortar</button>
+      <button class="crop-btn cancel" onclick="closeCropper()">Cancelar</button>
+      <button class="crop-btn apply" id="opt-apply-btn" onclick="applyOptimized()">✅ Usar optimizada</button>
+    </div>
   </div>
 </div>
 
@@ -2160,9 +2252,13 @@ function drawCropBox(){
   box.style.width=cropBox.w+'px'; box.style.height=cropBox.h+'px';
 }
 
-function closeCropper(){ document.getElementById('cropper-overlay').classList.remove('open'); cropperImg=null; cropperCallback=null; }
+function closeCropper(){ document.getElementById('cropper-overlay').classList.remove('open'); cropperImg=null; cropperCallback=null; optCroppedDataUrl=null; optCroppedBlob=null; backToCrop(); }
 
-function applyCrop(){
+// Cropped data stored for optimizer
+let optCroppedDataUrl=null, optCroppedBlob=null;
+
+function goToOptimize(){
+  // Do the crop first (same logic as applyCrop but without calling callback yet)
   const canvas=document.getElementById('cropper-canvas');
   const scale=cropperImg.width/canvas.width;
   const q=Number(document.getElementById('crop-quality').value)/100;
@@ -2172,10 +2268,106 @@ function applyCrop(){
   const out=document.createElement('canvas');
   out.width=Math.round(rw*s2); out.height=Math.round(rh*s2);
   out.getContext('2d').drawImage(cropperImg, Math.round(cropBox.x*scale), Math.round(cropBox.y*scale), rw, rh, 0, 0, out.width, out.height);
-  const dataUrl=out.toDataURL('image/jpeg',q);
-  document.getElementById('cropper-overlay').classList.remove('open');
-  const cb=cropperCallback; cropperCallback=null;
-  if(cb) cb(dataUrl, `${out.width}×${out.height}px · ~${Math.round(dataUrl.length*.75/1024)} KB`);
+  optCroppedDataUrl = out.toDataURL('image/jpeg', q);
+  optCroppedBlob = null;
+
+  // Show optimizer step
+  document.getElementById('opt-panel-crop').classList.remove('active');
+  document.getElementById('opt-panel-opt').classList.add('active');
+  document.getElementById('step-ind-1').classList.remove('active'); document.getElementById('step-ind-1').classList.add('done');
+  document.getElementById('step-ind-2').classList.remove('pending'); document.getElementById('step-ind-2').classList.add('active');
+
+  // Load original in compare
+  const origImg = document.getElementById('opt-img-orig');
+  origImg.src = optCroppedDataUrl;
+  origImg.onload = ()=>{
+    const kb = Math.round(optCroppedDataUrl.length * .75 / 1024);
+    document.getElementById('opt-stats-orig').innerHTML =
+      `<span>${origImg.naturalWidth}×${origImg.naturalHeight}px</span><span>${kb} KB</span>`;
+    // Set sensible defaults based on size
+    document.getElementById('opt-rw').value = Math.min(origImg.naturalWidth, 800);
+    document.getElementById('opt-val-w').textContent = Math.min(origImg.naturalWidth, 800);
+    document.getElementById('opt-rh').value = Math.min(origImg.naturalHeight, 600);
+    document.getElementById('opt-val-h').textContent = Math.min(origImg.naturalHeight, 600);
+    optReprocess();
+  };
+}
+
+function backToCrop(){
+  document.getElementById('opt-panel-opt').classList.remove('active');
+  document.getElementById('opt-panel-crop').classList.add('active');
+  document.getElementById('step-ind-2').classList.remove('active'); document.getElementById('step-ind-2').classList.add('pending');
+  document.getElementById('step-ind-1').classList.remove('done'); document.getElementById('step-ind-1').classList.add('active');
+}
+
+function optQuantize(ctx, w, h, levels){
+  const d = ctx.getImageData(0,0,w,h);
+  const px = d.data;
+  const step = Math.max(1, Math.round(256/Math.cbrt(levels)));
+  for(let i=0;i<px.length;i+=4){
+    px[i]   = Math.round(px[i]  /step)*step;
+    px[i+1] = Math.round(px[i+1]/step)*step;
+    px[i+2] = Math.round(px[i+2]/step)*step;
+  }
+  ctx.putImageData(d,0,0);
+}
+
+function optReprocess(){
+  if(!optCroppedDataUrl) return;
+  const origImg = document.getElementById('opt-img-orig');
+  if(!origImg.naturalWidth) return;
+  const maxW = parseInt(document.getElementById('opt-rw').value);
+  const maxH = parseInt(document.getElementById('opt-rh').value);
+  const quality = parseInt(document.getElementById('opt-rq').value)/100;
+  const fmt = document.getElementById('opt-fmt').value;
+  const paleta = document.getElementById('opt-paleta').value;
+
+  let w = origImg.naturalWidth, h = origImg.naturalHeight;
+  const ratio = Math.min(maxW/w, maxH/h, 1);
+  w = Math.round(w*ratio); h = Math.round(h*ratio);
+
+  const oc = document.getElementById('opt-canvas');
+  oc.width=w; oc.height=h;
+  const ctx = oc.getContext('2d');
+  ctx.drawImage(origImg,0,0,w,h);
+  if(paleta!=='full') optQuantize(ctx,w,h,parseInt(paleta));
+
+  oc.toBlob(blob=>{
+    optCroppedBlob = blob;
+    const url = URL.createObjectURL(blob);
+    document.getElementById('opt-img-result').src = url;
+    const origKB = Math.round(optCroppedDataUrl.length*.75/1024);
+    const newKB = Math.round(blob.size/1024);
+    const pct = ((1-blob.size/(optCroppedDataUrl.length*.75))*100).toFixed(0);
+    const better = blob.size < optCroppedDataUrl.length*.75;
+    document.getElementById('opt-stats-result').innerHTML =
+      `<span>${w}×${h}px</span><span class="${better?'better':''}">${newKB} KB</span><span class="${better?'better':''}">${better?'−':'+'}${Math.abs(pct)}%</span>`;
+  }, fmt, quality);
+}
+
+function applyOptimized(){
+  if(!optCroppedBlob && !optCroppedDataUrl){ closeCropper(); return; }
+  if(optCroppedBlob){
+    const reader = new FileReader();
+    reader.onload = ev=>{
+      const dataUrl = ev.target.result;
+      const sizeStr = `${document.getElementById('opt-img-result').naturalWidth||'?'}×${document.getElementById('opt-img-result').naturalHeight||'?'}px · ~${Math.round(optCroppedBlob.size/1024)} KB`;
+      document.getElementById('cropper-overlay').classList.remove('open');
+      backToCrop();
+      const cb = cropperCallback; cropperCallback=null;
+      if(cb) cb(dataUrl, sizeStr);
+      optCroppedDataUrl=null; optCroppedBlob=null;
+    };
+    reader.readAsDataURL(optCroppedBlob);
+  } else {
+    // Fallback: use cropped dataUrl directly
+    const sizeStr = `${document.getElementById('opt-img-orig').naturalWidth}×${document.getElementById('opt-img-orig').naturalHeight}px`;
+    document.getElementById('cropper-overlay').classList.remove('open');
+    backToCrop();
+    const cb = cropperCallback; cropperCallback=null;
+    if(cb) cb(optCroppedDataUrl, sizeStr);
+    optCroppedDataUrl=null;
+  }
 }
 
 function updateQualityLabel(){
