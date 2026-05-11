@@ -2296,11 +2296,18 @@ function goToOptimize(){
     document.getElementById('opt-val-w').textContent = Math.min(origImg.naturalWidth, 800);
     document.getElementById('opt-rh').value = Math.min(origImg.naturalHeight, 600);
     document.getElementById('opt-val-h').textContent = Math.min(origImg.naturalHeight, 600);
-    // Reset aspect lock
-    _optAspectLocked = false;
-    _optAspectRatio  = null;
+    // Activar lock de proporción por defecto
+    _optAspectLocked = true;
+    _optAspectRatio  = origImg.naturalWidth / origImg.naturalHeight;
     const lockBtn = document.getElementById('opt-lock-btn');
-    if(lockBtn){ lockBtn.style.background='none'; lockBtn.style.color='var(--gold)'; lockBtn.textContent='🔓 libre'; lockBtn.title='Bloquear proporción'; }
+    if(lockBtn){
+      const gcd = (a,b)=>b?gcd(b,a%b):a;
+      const d = gcd(origImg.naturalWidth, origImg.naturalHeight);
+      lockBtn.style.background = 'var(--gold)';
+      lockBtn.style.color      = 'var(--bd)';
+      lockBtn.textContent = `🔒 ${origImg.naturalWidth/d}:${origImg.naturalHeight/d}`;
+      lockBtn.title = 'Desbloquear proporción';
+    }
     optReprocess();
   };
 }
