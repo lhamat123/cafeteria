@@ -588,8 +588,12 @@
   .opt-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;margin-top:8px}
   .opt-compare-box{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px}
   .opt-compare-box h4{font-size:10px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
-  .opt-compare-img{width:100%;height:130px;background:rgba(0,0,0,.4);border-radius:5px;overflow:hidden;display:flex;align-items:center;justify-content:center}
-  .opt-compare-img img{max-width:100%;max-height:100%;object-fit:contain}
+  .opt-compare-img{width:100%;height:130px;background:rgba(0,0,0,.4);border-radius:5px;overflow:hidden;display:flex;align-items:center;justify-content:center;cursor:grab;position:relative;touch-action:none;user-select:none}
+  .opt-compare-img.dragging{cursor:grabbing}
+  .opt-compare-img img{max-width:100%;max-height:100%;object-fit:contain;pointer-events:none;transform-origin:0 0;will-change:transform}
+  .opt-zoom-hint{position:absolute;bottom:4px;right:5px;font-size:9px;color:rgba(255,255,255,.3);pointer-events:none;letter-spacing:.04em}
+  .opt-zoom-reset{position:absolute;top:4px;right:5px;font-size:9px;background:rgba(0,0,0,.45);color:rgba(255,255,255,.55);border:none;border-radius:4px;padding:1px 5px;cursor:pointer;display:none}
+  .opt-zoom-reset.visible{display:block}
   .opt-stats{font-size:11px;color:rgba(255,255,255,.4);margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}
   .opt-stats span{background:rgba(255,255,255,.07);padding:2px 6px;border-radius:4px}
   .opt-stats span.better{color:#4ade80}
@@ -1114,12 +1118,20 @@
     <div class="opt-compare" id="opt-compare">
       <div class="opt-compare-box">
         <h4>Recortada</h4>
-        <div class="opt-compare-img"><img id="opt-img-orig" alt=""></div>
+        <div class="opt-compare-img" id="opt-vp-orig">
+          <img id="opt-img-orig" alt="">
+          <button class="opt-zoom-reset" id="opt-reset-orig" onclick="optZoomReset()">↺ reset</button>
+          <span class="opt-zoom-hint">🔍 scroll · arrastra</span>
+        </div>
         <div class="opt-stats" id="opt-stats-orig"></div>
       </div>
       <div class="opt-compare-box">
         <h4>Optimizada</h4>
-        <div class="opt-compare-img"><img id="opt-img-result" alt=""></div>
+        <div class="opt-compare-img" id="opt-vp-result">
+          <img id="opt-img-result" alt="">
+          <button class="opt-zoom-reset" id="opt-reset-result" onclick="optZoomReset()">↺ reset</button>
+          <span class="opt-zoom-hint">🔍 scroll · arrastra</span>
+        </div>
         <div class="opt-stats" id="opt-stats-result"></div>
       </div>
     </div>
@@ -2445,6 +2457,142 @@ function applyOptimized(){
     optCroppedDataUrl=null;
   }
 }
+
+/* ── ZOOM + PANEO SINCRONIZADO ─────────────────────────────────────────── */
+(function(){
+  const MIN_Z=1, MAX_Z=8;
+  let z=1, px=0, py=0; // estado compartido
+  let dragging=false, lastX=0, lastY=0;
+  // Pinch
+  let pinchDist0=null, pinchZ0=1, pinchPx0=0, pinchPy0=0;
+
+  function vps(){ return [document.getElementById('opt-vp-orig'), document.getElementById('opt-vp-result')]; }
+  function imgs(){ return [document.getElementById('opt-img-orig'), document.getElementById('opt-img-result')]; }
+
+  function clampPan(){
+    // Permite desplazar pero no salir más allá del borde opuesto al zoom
+    // (límite simple: el centro siempre queda dentro de la imagen escalada)
+    const vp = document.getElementById('opt-vp-orig');
+    if(!vp) return;
+    const W=vp.clientWidth, H=vp.clientHeight;
+    const maxX = (z-1)*W/2, maxY = (z-1)*H/2;
+    px = Math.max(-maxX, Math.min(maxX, px));
+    py = Math.max(-maxY, Math.min(maxY, py));
+  }
+
+  function applyTransform(){
+    clampPan();
+    const t = `translate(calc(-50% + ${px}px), calc(-50% + ${py}px)) scale(${z})`;
+    imgs().forEach(img=>{
+      if(!img) return;
+      img.style.position='absolute';
+      img.style.top='50%'; img.style.left='50%';
+      img.style.maxWidth='none'; img.style.maxHeight='none';
+      img.style.width='auto'; img.style.height='100%';
+      img.style.transform=t;
+    });
+    const showReset = z!==1||px!==0||py!==0;
+    ['opt-reset-orig','opt-reset-result'].forEach(id=>{
+      const b=document.getElementById(id);
+      if(b) b.classList.toggle('visible', showReset);
+    });
+  }
+
+  // ── Wheel (zoom centrado en cursor) ──
+  function onWheel(e){
+    e.preventDefault();
+    const vp = e.currentTarget;
+    const rect = vp.getBoundingClientRect();
+    const cx = e.clientX - rect.left - rect.width/2;
+    const cy = e.clientY - rect.top  - rect.height/2;
+    const delta = e.deltaY < 0 ? 1.15 : 1/1.15;
+    const newZ = Math.max(MIN_Z, Math.min(MAX_Z, z*delta));
+    // Ajustar pan para que el punto bajo el cursor no se mueva
+    px = cx - (cx - px)*(newZ/z);
+    py = cy - (cy - py)*(newZ/z);
+    z  = newZ;
+    applyTransform();
+  }
+
+  // ── Mouse drag ──
+  function onMouseDown(e){
+    if(e.button!==0) return;
+    dragging=true; lastX=e.clientX; lastY=e.clientY;
+    vps().forEach(v=>v&&v.classList.add('dragging'));
+    e.preventDefault();
+  }
+  function onMouseMove(e){
+    if(!dragging) return;
+    px += e.clientX-lastX; py += e.clientY-lastY;
+    lastX=e.clientX; lastY=e.clientY;
+    applyTransform();
+  }
+  function onMouseUp(){ dragging=false; vps().forEach(v=>v&&v.classList.remove('dragging')); }
+
+  // ── Touch drag + pinch ──
+  function touchDist(t){ return Math.hypot(t[0].clientX-t[1].clientX, t[0].clientY-t[1].clientY); }
+  function touchMid(t,rect){ return { x:(t[0].clientX+t[1].clientX)/2-rect.left-rect.width/2, y:(t[0].clientY+t[1].clientY)/2-rect.top-rect.height/2 }; }
+
+  function onTouchStart(e){
+    if(e.touches.length===1){
+      dragging=true; lastX=e.touches[0].clientX; lastY=e.touches[0].clientY;
+    } else if(e.touches.length===2){
+      dragging=false;
+      pinchDist0=touchDist(e.touches);
+      pinchZ0=z; pinchPx0=px; pinchPy0=py;
+    }
+    e.preventDefault();
+  }
+  function onTouchMove(e){
+    if(e.touches.length===1 && dragging){
+      px += e.touches[0].clientX-lastX; py += e.touches[0].clientY-lastY;
+      lastX=e.touches[0].clientX; lastY=e.touches[0].clientY;
+      applyTransform();
+    } else if(e.touches.length===2 && pinchDist0){
+      const d = touchDist(e.touches);
+      const newZ = Math.max(MIN_Z, Math.min(MAX_Z, pinchZ0*(d/pinchDist0)));
+      const vp = e.currentTarget;
+      const rect = vp.getBoundingClientRect();
+      const mid  = touchMid(e.touches, rect);
+      px = mid.x - (mid.x - pinchPx0)*(newZ/pinchZ0);
+      py = mid.y - (mid.y - pinchPy0)*(newZ/pinchZ0);
+      z  = newZ;
+      applyTransform();
+    }
+    e.preventDefault();
+  }
+  function onTouchEnd(e){ if(e.touches.length===0){ dragging=false; pinchDist0=null; } }
+
+  // ── Doble clic → reset ──
+  function onDblClick(){ z=1; px=0; py=0; applyTransform(); }
+
+  function attachHandlers(){
+    vps().forEach(vp=>{
+      if(!vp||vp._zoomBound) return;
+      vp._zoomBound=true;
+      vp.addEventListener('wheel',      onWheel,      {passive:false});
+      vp.addEventListener('mousedown',  onMouseDown);
+      vp.addEventListener('touchstart', onTouchStart, {passive:false});
+      vp.addEventListener('touchmove',  onTouchMove,  {passive:false});
+      vp.addEventListener('touchend',   onTouchEnd);
+      vp.addEventListener('dblclick',   onDblClick);
+    });
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup',   onMouseUp);
+  }
+
+  // Exponer reset global para el botón
+  window.optZoomReset = function(){ z=1; px=0; py=0; applyTransform(); };
+
+  // Resetear estado cuando se entra al paso de optimización
+  const _origGoToOptimize = window.goToOptimize;
+  window.goToOptimize = function(){
+    _origGoToOptimize && _origGoToOptimize();
+    z=1; px=0; py=0;
+    // Dar tiempo al DOM para que las imágenes existan
+    setTimeout(()=>{ attachHandlers(); applyTransform(); }, 100);
+  };
+})();
 
 function updateQualityLabel(){
   const q=Number(document.getElementById('crop-quality').value);
