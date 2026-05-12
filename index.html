@@ -1192,10 +1192,6 @@
         <span class="iai-icon">📁</span>
         <span class="iai-lbl"><span>Cargar imagen nueva</span><span class="iai-desc">Reemplazar con otra imagen del dispositivo</span></span>
       </button>
-      <button class="img-action-btn" id="iamBtnPaste" style="border-color:rgba(201,168,124,.35)">
-        <span class="iai-icon">📋</span>
-        <span class="iai-lbl"><span>Pegar desde portapapeles</span><span class="iai-desc">Usa una imagen copiada (Ctrl+C / captura)</span></span>
-      </button>
       <button class="img-action-btn iai-cancel" id="iamBtnCancel">Cancelar</button>
     </div>
   </div>
@@ -3078,132 +3074,84 @@ function renderAdmRepartos(){
 }
 
 /* ── IMAGE ACTION MODAL ─────────────────────────────────────────────────
-   Cuando ya hay imagen: muestra opciones (recortar / optimizar / nueva / pegar).
-   Cuando NO hay imagen: muestra modal con opciones nueva + pegar.
+   Cuando ya hay imagen: muestra opciones (recortar / optimizar / nueva).
+   Cuando NO hay imagen: va directo al picker.
 ──────────────────────────────────────────────────────────────────────── */
 (function(){
+  let _resolve=null;
 
   function openModal(currentSrc){
     return new Promise(resolve=>{
+      _resolve=resolve;
       const modal=document.getElementById('imgActionModal');
       const prev =document.getElementById('iamPreview');
       const sub  =document.getElementById('iamSub');
+      if(prev){ prev.src=currentSrc||''; prev.style.display=currentSrc?'':'none'; }
+      if(sub)  sub.textContent = currentSrc ? '¿Qué deseas hacer con la imagen?' : 'Cargar imagen';
 
-      const hasSrc = !!(currentSrc && currentSrc.length > 4);
-      if(prev){ prev.src=hasSrc?currentSrc:''; prev.style.display=hasSrc?'':'none'; }
-      if(sub)  sub.textContent = hasSrc ? '¿Qué deseas hacer con la imagen?' : 'Agregar imagen';
+      document.getElementById('iamBtnCrop')  .onclick=()=>{ closeModal(); resolve('crop');   };
+      document.getElementById('iamBtnOpt')   .onclick=()=>{ closeModal(); resolve('opt');    };
+      document.getElementById('iamBtnNew')   .onclick=()=>{ closeModal(); resolve('new');    };
+      document.getElementById('iamBtnCancel').onclick=()=>{ closeModal(); resolve(null);     };
 
-      // Recortar y Optimizar solo si ya hay imagen
-      const btnCrop = document.getElementById('iamBtnCrop');
-      const btnOpt  = document.getElementById('iamBtnOpt');
-      if(btnCrop) btnCrop.style.display = hasSrc ? '' : 'none';
-      if(btnOpt)  btnOpt.style.display  = hasSrc ? '' : 'none';
-
-      const done = (val)=>{ modal.classList.remove('open'); modal.onclick=null; resolve(val); };
-      document.getElementById('iamBtnCrop')  .onclick=()=>done('crop');
-      document.getElementById('iamBtnOpt')   .onclick=()=>done('opt');
-      document.getElementById('iamBtnNew')   .onclick=()=>done('new');
-      document.getElementById('iamBtnPaste') .onclick=()=>done('paste');
-      document.getElementById('iamBtnCancel').onclick=()=>done(null);
       modal.classList.add('open');
-      modal.onclick=ev=>{ if(ev.target===modal) done(null); };
+      modal.onclick=ev=>{ if(ev.target===modal){ closeModal(); resolve(null); } };
     });
   }
 
-  // Lee imagen del portapapeles usando la Clipboard API moderna.
-  // Devuelve Promise<File|null>.
-  async function readClipboardImage(){
-    // Intentar API moderna (requiere permiso clipboard-read)
-    if(navigator.clipboard && navigator.clipboard.read){
-      try{
-        const items = await navigator.clipboard.read();
-        for(const item of items){
-          const imgType = item.types.find(t=>t.startsWith('image/'));
-          if(imgType){
-            const blob = await item.getType(imgType);
-            return new File([blob], 'pegada.'+imgType.split('/')[1], {type:imgType});
-          }
-        }
-        toast('No hay imagen en el portapapeles — copia una imagen primero','warn');
-        return null;
-      } catch(err){
-        if(err.name==='NotAllowedError'){
-          // Permiso denegado → informar y ofrecer Ctrl+V manual
-          toast('Permiso denegado al portapapeles — presiona Ctrl+V ahora','warn');
-        }
-        // Caer al fallback
-      }
-    }
-    // Fallback: escuchar el evento paste durante 6 s
-    return new Promise(resolve=>{
-      const overlay = document.createElement('div');
-      overlay.style.cssText='position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55)';
-      overlay.innerHTML=`<div style="background:#fff;border-radius:14px;padding:1.4rem 1.8rem;text-align:center;max-width:320px;font-family:Lato,sans-serif">
-        <div style="font-size:2rem;margin-bottom:.6rem">📋</div>
-        <p style="font-size:.9rem;font-weight:700;color:#1a1008;margin-bottom:.4rem">Presiona <kbd style="background:#f0ede8;padding:2px 7px;border-radius:5px;font-size:.85rem">Ctrl+V</kbd></p>
-        <p style="font-size:.78rem;color:#6b5340">para pegar la imagen copiada</p>
-        <button id="_pasteOverlayCancel" style="margin-top:1rem;padding:.45rem 1.2rem;border-radius:8px;border:1.5px solid #d8d5d0;background:none;cursor:pointer;font-size:.8rem">Cancelar</button>
-      </div>`;
-      document.body.appendChild(overlay);
-
-      const cleanup=(file)=>{
-        document.removeEventListener('paste', onPaste);
-        document.body.removeChild(overlay);
-        clearTimeout(timer);
-        resolve(file);
-      };
-
-      const onPaste=(ev)=>{
-        ev.preventDefault();
-        const items=Array.from((ev.clipboardData||window.clipboardData).items||[]);
-        const imgItem=items.find(i=>i.type.startsWith('image/'));
-        if(imgItem){ cleanup(imgItem.getAsFile()); }
-        else { toast('No hay imagen en el portapapeles','warn'); cleanup(null); }
-      };
-
-      document.addEventListener('paste', onPaste, {once:true});
-      overlay.querySelector('#_pasteOverlayCancel').onclick=()=>cleanup(null);
-      const timer=setTimeout(()=>{ document.removeEventListener('paste',onPaste); cleanup(null); }, 10000);
-    });
+  function closeModal(){
+    document.getElementById('imgActionModal').classList.remove('open');
   }
 
-  // Núcleo: siempre abre el modal
+  // Núcleo: si ya hay imagen ofrece el modal; si no, va directo a pickFile
   async function smartPick(currentSrc, cropMode, onDone){
-    const action = await openModal(currentSrc);
-    if(!action) return;
-
-    if(action==='paste'){
-      const file = await readClipboardImage();
-      if(file) openCropper(file, cropMode, onDone);
-      return;
-    }
-    if(action==='new'){
+    if(currentSrc && currentSrc.length>4){
+      const action = await openModal(currentSrc);
+      if(!action) return;
+      if(action==='new'){
+        pickFile(file=>openCropper(file, cropMode, onDone));
+      } else {
+        // Reusar imagen actual → cargarla en el cropper como Blob
+        urlToFile(currentSrc, file=>{
+          // Para 'crop': paso 1 solamente. Para 'opt': ir directo a paso 2.
+          if(action==='opt'){
+            openCropperGoOpt(file, cropMode, onDone);
+          } else {
+            openCropper(file, cropMode, onDone);
+          }
+        });
+      }
+    } else {
       pickFile(file=>openCropper(file, cropMode, onDone));
-      return;
     }
-    // 'crop' u 'opt' — reusar imagen actual
-    urlToFile(currentSrc, file=>{
-      if(action==='opt') openCropperGoOpt(file, cropMode, onDone);
-      else               openCropper(file, cropMode, onDone);
-    });
   }
 
+  // Convierte src (dataURL o URL) a File
   function urlToFile(src, cb){
     fetch(src).then(r=>r.blob()).then(blob=>{
-      cb(new File([blob],'imagen.jpg',{type:blob.type||'image/jpeg'}));
-    }).catch(()=>{ pickFile(cb); });
+      cb(new File([blob], 'imagen.jpg', {type: blob.type||'image/jpeg'}));
+    }).catch(()=>{
+      // Si falla (URL externa con CORS), ir a picker
+      pickFile(cb);
+    });
   }
 
+  // Abre el cropper y luego salta automáticamente al paso de optimización
   function openCropperGoOpt(file, mode, onDone){
-    openCropper(file, mode, onDone);
+    openCropper(file, mode, onDone);      // carga la imagen en el cropper
+    // Esperamos a que el cropper esté visible y disparamos goToOptimize
     const wait=()=>{
       const panel=document.getElementById('opt-panel-crop');
-      if(panel&&panel.classList.contains('active')) goToOptimize();
-      else setTimeout(wait,80);
+      if(panel && panel.classList.contains('active')){
+        goToOptimize();
+      } else {
+        setTimeout(wait,80);
+      }
     };
     setTimeout(wait,120);
   }
 
+  // Exponer como global
   window.smartImagePick = smartPick;
 })();
 
