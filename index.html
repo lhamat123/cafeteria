@@ -523,6 +523,32 @@
   .gh-status.ok{color:#4ade80}
   .gh-status.err{color:#f87171}
 
+  /* ── MOVER A CATEGORÍA ── */
+  .move-cat-wrap{display:flex;flex-direction:column;gap:2px;flex-shrink:0;align-items:center}
+  .move-cat-sel{font-family:'Lato',sans-serif;font-size:.6rem;color:var(--gold);
+    background:#1a1a2e;border:1px solid rgba(201,168,124,.4);border-radius:4px;
+    padding:1px 2px;cursor:pointer;max-width:52px;text-align:center;
+    transition:border-color .14s;appearance:none;-webkit-appearance:none}
+  .move-cat-sel:focus{outline:none;border-color:var(--gold)}
+  .move-cat-sel:hover{border-color:var(--gold)}
+  .move-cat-sel option{background:#1a1008;color:#fff;font-size:.72rem}
+  .prow-sel{width:18px;height:18px;accent-color:var(--gold);cursor:pointer;flex-shrink:0;margin-top:14px}
+  .bulk-bar{display:none;align-items:center;gap:.6rem;padding:.5rem .8rem;
+    background:#1a1a2e;border-radius:8px;margin-bottom:.6rem;flex-wrap:wrap}
+  .bulk-bar.visible{display:flex}
+  .bulk-bar-label{font-size:.75rem;color:var(--gold);font-weight:700;flex:1}
+  .bulk-sel{font-family:'Lato',sans-serif;font-size:.75rem;color:var(--gold);
+    background:#0d1117;border:1.5px solid rgba(201,168,124,.5);border-radius:6px;
+    padding:4px 8px;cursor:pointer;flex:1;min-width:120px}
+  .bulk-sel:focus{outline:none;border-color:var(--gold)}
+  .bulk-move-btn{background:var(--gold);color:var(--bd);border:none;border-radius:6px;
+    padding:5px 12px;font-family:'Lato',sans-serif;font-size:.75rem;font-weight:700;
+    cursor:pointer;white-space:nowrap;transition:filter .14s}
+  .bulk-move-btn:hover{filter:brightness(1.1)}
+  .bulk-cancel-btn{background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);border:none;
+    border-radius:6px;padding:5px 10px;font-family:'Lato',sans-serif;font-size:.73rem;
+    cursor:pointer;transition:background .14s}
+  .bulk-cancel-btn:hover{background:rgba(255,255,255,.15)}
   /* ── ORDEN FLECHAS ── */
   .order-btns{display:flex;flex-direction:column;gap:2px;flex-shrink:0}
   .obtn{background:rgba(201,168,124,.15);border:1px solid rgba(201,168,124,.3);color:var(--gold);
@@ -3207,8 +3233,39 @@ function renderAdmTab(ci){
   addP.onclick=()=>{ cat.productos.push({nombre:'Nuevo producto',desc:'Descripción.',precio:'$0.00',badge:'',img:'',imgFull:''}); renderAdmTab(ci); };
   ph.appendChild(addP); pc.appendChild(ph);
 
+  // ── Barra de acción masiva ──
+  const bulkBar=document.createElement('div'); bulkBar.className='bulk-bar'; bulkBar.id=`bulkBar-${ci}`;
+  const bulkLabel=document.createElement('span'); bulkLabel.className='bulk-bar-label'; bulkLabel.id=`bulkLabel-${ci}`;
+  bulkLabel.textContent='0 productos seleccionados';
+  const bulkSel=document.createElement('select'); bulkSel.className='bulk-sel'; bulkSel.id=`bulkSel-${ci}`;
+  bulkSel.innerHTML='<option value="">— Mover a categoría —</option>';
+  DATA.categorias.forEach((c2,i2)=>{ if(i2===ci) return; const o=document.createElement('option'); o.value=i2; o.textContent=c2.label; bulkSel.appendChild(o); });
+  const bulkMoveBtn=document.createElement('button'); bulkMoveBtn.className='bulk-move-btn'; bulkMoveBtn.textContent='↗ Mover';
+  bulkMoveBtn.onclick=()=>{
+    const dest=parseInt(bulkSel.value);
+    if(isNaN(dest)||dest<0||dest>=DATA.categorias.length){ toast('Elige una categoría destino','warn'); return; }
+    const checks=pc.querySelectorAll('.prow-sel:checked');
+    if(!checks.length){ toast('Selecciona al menos un producto','warn'); return; }
+    const indices=Array.from(checks).map(ch=>parseInt(ch.dataset.pi)).sort((a,b)=>b-a);
+    const moved=[];
+    indices.forEach(idx=>{ moved.unshift(DATA.categorias[ci].productos.splice(idx,1)[0]); });
+    DATA.categorias[dest].productos.push(...moved);
+    toast(`${moved.length} producto(s) movido(s) a "${DATA.categorias[dest].label}"`, 'ok');
+    renderAdmTab(ci);
+  };
+  const bulkCancel=document.createElement('button'); bulkCancel.className='bulk-cancel-btn'; bulkCancel.textContent='Cancelar';
+  bulkCancel.onclick=()=>{ pc.querySelectorAll('.prow-sel').forEach(c=>c.checked=false); updateBulkBar(ci,pc); };
+  bulkBar.appendChild(bulkLabel); bulkBar.appendChild(bulkSel); bulkBar.appendChild(bulkMoveBtn); bulkBar.appendChild(bulkCancel);
+  pc.appendChild(bulkBar);
+
   cat.productos.forEach((p,pi)=>{
     const row=document.createElement('div'); row.className='prow';
+
+    // Checkbox de selección múltiple
+    const chk=document.createElement('input'); chk.type='checkbox'; chk.className='prow-sel';
+    chk.dataset.pi=pi; chk.title='Seleccionar para mover';
+    chk.onchange=()=>updateBulkBar(ci,pc);
+    row.appendChild(chk);
 
     // ↑↓ order buttons
     const ob=document.createElement('div'); ob.className='order-btns';
@@ -3220,6 +3277,22 @@ function renderAdmTab(ci){
     bd.onclick=()=>{ moveProd(ci,pi,1); };
     ob.appendChild(bu); ob.appendChild(bd);
     row.appendChild(ob);
+
+    // ↗ Mover individualmente
+    const mv=document.createElement('div'); mv.className='move-cat-wrap';
+    mv.title='Mover a otra categoría';
+    const mvSel=document.createElement('select'); mvSel.className='move-cat-sel';
+    mvSel.innerHTML='<option value="">↗</option>';
+    DATA.categorias.forEach((c2,i2)=>{ if(i2===ci) return; const o=document.createElement('option'); o.value=i2; o.textContent=c2.label.length>8?c2.label.slice(0,7)+'…':c2.label; o.title=c2.label; mvSel.appendChild(o); });
+    mvSel.onchange=()=>{
+      const dest=parseInt(mvSel.value); if(isNaN(dest)||dest<0) return;
+      const [prod]=DATA.categorias[ci].productos.splice(pi,1);
+      DATA.categorias[dest].productos.push(prod);
+      toast(`"${prod.nombre}" → "${DATA.categorias[dest].label}"`, 'ok');
+      renderAdmTab(ci);
+    };
+    mv.appendChild(mvSel);
+    row.appendChild(mv);
 
     const th=document.createElement('div'); th.className='athumb';
     th.innerHTML=`<img src="${e(p.img||'')}" alt=""><div class="athumb-ov">📷</div>`;
@@ -3250,6 +3323,7 @@ function renderAdmTab(ci){
     row.appendChild(del);
     pc.appendChild(row);
   });
+  const addPBottom=document.createElement('button'); addPBottom.className='ab ab-blue'; addPBottom.style.cssText='width:100%;margin:.5rem 0 .2rem;padding:.55rem;font-size:.82rem;border-radius:8px;justify-content:center'; addPBottom.textContent='+ Producto'; addPBottom.onclick=()=>{ cat.productos.push({nombre:'Nuevo producto',desc:'Descripción.',precio:'$0.00',badge:'',img:'',imgFull:''}); renderAdmTab(ci); }; pc.appendChild(addPBottom);
   content.appendChild(pc);
 
   // Gallery
@@ -3328,6 +3402,16 @@ function moveProd(ci, pi, dir){
   if(j<0||j>=arr.length) return;
   [arr[pi],arr[j]]=[arr[j],arr[pi]];
   renderAdmTab(ci);
+}
+
+function updateBulkBar(ci, pc){
+  const bar=document.getElementById(`bulkBar-${ci}`);
+  const label=document.getElementById(`bulkLabel-${ci}`);
+  if(!bar||!label) return;
+  const checked=pc.querySelectorAll(".prow-sel:checked");
+  const n=checked.length;
+  if(n>0){ bar.classList.add("visible"); label.textContent=n===1?"1 producto seleccionado":`${n} productos seleccionados`; }
+  else { bar.classList.remove("visible"); }
 }
 
 /* apply / github / export / import */
