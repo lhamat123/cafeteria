@@ -1218,6 +1218,10 @@
         <span class="iai-icon">📁</span>
         <span class="iai-lbl"><span>Cargar imagen nueva</span><span class="iai-desc">Reemplazar con otra imagen del dispositivo</span></span>
       </button>
+      <button class="img-action-btn" id="iamBtnClipboard" style="background:rgba(37,99,235,.08);border-color:rgba(37,99,235,.25)">
+        <span class="iai-icon">📋</span>
+        <span class="iai-lbl"><span>Pegar desde portapapeles</span><span class="iai-desc">Usa la imagen copiada (Ctrl+C / captura de pantalla)</span></span>
+      </button>
       <button class="img-action-btn iai-cancel" id="iamBtnCancel">Cancelar</button>
     </div>
   </div>
@@ -3109,16 +3113,26 @@ function renderAdmRepartos(){
   function openModal(currentSrc){
     return new Promise(resolve=>{
       _resolve=resolve;
-      const modal=document.getElementById('imgActionModal');
-      const prev =document.getElementById('iamPreview');
-      const sub  =document.getElementById('iamSub');
-      if(prev){ prev.src=currentSrc||''; prev.style.display=currentSrc?'':'none'; }
-      if(sub)  sub.textContent = currentSrc ? '¿Qué deseas hacer con la imagen?' : 'Cargar imagen';
+      const modal     = document.getElementById('imgActionModal');
+      const prev      = document.getElementById('iamPreview');
+      const sub       = document.getElementById('iamSub');
+      const btnCrop   = document.getElementById('iamBtnCrop');
+      const btnOpt    = document.getElementById('iamBtnOpt');
+      const btnClip   = document.getElementById('iamBtnClipboard');
+      const hasImg    = !!(currentSrc && currentSrc.length > 4);
 
-      document.getElementById('iamBtnCrop')  .onclick=()=>{ closeModal(); resolve('crop');   };
-      document.getElementById('iamBtnOpt')   .onclick=()=>{ closeModal(); resolve('opt');    };
-      document.getElementById('iamBtnNew')   .onclick=()=>{ closeModal(); resolve('new');    };
-      document.getElementById('iamBtnCancel').onclick=()=>{ closeModal(); resolve(null);     };
+      if(prev){ prev.src=currentSrc||''; prev.style.display=hasImg?'':'none'; }
+      if(sub)  sub.textContent = hasImg ? '¿Qué deseas hacer con la imagen?' : 'Agregar imagen';
+
+      // Recortar/optimizar solo disponibles si ya hay imagen
+      if(btnCrop) btnCrop.style.display = hasImg ? '' : 'none';
+      if(btnOpt)  btnOpt.style.display  = hasImg ? '' : 'none';
+
+      if(btnCrop) btnCrop.onclick = ()=>{ closeModal(); resolve('crop');      };
+      if(btnOpt)  btnOpt.onclick  = ()=>{ closeModal(); resolve('opt');       };
+      document.getElementById('iamBtnNew')   .onclick = ()=>{ closeModal(); resolve('new');       };
+      if(btnClip) btnClip.onclick            = ()=>{ closeModal(); resolve('clipboard');          };
+      document.getElementById('iamBtnCancel').onclick = ()=>{ closeModal(); resolve(null);        };
 
       modal.classList.add('open');
       modal.onclick=ev=>{ if(ev.target===modal){ closeModal(); resolve(null); } };
@@ -3131,24 +3145,47 @@ function renderAdmRepartos(){
 
   // Núcleo: si ya hay imagen ofrece el modal; si no, va directo a pickFile
   async function smartPick(currentSrc, cropMode, onDone){
-    if(currentSrc && currentSrc.length>4){
-      const action = await openModal(currentSrc);
-      if(!action) return;
-      if(action==='new'){
-        pickFile(file=>openCropper(file, cropMode, onDone));
-      } else {
-        // Reusar imagen actual → cargarla en el cropper como Blob
-        urlToFile(currentSrc, file=>{
-          // Para 'crop': paso 1 solamente. Para 'opt': ir directo a paso 2.
-          if(action==='opt'){
-            openCropperGoOpt(file, cropMode, onDone);
-          } else {
-            openCropper(file, cropMode, onDone);
-          }
-        });
-      }
-    } else {
+    // Siempre mostrar el modal — con o sin imagen previa
+    const action = await openModal(currentSrc);
+    if(!action) return;
+
+    if(action === 'clipboard'){
+      pasteFromClipboard(file => {
+        if(!file){ toast('No hay imagen en el portapapeles','warn'); return; }
+        openCropper(file, cropMode, onDone);
+      });
+    } else if(action === 'new'){
       pickFile(file=>openCropper(file, cropMode, onDone));
+    } else if(action === 'opt'){
+      urlToFile(currentSrc, file=>openCropperGoOpt(file, cropMode, onDone));
+    } else if(action === 'crop'){
+      urlToFile(currentSrc, file=>openCropper(file, cropMode, onDone));
+    }
+  }
+
+  // Lee imagen del portapapeles (Clipboard API) con fallback
+  async function pasteFromClipboard(cb){
+    try{
+      const items = await navigator.clipboard.read();
+      for(const item of items){
+        const imgType = item.types.find(t=>t.startsWith('image/'));
+        if(imgType){
+          const blob = await item.getType(imgType);
+          cb(new File([blob], 'clipboard.png', {type: imgType}));
+          return;
+        }
+      }
+      toast('No hay imagen en el portapapeles — copia una imagen primero','warn');
+      cb(null);
+    }catch(err){
+      // Fallback: pegar con Ctrl+V en un textarea oculto (para navegadores sin Clipboard API)
+      if(err.name === 'NotAllowedError'){
+        toast('Permiso denegado — pega la imagen directamente con Ctrl+V en el área de la imagen','warn');
+        cb(null);
+      } else {
+        toast('Portapapeles no disponible — usa "Cargar imagen nueva"','warn');
+        cb(null);
+      }
     }
   }
 
@@ -3177,9 +3214,58 @@ function renderAdmRepartos(){
     setTimeout(wait,120);
   }
 
+
   // Exponer como global
   window.smartImagePick = smartPick;
+  window.pasteFromClipboard = pasteFromClipboard;
 })();
+
+// ── Atajo de teclado global: Ctrl+V / Cmd+V pega imagen cuando el admin está abierto ──
+document.addEventListener('paste', ev => {
+  if(!document.getElementById('page-admin').classList.contains('active')) return;
+  const items = ev.clipboardData?.items;
+  if(!items) return;
+  for(const item of items){
+    if(item.type.startsWith('image/')){
+      const file = item.getAsFile();
+      if(!file) continue;
+      ev.preventDefault();
+      toast('📋 Imagen del portapapeles detectada — abriendo editor…', '');
+      // Abrir cropper directamente (sin pasar por el modal de acción)
+      openCropper(file, 'main', (dataUrl, sizeStr) => {
+        // Intentar aplicar al campo de imagen activo según el tab
+        if(typeof admTab !== 'undefined'){
+          if(admTab === -1){
+            // Tab de info — preguntar qué campo
+            const choices = ['bannerImg','aboutImg','promoImg'];
+            const names   = ['Banner / Logo','Historia (about)','Promo'];
+            const idx = choices.findIndex((_,i)=> confirm(`¿Aplicar imagen a "${names[i]}"?\n\nPresiona Cancelar para intentar el siguiente campo.`));
+            const field = choices[idx >= 0 ? idx : 0];
+            if(!DATA.info) DATA.info = {};
+            DATA.info[field] = dataUrl;
+            // Actualizar thumb si está visible
+            const thumbId = field === 'bannerImg' ? 'bannerThumb' : field === 'aboutImg' ? 'aboutThumb' : 'promoThumb';
+            const th = document.getElementById(thumbId);
+            if(th) th.querySelector('img').src = dataUrl;
+            toast('✅ Imagen aplicada a ' + names[idx >= 0 ? idx : 0], 'ok');
+          } else if(admTab >= 0){
+            // Tab de categoría — aplicar al último producto editado o al primero sin imagen
+            const cat = DATA.categorias[admTab];
+            if(!cat) return;
+            let pi = cat.productos.findIndex(p => !p.img || p.img.length < 5);
+            if(pi < 0) pi = cat.productos.length - 1;
+            if(pi < 0) return;
+            DATA.categorias[admTab].productos[pi].img = dataUrl;
+            DATA.categorias[admTab].productos[pi].imgFull = dataUrl;
+            renderAdmTab(admTab);
+            toast(`✅ Imagen aplicada a "${cat.productos[pi].nombre}"`, 'ok');
+          }
+        }
+      });
+      break;
+    }
+  }
+});
 
 function admUploadInfoGalAt(fi,imgEl){
   const cur = DATA.info?.galeria?.[fi]?.img || '';
@@ -3300,6 +3386,17 @@ function renderAdmTab(ci){
     leftCol.appendChild(chk);
 
     row.appendChild(leftCol);
+
+    // ▲▼ order buttons
+    const ob=document.createElement('div'); ob.className='order-btns';
+    const bu=document.createElement('button'); bu.className='obtn'; bu.textContent='▲';
+    bu.title='Subir'; bu.disabled=(pi===0);
+    bu.onclick=()=>{ moveProd(ci,pi,-1); };
+    const bd=document.createElement('button'); bd.className='obtn'; bd.textContent='▼';
+    bd.title='Bajar'; bd.disabled=(pi===cat.productos.length-1);
+    bd.onclick=()=>{ moveProd(ci,pi,1); };
+    ob.appendChild(bu); ob.appendChild(bd);
+    row.appendChild(ob);
 
     const th=document.createElement('div'); th.className='athumb';
     th.innerHTML=`<img src="${e(p.img||'')}" alt=""><div class="athumb-ov">📷</div>`;
