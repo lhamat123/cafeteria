@@ -3261,38 +3261,45 @@ function renderAdmTab(ci){
   cat.productos.forEach((p,pi)=>{
     const row=document.createElement('div'); row.className='prow';
 
-    // Checkbox de selección múltiple
-    const chk=document.createElement('input'); chk.type='checkbox'; chk.className='prow-sel';
-    chk.dataset.pi=pi; chk.title='Seleccionar para mover';
-    chk.onchange=()=>updateBulkBar(ci,pc);
-    row.appendChild(chk);
+    // Columna izquierda: selector ↗ arriba + checkbox abajo (mismo ancho)
+    const leftCol=document.createElement('div');
+    leftCol.style.cssText='display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;width:18px';
 
-    // ↑↓ order buttons
-    const ob=document.createElement('div'); ob.className='order-btns';
-    const bu=document.createElement('button'); bu.className='obtn'; bu.textContent='▲';
-    bu.title='Subir'; bu.disabled=(pi===0);
-    bu.onclick=()=>{ moveProd(ci,pi,-1); };
-    const bd=document.createElement('button'); bd.className='obtn'; bd.textContent='▼';
-    bd.title='Bajar'; bd.disabled=(pi===cat.productos.length-1);
-    bd.onclick=()=>{ moveProd(ci,pi,1); };
-    ob.appendChild(bu); ob.appendChild(bd);
-    row.appendChild(ob);
-
-    // ↗ Mover individualmente
-    const mv=document.createElement('div'); mv.className='move-cat-wrap';
-    mv.title='Mover a otra categoría';
+    // ↗ Mover individualmente (arriba)
     const mvSel=document.createElement('select'); mvSel.className='move-cat-sel';
+    mvSel.style.cssText='width:18px;height:18px;font-size:.5rem;padding:0;text-align:center;background:#1a1a2e;border:1px solid rgba(201,168,124,.4);color:#C9A87C;border-radius:3px;cursor:pointer;appearance:none;-webkit-appearance:none;overflow:hidden';
+    mvSel.title='Mover a otra categoría';
     mvSel.innerHTML='<option value="">↗</option>';
     DATA.categorias.forEach((c2,i2)=>{ if(i2===ci) return; const o=document.createElement('option'); o.value=i2; o.textContent=c2.label.length>8?c2.label.slice(0,7)+'…':c2.label; o.title=c2.label; mvSel.appendChild(o); });
     mvSel.onchange=()=>{
       const dest=parseInt(mvSel.value); if(isNaN(dest)||dest<0) return;
-      const [prod]=DATA.categorias[ci].productos.splice(pi,1);
-      DATA.categorias[dest].productos.push(prod);
-      toast(`"${prod.nombre}" → "${DATA.categorias[dest].label}"`, 'ok');
+      const checked=pc.querySelectorAll('.prow-sel:checked');
+      const thisChecked=Array.from(checked).some(c=>parseInt(c.dataset.pi)===pi);
+      if(checked.length>0 && thisChecked){
+        // Este producto está entre los marcados: mover todos los seleccionados
+        const indices=Array.from(checked).map(c=>parseInt(c.dataset.pi)).sort((a,b)=>b-a);
+        const moved=[];
+        indices.forEach(idx=>{ moved.unshift(DATA.categorias[ci].productos.splice(idx,1)[0]); });
+        DATA.categorias[dest].productos.push(...moved);
+        toast(`${moved.length} producto(s) → "${DATA.categorias[dest].label}"`, 'ok');
+      } else {
+        // Sin selección activa en este producto: mover solo este
+        const [prod]=DATA.categorias[ci].productos.splice(pi,1);
+        DATA.categorias[dest].productos.push(prod);
+        toast(`"${prod.nombre}" → "${DATA.categorias[dest].label}"`, 'ok');
+      }
       renderAdmTab(ci);
     };
-    mv.appendChild(mvSel);
-    row.appendChild(mv);
+    leftCol.appendChild(mvSel);
+
+    // Checkbox de selección múltiple (abajo)
+    const chk=document.createElement('input'); chk.type='checkbox'; chk.className='prow-sel';
+    chk.style.cssText='width:18px;height:18px;accent-color:#C9A87C;cursor:pointer;flex-shrink:0';
+    chk.dataset.pi=pi; chk.title='Seleccionar para mover varios';
+    chk.onchange=()=>updateBulkBar(ci,pc);
+    leftCol.appendChild(chk);
+
+    row.appendChild(leftCol);
 
     const th=document.createElement('div'); th.className='athumb';
     th.innerHTML=`<img src="${e(p.img||'')}" alt=""><div class="athumb-ov">📷</div>`;
