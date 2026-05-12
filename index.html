@@ -3223,47 +3223,50 @@ function renderAdmRepartos(){
 // ── Atajo de teclado global: Ctrl+V / Cmd+V pega imagen cuando el admin está abierto ──
 document.addEventListener('paste', ev => {
   if(!document.getElementById('page-admin').classList.contains('active')) return;
+  // No interceptar si el foco está en un campo de texto editable
+  const tag = document.activeElement?.tagName;
+  const isEditable = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT'
+    || document.activeElement?.isContentEditable;
+  if(isEditable) return;
   const items = ev.clipboardData?.items;
   if(!items) return;
+  // Ignorar si viene también texto — señal de copia desde Excel u otra app de tabla
+  const hasText = Array.from(items).some(it => it.kind==='string' && (it.type==='text/plain'||it.type==='text/html'));
+  if(hasText) return;
   for(const item of items){
-    if(item.type.startsWith('image/')){
-      const file = item.getAsFile();
-      if(!file) continue;
-      ev.preventDefault();
-      toast('📋 Imagen del portapapeles detectada — abriendo editor…', '');
-      // Abrir cropper directamente (sin pasar por el modal de acción)
-      openCropper(file, 'main', (dataUrl, sizeStr) => {
-        // Intentar aplicar al campo de imagen activo según el tab
-        if(typeof admTab !== 'undefined'){
-          if(admTab === -1){
-            // Tab de info — preguntar qué campo
-            const choices = ['bannerImg','aboutImg','promoImg'];
-            const names   = ['Banner / Logo','Historia (about)','Promo'];
-            const idx = choices.findIndex((_,i)=> confirm(`¿Aplicar imagen a "${names[i]}"?\n\nPresiona Cancelar para intentar el siguiente campo.`));
-            const field = choices[idx >= 0 ? idx : 0];
-            if(!DATA.info) DATA.info = {};
-            DATA.info[field] = dataUrl;
-            // Actualizar thumb si está visible
-            const thumbId = field === 'bannerImg' ? 'bannerThumb' : field === 'aboutImg' ? 'aboutThumb' : 'promoThumb';
-            const th = document.getElementById(thumbId);
-            if(th) th.querySelector('img').src = dataUrl;
-            toast('✅ Imagen aplicada a ' + names[idx >= 0 ? idx : 0], 'ok');
-          } else if(admTab >= 0){
-            // Tab de categoría — aplicar al último producto editado o al primero sin imagen
-            const cat = DATA.categorias[admTab];
-            if(!cat) return;
-            let pi = cat.productos.findIndex(p => !p.img || p.img.length < 5);
-            if(pi < 0) pi = cat.productos.length - 1;
-            if(pi < 0) return;
-            DATA.categorias[admTab].productos[pi].img = dataUrl;
-            DATA.categorias[admTab].productos[pi].imgFull = dataUrl;
-            renderAdmTab(admTab);
-            toast(`✅ Imagen aplicada a "${cat.productos[pi].nombre}"`, 'ok');
-          }
-        }
-      });
-      break;
+    if(!item.type.startsWith('image/')) continue;
+    const file = item.getAsFile();
+    if(!file) continue;
+
+    // Solo funciona en tab de categoría
+    if(typeof admTab === 'undefined' || admTab < 0){
+      toast('Ctrl+V de imagen solo funciona dentro de un tab de categoría','warn');
+      return;
     }
+    if(!DATA.categorias[admTab]) return;
+
+    // Recoger checkboxes marcados
+    const admContent = document.getElementById('admContent');
+    const checked = admContent ? Array.from(admContent.querySelectorAll('.prow-sel:checked')) : [];
+    if(!checked.length){
+      toast('☑️ Selecciona al menos un producto con el checkbox antes de pegar','warn');
+      return;
+    }
+
+    ev.preventDefault();
+    const indices = checked.map(ch => parseInt(ch.dataset.pi));
+    toast(`📋 Imagen detectada — aplicando a ${indices.length} producto(s)…`, '');
+
+    openCropper(file, 'main', (dataUrl) => {
+      indices.forEach(pi => {
+        if(!DATA.categorias[admTab].productos[pi]) return;
+        DATA.categorias[admTab].productos[pi].img     = dataUrl;
+        DATA.categorias[admTab].productos[pi].imgFull = dataUrl;
+      });
+      renderAdmTab(admTab);
+      toast(`✅ Imagen aplicada a ${indices.length} producto(s)`, 'ok');
+    });
+    break;
   }
 });
 
@@ -3398,10 +3401,25 @@ function renderAdmTab(ci){
     ob.appendChild(bu); ob.appendChild(bd);
     row.appendChild(ob);
 
+    const thWrap=document.createElement('div'); thWrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0';
     const th=document.createElement('div'); th.className='athumb';
     th.innerHTML=`<img src="${e(p.img||'')}" alt=""><div class="athumb-ov">📷</div>`;
     th.onclick=()=>admUploadProd(ci,pi,th.querySelector('img'));
-    row.appendChild(th);
+    const delImg=document.createElement('button');
+    delImg.title='Eliminar imagen';
+    delImg.style.cssText='background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.35);color:#dc2626;border-radius:5px;font-size:.6rem;padding:1px 5px;cursor:pointer;line-height:1.4;font-family:inherit;display:'+(p.img?'block':'none');
+    delImg.textContent='✕ img';
+    delImg.onclick=(ev)=>{
+      ev.stopPropagation();
+      if(!confirm('¿Eliminar la imagen de este producto?')) return;
+      DATA.categorias[ci].productos[pi].img='';
+      DATA.categorias[ci].productos[pi].imgFull='';
+      th.querySelector('img').src='';
+      delImg.style.display='none';
+      toast('Imagen eliminada','ok');
+    };
+    thWrap.appendChild(th); thWrap.appendChild(delImg);
+    row.appendChild(thWrap);
     const pf=document.createElement('div'); pf.className='pfields';
     pf.innerHTML=`
       <div class="afw"><label class="albl">Nombre</label><input class="ainp" value="${e(p.nombre)}" oninput="DATA.categorias[${ci}].productos[${pi}].nombre=this.value"></div>
@@ -3467,6 +3485,9 @@ function admUploadProd(ci,pi,imgEl){
     DATA.categorias[ci].productos[pi].img=dataUrl;
     DATA.categorias[ci].productos[pi].imgFull=dataUrl;
     imgEl.src=dataUrl;
+    // Mostrar botón eliminar imagen si existe
+    const delBtn=imgEl.closest('.athumb')?.parentElement?.querySelector('button[title="Eliminar imagen"]');
+    if(delBtn) delBtn.style.display='block';
     const hint=document.getElementById(`phint-${ci}-${pi}`);
     if(hint) hint.textContent='✅ '+(sizeStr||'');
     toast('Imagen actualizada','ok');
