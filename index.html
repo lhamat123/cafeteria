@@ -463,15 +463,10 @@
   .athumb{width:52px;height:52px;border-radius:8px;overflow:hidden;flex-shrink:0;
     border:1px solid #e0ddd9;cursor:pointer;position:relative}
   .athumb img{width:100%;height:100%;object-fit:cover;display:block}
-  .athumb-ov{position:absolute;inset:0;background:rgba(0,0,0,.45);
-    display:flex;align-items:center;justify-content:center;gap:.25rem;opacity:0;
-    transition:opacity .14s;color:#fff}
+  .athumb-ov{position:absolute;inset:0;background:rgba(0,0,0,.4);
+    display:flex;align-items:center;justify-content:center;opacity:0;
+    transition:opacity .14s;font-size:.78rem;color:#fff}
   .athumb:hover .athumb-ov{opacity:1}
-  .athumb .gov{background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:5px;
-    padding:3px 6px;cursor:pointer;font-size:.66rem;transition:background .14s;line-height:1.3}
-  .athumb .gov:hover{background:rgba(255,255,255,.35)}
-  .athumb .gov.del{background:rgba(220,38,38,.5)}
-  .athumb .gov.del:hover{background:rgba(220,38,38,.85)}
   .pfields{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:.3rem .45rem}
   .pf-full{grid-column:1/-1}
   .ainp{padding:5px 8px;border-radius:6px;border:1.5px solid #d8d5d0;
@@ -1223,10 +1218,6 @@
         <span class="iai-icon">📁</span>
         <span class="iai-lbl"><span>Cargar imagen nueva</span><span class="iai-desc">Reemplazar con otra imagen del dispositivo</span></span>
       </button>
-      <button class="img-action-btn" id="iamBtnClipboard" style="background:rgba(37,99,235,.08);border-color:rgba(37,99,235,.25)">
-        <span class="iai-icon">📋</span>
-        <span class="iai-lbl"><span>Pegar desde portapapeles</span><span class="iai-desc">Usa la imagen copiada (Ctrl+C / captura de pantalla)</span></span>
-      </button>
       <button class="img-action-btn iai-cancel" id="iamBtnCancel">Cancelar</button>
     </div>
   </div>
@@ -1838,7 +1829,11 @@ async function saveToGitHub() {
   const sha = await fetchCurrentSHA(apiUrl, token);
 
   setGhStatus('⏳ Publicando en GitHub...', '');
-  const content = toBase64(JSON.stringify(DATA, null, 2));
+  cleanImgFull(DATA); // elimina imgFull duplicado antes de publicar
+  const jsonStr = JSON.stringify(DATA, null, 2);
+  const sizeKB = Math.round(jsonStr.length / 1024);
+  if(sizeKB > 900){ toast(`⚠️ JSON muy grande (${sizeKB} KB) — comprime las imágenes para evitar errores en GitHub`,'warn'); }
+  const content = toBase64(jsonStr);
   const body = {
     message: 'Actualizar carta — Café Roble',
     content,
@@ -3118,26 +3113,16 @@ function renderAdmRepartos(){
   function openModal(currentSrc){
     return new Promise(resolve=>{
       _resolve=resolve;
-      const modal     = document.getElementById('imgActionModal');
-      const prev      = document.getElementById('iamPreview');
-      const sub       = document.getElementById('iamSub');
-      const btnCrop   = document.getElementById('iamBtnCrop');
-      const btnOpt    = document.getElementById('iamBtnOpt');
-      const btnClip   = document.getElementById('iamBtnClipboard');
-      const hasImg    = !!(currentSrc && currentSrc.length > 4);
+      const modal=document.getElementById('imgActionModal');
+      const prev =document.getElementById('iamPreview');
+      const sub  =document.getElementById('iamSub');
+      if(prev){ prev.src=currentSrc||''; prev.style.display=currentSrc?'':'none'; }
+      if(sub)  sub.textContent = currentSrc ? '¿Qué deseas hacer con la imagen?' : 'Cargar imagen';
 
-      if(prev){ prev.src=currentSrc||''; prev.style.display=hasImg?'':'none'; }
-      if(sub)  sub.textContent = hasImg ? '¿Qué deseas hacer con la imagen?' : 'Agregar imagen';
-
-      // Recortar/optimizar solo disponibles si ya hay imagen
-      if(btnCrop) btnCrop.style.display = hasImg ? '' : 'none';
-      if(btnOpt)  btnOpt.style.display  = hasImg ? '' : 'none';
-
-      if(btnCrop) btnCrop.onclick = ()=>{ closeModal(); resolve('crop');      };
-      if(btnOpt)  btnOpt.onclick  = ()=>{ closeModal(); resolve('opt');       };
-      document.getElementById('iamBtnNew')   .onclick = ()=>{ closeModal(); resolve('new');       };
-      if(btnClip) btnClip.onclick            = ()=>{ closeModal(); resolve('clipboard');          };
-      document.getElementById('iamBtnCancel').onclick = ()=>{ closeModal(); resolve(null);        };
+      document.getElementById('iamBtnCrop')  .onclick=()=>{ closeModal(); resolve('crop');   };
+      document.getElementById('iamBtnOpt')   .onclick=()=>{ closeModal(); resolve('opt');    };
+      document.getElementById('iamBtnNew')   .onclick=()=>{ closeModal(); resolve('new');    };
+      document.getElementById('iamBtnCancel').onclick=()=>{ closeModal(); resolve(null);     };
 
       modal.classList.add('open');
       modal.onclick=ev=>{ if(ev.target===modal){ closeModal(); resolve(null); } };
@@ -3150,47 +3135,24 @@ function renderAdmRepartos(){
 
   // Núcleo: si ya hay imagen ofrece el modal; si no, va directo a pickFile
   async function smartPick(currentSrc, cropMode, onDone){
-    // Siempre mostrar el modal — con o sin imagen previa
-    const action = await openModal(currentSrc);
-    if(!action) return;
-
-    if(action === 'clipboard'){
-      pasteFromClipboard(file => {
-        if(!file){ toast('No hay imagen en el portapapeles','warn'); return; }
-        openCropper(file, cropMode, onDone);
-      });
-    } else if(action === 'new'){
-      pickFile(file=>openCropper(file, cropMode, onDone));
-    } else if(action === 'opt'){
-      urlToFile(currentSrc, file=>openCropperGoOpt(file, cropMode, onDone));
-    } else if(action === 'crop'){
-      urlToFile(currentSrc, file=>openCropper(file, cropMode, onDone));
-    }
-  }
-
-  // Lee imagen del portapapeles (Clipboard API) con fallback
-  async function pasteFromClipboard(cb){
-    try{
-      const items = await navigator.clipboard.read();
-      for(const item of items){
-        const imgType = item.types.find(t=>t.startsWith('image/'));
-        if(imgType){
-          const blob = await item.getType(imgType);
-          cb(new File([blob], 'clipboard.png', {type: imgType}));
-          return;
-        }
-      }
-      toast('No hay imagen en el portapapeles — copia una imagen primero','warn');
-      cb(null);
-    }catch(err){
-      // Fallback: pegar con Ctrl+V en un textarea oculto (para navegadores sin Clipboard API)
-      if(err.name === 'NotAllowedError'){
-        toast('Permiso denegado — pega la imagen directamente con Ctrl+V en el área de la imagen','warn');
-        cb(null);
+    if(currentSrc && currentSrc.length>4){
+      const action = await openModal(currentSrc);
+      if(!action) return;
+      if(action==='new'){
+        pickFile(file=>openCropper(file, cropMode, onDone));
       } else {
-        toast('Portapapeles no disponible — usa "Cargar imagen nueva"','warn');
-        cb(null);
+        // Reusar imagen actual → cargarla en el cropper como Blob
+        urlToFile(currentSrc, file=>{
+          // Para 'crop': paso 1 solamente. Para 'opt': ir directo a paso 2.
+          if(action==='opt'){
+            openCropperGoOpt(file, cropMode, onDone);
+          } else {
+            openCropper(file, cropMode, onDone);
+          }
+        });
       }
+    } else {
+      pickFile(file=>openCropper(file, cropMode, onDone));
     }
   }
 
@@ -3219,61 +3181,9 @@ function renderAdmRepartos(){
     setTimeout(wait,120);
   }
 
-
   // Exponer como global
   window.smartImagePick = smartPick;
-  window.pasteFromClipboard = pasteFromClipboard;
 })();
-
-// ── Atajo de teclado global: Ctrl+V / Cmd+V pega imagen cuando el admin está abierto ──
-document.addEventListener('paste', ev => {
-  if(!document.getElementById('page-admin').classList.contains('active')) return;
-  // No interceptar si el foco está en un campo de texto editable
-  const tag = document.activeElement?.tagName;
-  const isEditable = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT'
-    || document.activeElement?.isContentEditable;
-  if(isEditable) return;
-  const items = ev.clipboardData?.items;
-  if(!items) return;
-  // Ignorar si viene también texto — señal de copia desde Excel u otra app de tabla
-  const hasText = Array.from(items).some(it => it.kind==='string' && (it.type==='text/plain'||it.type==='text/html'));
-  if(hasText) return;
-  for(const item of items){
-    if(!item.type.startsWith('image/')) continue;
-    const file = item.getAsFile();
-    if(!file) continue;
-
-    // Solo funciona en tab de categoría
-    if(typeof admTab === 'undefined' || admTab < 0){
-      toast('Ctrl+V de imagen solo funciona dentro de un tab de categoría','warn');
-      return;
-    }
-    if(!DATA.categorias[admTab]) return;
-
-    // Recoger checkboxes marcados
-    const admContent = document.getElementById('admContent');
-    const checked = admContent ? Array.from(admContent.querySelectorAll('.prow-sel:checked')) : [];
-    if(!checked.length){
-      toast('☑️ Selecciona al menos un producto con el checkbox antes de pegar','warn');
-      return;
-    }
-
-    ev.preventDefault();
-    const indices = checked.map(ch => parseInt(ch.dataset.pi));
-    toast(`📋 Imagen detectada — aplicando a ${indices.length} producto(s)…`, '');
-
-    openCropper(file, 'main', (dataUrl) => {
-      indices.forEach(pi => {
-        if(!DATA.categorias[admTab].productos[pi]) return;
-        DATA.categorias[admTab].productos[pi].img     = dataUrl;
-        DATA.categorias[admTab].productos[pi].imgFull = dataUrl;
-      });
-      renderAdmTab(admTab);
-      toast(`✅ Imagen aplicada a ${indices.length} producto(s)`, 'ok');
-    });
-    break;
-  }
-});
 
 function admUploadInfoGalAt(fi,imgEl){
   const cur = DATA.info?.galeria?.[fi]?.img || '';
@@ -3395,35 +3305,9 @@ function renderAdmTab(ci){
 
     row.appendChild(leftCol);
 
-    // ▲▼ order buttons
-    const ob=document.createElement('div'); ob.className='order-btns';
-    const bu=document.createElement('button'); bu.className='obtn'; bu.textContent='▲';
-    bu.title='Subir'; bu.disabled=(pi===0);
-    bu.onclick=()=>{ moveProd(ci,pi,-1); };
-    const bd=document.createElement('button'); bd.className='obtn'; bd.textContent='▼';
-    bd.title='Bajar'; bd.disabled=(pi===cat.productos.length-1);
-    bd.onclick=()=>{ moveProd(ci,pi,1); };
-    ob.appendChild(bu); ob.appendChild(bd);
-    row.appendChild(ob);
-
     const th=document.createElement('div'); th.className='athumb';
-    const hasImg = !!(p.img && p.img.length > 4);
-    th.innerHTML=`<img src="${e(p.img||'')}" alt="">
-      <div class="athumb-ov">
-        <button class="gov" title="Cambiar imagen">📷</button>
-        ${hasImg ? `<button class="gov del" title="Eliminar imagen">✕</button>` : ''}
-      </div>`;
-    th.querySelector('.gov[title="Cambiar imagen"]').onclick=(ev)=>{ev.stopPropagation();admUploadProd(ci,pi,th.querySelector('img'));};
-    const delBtn=th.querySelector('.gov.del');
-    if(delBtn) delBtn.onclick=(ev)=>{
-      ev.stopPropagation();
-      if(!confirm('¿Eliminar la imagen de este producto?')) return;
-      DATA.categorias[ci].productos[pi].img='';
-      DATA.categorias[ci].productos[pi].imgFull='';
-      th.querySelector('img').src='';
-      delBtn.remove();
-      toast('Imagen eliminada','ok');
-    };
+    th.innerHTML=`<img src="${e(p.img||'')}" alt=""><div class="athumb-ov">📷</div>`;
+    th.onclick=()=>admUploadProd(ci,pi,th.querySelector('img'));
     row.appendChild(th);
     const pf=document.createElement('div'); pf.className='pfields';
     pf.innerHTML=`
@@ -3490,22 +3374,6 @@ function admUploadProd(ci,pi,imgEl){
     DATA.categorias[ci].productos[pi].img=dataUrl;
     DATA.categorias[ci].productos[pi].imgFull=dataUrl;
     imgEl.src=dataUrl;
-    // Añadir botón ✕ al overlay si aún no existe
-    const ov=imgEl.closest('.athumb')?.querySelector('.athumb-ov');
-    if(ov && !ov.querySelector('.gov.del')){
-      const xBtn=document.createElement('button');
-      xBtn.className='gov del'; xBtn.title='Eliminar imagen'; xBtn.textContent='✕';
-      xBtn.onclick=(ev)=>{
-        ev.stopPropagation();
-        if(!confirm('¿Eliminar la imagen de este producto?')) return;
-        DATA.categorias[ci].productos[pi].img='';
-        DATA.categorias[ci].productos[pi].imgFull='';
-        imgEl.src='';
-        xBtn.remove();
-        toast('Imagen eliminada','ok');
-      };
-      ov.appendChild(xBtn);
-    }
     const hint=document.getElementById(`phint-${ci}-${pi}`);
     if(hint) hint.textContent='✅ '+(sizeStr||'');
     toast('Imagen actualizada','ok');
@@ -3622,11 +3490,24 @@ function admExport(){
   toast('JSON exportado','ok');
 }
 
+/* Elimina imgFull duplicado de cada producto/foto para reducir el tamaño del JSON */
+function cleanImgFull(dataObj){
+  try{
+    (dataObj.categorias||[]).forEach(cat=>{
+      (cat.productos||[]).forEach(p=>{ if('imgFull' in p) delete p.imgFull; });
+      const fotos=(cat.galeria?.fotos||[]);
+      fotos.forEach(f=>{ if('imgFull' in f) delete f.imgFull; });
+    });
+    (dataObj.info?.galeria||[]).forEach(g=>{ if('imgFull' in g) delete g.imgFull; });
+  }catch(_){}
+  return dataObj;
+}
+
 function admImport(input){
   const f=input.files[0]; if(!f) return;
   const r=new FileReader(); r.onload=ev=>{
     try{
-      DATA=JSON.parse(ev.target.result);
+      DATA=cleanImgFull(JSON.parse(ev.target.result));
       localStorage.setItem('cafeRoble_v3',JSON.stringify(DATA));
       admTab=0; buildAdmin(); renderMenu(); renderInfo(); checkUnavailBtn();
       toast('JSON importado','ok');
