@@ -533,12 +533,11 @@
 
   /* ── MOVER ENTRE CATEGORÍAS ── */
   .left-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;width:20px}
-  .move-cat-sel{width:20px;height:20px;font-size:.55rem;padding:0;text-align:center;
+  .mv-sel{width:20px;height:20px;font-size:.55rem;padding:0;text-align:center;
     background:#1a1a2e;border:1px solid rgba(201,168,124,.45);color:var(--gold);
-    border-radius:4px;cursor:pointer;appearance:none;-webkit-appearance:none;
-    transition:border-color .14s;overflow:hidden}
-  .move-cat-sel:hover,.move-cat-sel:focus{border-color:var(--gold);outline:none}
-  .move-cat-sel option{background:#1a1008;color:#fff;font-size:.75rem}
+    border-radius:4px;cursor:pointer;appearance:none;-webkit-appearance:none}
+  .mv-sel:hover,.mv-sel:focus{border-color:var(--gold);outline:none}
+  .mv-sel option{background:#1a1008;color:#fff;font-size:.75rem}
   .prow-sel{width:20px;height:20px;accent-color:var(--gold);cursor:pointer;flex-shrink:0}
   .bulk-bar{display:none;align-items:center;gap:.5rem;padding:.45rem .75rem;
     background:#0a1020;border-bottom:1px solid rgba(201,168,124,.25);flex-wrap:wrap}
@@ -546,16 +545,16 @@
   .bulk-bar-lbl{font-size:.75rem;color:var(--gold);font-weight:700;flex:1;white-space:nowrap}
   .bulk-dest{font-size:.75rem;color:var(--gold);background:#0d1117;
     border:1.5px solid rgba(201,168,124,.5);border-radius:6px;padding:4px 8px;
-    cursor:pointer;flex:1;min-width:110px}
+    cursor:pointer;flex:1;min-width:110px;font-family:'Lato',sans-serif}
   .bulk-dest:focus{outline:none;border-color:var(--gold)}
-  .bulk-move-btn{background:var(--gold);color:var(--bd);border:none;border-radius:6px;
-    padding:5px 12px;font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap;
+  .bulk-mv-btn{background:var(--gold);color:var(--bd);border:none;border-radius:6px;
+    padding:5px 12px;font-size:.75rem;font-weight:700;cursor:pointer;
     font-family:'Lato',sans-serif;transition:filter .14s}
-  .bulk-move-btn:hover{filter:brightness(1.1)}
-  .bulk-cancel-btn{background:rgba(255,255,255,.08);color:rgba(255,255,255,.55);border:none;
+  .bulk-mv-btn:hover{filter:brightness(1.1)}
+  .bulk-cancel{background:rgba(255,255,255,.08);color:rgba(255,255,255,.55);border:none;
     border-radius:6px;padding:5px 9px;font-size:.72rem;cursor:pointer;font-family:'Lato',sans-serif}
-  .bulk-cancel-btn:hover{background:rgba(255,255,255,.16)}
-  .add-prod-bottom{width:100%;margin:.5rem 0 .1rem;padding:.5rem;font-size:.82rem;
+  .bulk-cancel:hover{background:rgba(255,255,255,.16)}
+  .add-p-bottom{width:100%;margin:.5rem 0 .1rem;padding:.5rem;font-size:.82rem;
     border-radius:8px;justify-content:center;font-family:'Lato',sans-serif}
   .atab-wrap{display:flex;align-items:center;gap:2px;border-radius:20px;
     border:1.5px solid rgba(201,168,124,.4);background:transparent;overflow:hidden}
@@ -3234,63 +3233,64 @@ function renderAdmTab(ci){
   addP.onclick=()=>{ cat.productos.push({nombre:'Nuevo producto',desc:'Descripción.',precio:'$0.00',badge:'',img:'',imgFull:''}); renderAdmTab(ci); };
   ph.appendChild(addP); pc.appendChild(ph);
 
-  // Barra de acción masiva
-  const bulkBar=document.createElement('div'); bulkBar.className='bulk-bar'; bulkBar.id=`bulkBar-${ci}`;
-  const bulkLbl=document.createElement('span'); bulkLbl.className='bulk-bar-lbl'; bulkLbl.id=`bulkLbl-${ci}`; bulkLbl.textContent='0 seleccionados';
-  const bulkDest=document.createElement('select'); bulkDest.className='bulk-dest'; bulkDest.id=`bulkDest-${ci}`;
-  bulkDest.innerHTML='<option value="">— Mover a categoría —</option>';
-  DATA.categorias.forEach((c2,i2)=>{ if(i2===ci) return; const o=document.createElement('option'); o.value=i2; o.textContent=c2.label; bulkDest.appendChild(o); });
-  const bulkMoveBtn=document.createElement('button'); bulkMoveBtn.className='bulk-move-btn'; bulkMoveBtn.textContent='↗ Mover';
-  bulkMoveBtn.onclick=()=>{
-    const dest=parseInt(bulkDest.value);
-    if(isNaN(dest)||dest<0||dest>=DATA.categorias.length){ return; }
-    const checks=pc.querySelectorAll('.prow-sel:checked');
+  // ── Barra de acción masiva ──
+  const bulkBar=document.createElement('div'); bulkBar.className='bulk-bar'; bulkBar.id='bkb-'+ci;
+  const bulkLbl=document.createElement('span'); bulkLbl.className='bulk-bar-lbl'; bulkLbl.id='bkl-'+ci;
+  bulkLbl.textContent='0 seleccionados';
+  const bulkDest=document.createElement('select'); bulkDest.className='bulk-dest';
+  bulkDest.innerHTML='<option value="">— Mover a —</option>';
+  DATA.categorias.forEach(function(c2,i2){ if(i2===ci) return; var o=document.createElement('option'); o.value=i2; o.textContent=c2.label; bulkDest.appendChild(o); });
+  const bulkMvBtn=document.createElement('button'); bulkMvBtn.className='bulk-mv-btn'; bulkMvBtn.textContent='↗ Mover';
+  bulkMvBtn.onclick=function(){
+    var dest=parseInt(bulkDest.value);
+    if(isNaN(dest)||dest<0||dest>=DATA.categorias.length) return;
+    var checks=Array.from(pc.querySelectorAll('.prow-sel:checked'));
     if(!checks.length) return;
-    const indices=Array.from(checks).map(ch=>parseInt(ch.dataset.pi)).sort((a,b)=>b-a);
-    const moved=[];
-    indices.forEach(idx=>{ moved.unshift(DATA.categorias[ci].productos.splice(idx,1)[0]); });
-    DATA.categorias[dest].productos.push(...moved);
-    toast(`${moved.length} producto(s) → "${DATA.categorias[dest].label}"`, 'ok');
+    var idxs=checks.map(function(c){return parseInt(c.dataset.pi);}).sort(function(a,b){return b-a;});
+    var moved=[];
+    idxs.forEach(function(idx){ moved.unshift(DATA.categorias[ci].productos.splice(idx,1)[0]); });
+    DATA.categorias[dest].productos.push.apply(DATA.categorias[dest].productos, moved);
+    toast(moved.length+' producto(s) → "'+DATA.categorias[dest].label+'"','ok');
     renderAdmTab(ci);
   };
-  const bulkCancel=document.createElement('button'); bulkCancel.className='bulk-cancel-btn'; bulkCancel.textContent='Cancelar';
-  bulkCancel.onclick=()=>{ pc.querySelectorAll('.prow-sel').forEach(c=>{ c.checked=false; }); updateBulkBar(ci,pc); };
-  bulkBar.appendChild(bulkLbl); bulkBar.appendChild(bulkDest); bulkBar.appendChild(bulkMoveBtn); bulkBar.appendChild(bulkCancel);
+  const bulkCancel=document.createElement('button'); bulkCancel.className='bulk-cancel'; bulkCancel.textContent='Cancelar';
+  bulkCancel.onclick=function(){ pc.querySelectorAll('.prow-sel').forEach(function(c){c.checked=false;}); updateBulkBar(ci,pc); };
+  bulkBar.appendChild(bulkLbl); bulkBar.appendChild(bulkDest); bulkBar.appendChild(bulkMvBtn); bulkBar.appendChild(bulkCancel);
   pc.appendChild(bulkBar);
 
   cat.productos.forEach((p,pi)=>{
     const row=document.createElement('div'); row.className='prow';
 
-    // Columna izquierda: ↗ (arriba) + ☐ (abajo)
+    // Columna izquierda: ↗ arriba + ☐ abajo (mismo ancho 20px)
     const leftCol=document.createElement('div'); leftCol.className='left-col';
 
-    const mvSel=document.createElement('select'); mvSel.className='move-cat-sel'; mvSel.title='Mover a otra categoría';
+    const mvSel=document.createElement('select'); mvSel.className='mv-sel'; mvSel.title='Mover a otra categoría';
     mvSel.innerHTML='<option value="">↗</option>';
-    DATA.categorias.forEach((c2,i2)=>{ if(i2===ci) return; const o=document.createElement('option'); o.value=i2; o.textContent=c2.label.length>9?c2.label.slice(0,8)+'…':c2.label; o.title=c2.label; mvSel.appendChild(o); });
-    mvSel.onchange=()=>{
-      const dest=parseInt(mvSel.value); if(isNaN(dest)||dest<0) return;
-      const checks=pc.querySelectorAll('.prow-sel:checked');
-      const thisSelected=Array.from(checks).some(c=>parseInt(c.dataset.pi)===pi);
-      if(checks.length>0 && thisSelected){
-        // Mover todos los seleccionados
-        const indices=Array.from(checks).map(c=>parseInt(c.dataset.pi)).sort((a,b)=>b-a);
-        const moved=[];
-        indices.forEach(idx=>{ moved.unshift(DATA.categorias[ci].productos.splice(idx,1)[0]); });
-        DATA.categorias[dest].productos.push(...moved);
-        toast(`${moved.length} producto(s) → "${DATA.categorias[dest].label}"`, 'ok');
-      } else {
-        // Mover solo este
-        const [prod]=DATA.categorias[ci].productos.splice(pi,1);
-        DATA.categorias[dest].productos.push(prod);
-        toast(`"${prod.nombre}" → "${DATA.categorias[dest].label}"`, 'ok');
-      }
-      renderAdmTab(ci);
-    };
+    DATA.categorias.forEach(function(c2,i2){ if(i2===ci) return; var o=document.createElement('option'); o.value=i2; o.textContent=c2.label.length>9?c2.label.slice(0,8)+'…':c2.label; o.title=c2.label; mvSel.appendChild(o); });
+    (function(capturedPi){
+      mvSel.onchange=function(){
+        var dest=parseInt(mvSel.value); if(isNaN(dest)||dest<0) return;
+        var checks=Array.from(pc.querySelectorAll('.prow-sel:checked'));
+        var thisSelected=checks.some(function(c){return parseInt(c.dataset.pi)===capturedPi;});
+        if(checks.length>0 && thisSelected){
+          var idxs=checks.map(function(c){return parseInt(c.dataset.pi);}).sort(function(a,b){return b-a;});
+          var moved=[];
+          idxs.forEach(function(idx){ moved.unshift(DATA.categorias[ci].productos.splice(idx,1)[0]); });
+          DATA.categorias[dest].productos.push.apply(DATA.categorias[dest].productos, moved);
+          toast(moved.length+' producto(s) → "'+DATA.categorias[dest].label+'"','ok');
+        } else {
+          var prod=DATA.categorias[ci].productos.splice(capturedPi,1)[0];
+          DATA.categorias[dest].productos.push(prod);
+          toast('"'+prod.nombre+'" → "'+DATA.categorias[dest].label+'"','ok');
+        }
+        renderAdmTab(ci);
+      };
+    })(pi);
     leftCol.appendChild(mvSel);
 
     const chk=document.createElement('input'); chk.type='checkbox'; chk.className='prow-sel';
     chk.dataset.pi=pi; chk.title='Seleccionar para mover varios';
-    chk.onchange=()=>updateBulkBar(ci,pc);
+    chk.onchange=function(){ updateBulkBar(ci,pc); };
     leftCol.appendChild(chk);
 
     row.appendChild(leftCol);
@@ -3336,12 +3336,11 @@ function renderAdmTab(ci){
     pc.appendChild(row);
   });
 
-  // + Producto al pie de la lista
-  const addPBottom=document.createElement('button');
-  addPBottom.className='ab ab-blue add-prod-bottom';
-  addPBottom.textContent='+ Producto';
-  addPBottom.onclick=()=>{ cat.productos.push({nombre:'Nuevo producto',desc:'Descripción.',precio:'$0.00',badge:'',img:'',imgFull:''}); renderAdmTab(ci); };
-  pc.appendChild(addPBottom);
+  // + Producto al pie
+  const addPBot=document.createElement('button'); addPBot.className='ab ab-blue add-p-bottom';
+  addPBot.textContent='+ Producto';
+  addPBot.onclick=()=>{ cat.productos.push({nombre:'Nuevo producto',desc:'Descripción.',precio:'$0.00',badge:'',img:'',imgFull:''}); renderAdmTab(ci); };
+  pc.appendChild(addPBot);
 
   content.appendChild(pc);
 
@@ -3424,11 +3423,11 @@ function moveProd(ci, pi, dir){
 }
 
 function updateBulkBar(ci, pc){
-  const bar=document.getElementById(`bulkBar-${ci}`);
-  const lbl=document.getElementById(`bulkLbl-${ci}`);
+  var bar=document.getElementById('bkb-'+ci);
+  var lbl=document.getElementById('bkl-'+ci);
   if(!bar||!lbl) return;
-  const n=pc.querySelectorAll('.prow-sel:checked').length;
-  if(n>0){ bar.classList.add('visible'); lbl.textContent=n===1?'1 producto seleccionado':`${n} productos seleccionados`; }
+  var n=pc.querySelectorAll('.prow-sel:checked').length;
+  if(n>0){ bar.classList.add('visible'); lbl.textContent=n===1?'1 producto seleccionado':n+' productos seleccionados'; }
   else { bar.classList.remove('visible'); }
 }
 
