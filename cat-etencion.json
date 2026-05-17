@@ -1,0 +1,31 @@
+{
+  "id": "cat1779023944629",
+  "label": "etencion",
+  "productos": [
+    {
+      "nombre": "encabexzado",
+      "desc": "asdadasd",
+      "precio": "",
+      "badge": "",
+      "img": ""
+    },
+    {
+      "nombre": "caso de bico",
+      "desc": "protejr",
+      "precio": "2777",
+      "badge": "aaaaa",
+      "img": ""
+    },
+    {
+      "nombre": "cuchillol",
+      "desc": "dasdasd sd aaaaaa",
+      "precio": "121",
+      "badge": "ssssss",
+      "img": ""
+    }
+  ],
+  "galeria": {
+    "titulo": "",
+    "fotos": []
+  }
+}
